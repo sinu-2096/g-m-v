@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Gharial GPS Viewer</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; }
-  #controls { display:flex; flex-wrap:wrap; gap:10px; margin:10px; align-items:center; }
-  #map { height: 65vh; }
-  #dropzone { border: 2px dashed #888; padding: 15px; text-align: center;
-              color: #555; margin: 10px; border-radius: 6px; cursor: pointer; }
-  table { border-collapse: collapse; width: 100%; margin: 10px; }
-  th, td { border: 1px solid #ccc; padding: 4px; font-size: 0.9em; text-align:center; }
-  th { background: #eee; }
-</style>
+  <meta charset="UTF-8">
+  <title>Gharial GPS Viewer</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    #controls { display:flex; flex-wrap:wrap; gap:10px; margin:10px; align-items:center; }
+    #map { height: 65vh; }
+    #dropzone { border: 2px dashed #888; padding: 15px; text-align: center;
+                color: #555; margin: 10px; border-radius: 6px; cursor: pointer; }
+    table { border-collapse: collapse; width: 100%; margin: 10px; }
+    th, td { border: 1px solid #ccc; padding: 4px; font-size: 0.9em; text-align:center; }
+    th { background: #eee; }
+  </style>
 </head>
 <body>
 
@@ -98,13 +98,18 @@ function julianToDate(year2d, jd) {
   return `${String(day).padStart(2,'0')}-${monthNames[month]}-${String(year).slice(-2)}`;
 }
 
+function toISODate(str) {
+  const m = str.match(/^(\d{2})-([A-Za-z]{3})-(\d{2})$/);
+  if (!m) return null;
+  const months = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
+  const yyyy = 2000 + parseInt(m[3], 10);
+  const mm = String(months[m[2]]).padStart(2, '0');
+  return `${yyyy}-${mm}-${m[1]}`;
+}
+
 function parseNameForDateTime(str) {
   const m = typeof str === 'string' && str.match(/yr:(\d+)\s+jd:(\d+)\s+hr:(\d+)\s+mn:(\d+)/i);
   return m ? { date: julianToDate(m[1], Number(m[2])), time: `${String(m[3]).padStart(2,'0')}:${String(m[4]).padStart(2,'0')}` } : null;
-}
-function parseFilenameForDateTime(filename) {
-  const m = filename && filename.match(/(\d{8})(\d{6})/);
-  return m ? { date: `${m[1].slice(6,8)}-${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[1].slice(4,6),10)-1]}-${m[1].slice(2,4)}`, time: `${m[2].slice(0,2)}:${m[2].slice(2,4)}` } : null;
 }
 function getFirstTextByLocalName(node, local) {
   const nodes = node.getElementsByTagName('*');
@@ -113,16 +118,27 @@ function getFirstTextByLocalName(node, local) {
   }
   return '';
 }
+
 function getLonLat(pm) {
   const coordsTxt = getFirstTextByLocalName(pm, 'coordinates').trim();
   if (!coordsTxt) return null;
   const [lon, lat] = coordsTxt.split(/\s+/)[0].split(',').map(Number);
   return (isNaN(lat) || isNaN(lon)) ? null : { lon, lat };
 }
+
 function getSerialFromFilename(fn) {
   const m = fn && fn.match(/_D0*(\d{5,6})_/i);
   return m ? m[1] : null;
 }
+
+function parseFilenameForDateTime(filename) {
+  const m = filename && filename.match(/(\d{8})(\d{6})/);
+  return m ? {
+    date: `${m[1].slice(6,8)}-${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[1].slice(4,6),10)-1]}-${m[1].slice(2,4)}`,
+    time: `${m[2].slice(0,2)}:${m[2].slice(2,4)}`
+  } : null;
+}
+
 function parsePlacemarkDateTime(pm, nameText) {
   let dt = parseNameForDateTime(nameText);
   if (dt) return dt;
@@ -140,7 +156,7 @@ function parsePlacemarkDateTime(pm, nameText) {
   if (whenTxt) {
     const [d, t] = whenTxt.split('T');
     const [y, mth, dd] = d.split('-');
-    return { 
+    return {
       date: `${dd}-${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(mth,10)-1]}-${y.slice(2)}`,
       time: t.slice(0,5)
     };
@@ -216,8 +232,9 @@ function applyFilter() {
   const to = document.getElementById('toDate').value;
   let filtered = allPoints.filter(p => {
     if (animalSel !== 'all' && p.animalId !== animalSel) return false;
-    if (from && (!p.date || p.date < from)) return false;
-    if (to && (!p.date || p.date > to)) return false;
+    const isoDate = p.date ? toISODate(p.date) : null;
+    if (from && (!isoDate || isoDate < from)) return false;
+    if (to && (!isoDate || isoDate > to)) return false;
     return true;
   });
   filtered.sort((a, b) =>
@@ -262,7 +279,11 @@ function handleFiles(files) {
     reader.onload = e => {
       handleKMLtext(e.target.result, file.name);
       loaded++;
-      status.textContent = `${files.length} file(s) loaded.`;
+      if (loaded === files.length) {
+        status.textContent = `${files.length} file(s) loaded.`;
+        updateAnimalFilterOptions();
+        applyFilter();
+      }
     };
     reader.readAsText(file);
   });
@@ -289,6 +310,7 @@ document.getElementById('dropzone').addEventListener('drop', e => {
   dropzone.style.background = '';
   handleFiles(e.dataTransfer.files);
 });
+
 document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
 document.getElementById('applyFilter').addEventListener('click', applyFilter);
 document.getElementById('clearData').addEventListener('click', () => {
@@ -303,4 +325,3 @@ document.getElementById('exportCSV').addEventListener('click', () => exportCSV(a
 </script>
 </body>
 </html>
-
