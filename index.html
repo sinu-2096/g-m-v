@@ -262,11 +262,7 @@ function handleFiles(files) {
     reader.onload = e => {
       handleKMLtext(e.target.result, file.name);
       loaded++;
-      if (loaded === files.length) {
-        updateAnimalFilterOptions();
-        applyFilter();
-        status.textContent = `Loaded: ${Array.from(files).map(f => f.name).join(', ')}`;
-      }
+      status.textContent = `${files.length} file(s) loaded.`;
     };
     reader.readAsText(file);
   });
@@ -307,3 +303,4 @@ document.getElementById('exportCSV').addEventListener('click', () => exportCSV(a
 </script>
 </body>
 </html>
+
