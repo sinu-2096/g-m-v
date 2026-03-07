@@ -1,327 +1,253 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Gharial GPS Viewer</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; }
-    #controls { display:flex; flex-wrap:wrap; gap:10px; margin:10px; align-items:center; }
-    #map { height: 65vh; }
-    #dropzone { border: 2px dashed #888; padding: 15px; text-align: center;
-                color: #555; margin: 10px; border-radius: 6px; cursor: pointer; }
-    table { border-collapse: collapse; width: 100%; margin: 10px; }
-    th, td { border: 1px solid #ccc; padding: 4px; font-size: 0.9em; text-align:center; }
-    th { background: #eee; }
-  </style>
+<meta charset="utf-8">
+<title>Pali Ghat Hatchling Viewer</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+#container{
+display:flex;
+height:100vh;
+}
+
+#sidebar{
+width:320px;
+padding:10px;
+overflow:auto;
+background:#f5f5f5;
+border-right:1px solid #ccc;
+}
+
+#map{
+flex:1;
+}
+
+select{
+width:100%;
+padding:8px;
+margin-bottom:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:6px;
+text-align:left;
+}
+
+th{
+background:#eee;
+}
+
+@media(max-width:768px){
+
+#container{
+flex-direction:column;
+}
+
+#sidebar{
+width:100%;
+height:40vh;
+border-right:none;
+border-bottom:1px solid #ccc;
+}
+
+#map{
+height:60vh;
+}
+
+}
+
+</style>
 </head>
+
 <body>
 
-<h2 style="margin:10px;">Gharial GPS Viewer</h2>
-<div id="controls">
-  <label>Animal ID:
-    <select id="animalFilter"><option value="all">All</option></select>
-  </label>
-  <label>From: <input type="date" id="fromDate"></label>
-  <label>To: <input type="date" id="toDate"></label>
-  <label>Basemap:
-    <select id="basemapSelect">
-      <option value="osm">OSM</option>
-      <option value="esri">Esri Satellite</option>
-      <option value="google">Google Hybrid</option>
-    </select>
-  </label>
-  <button id="applyFilter">Apply Filter</button>
-  <button id="clearData">Clear Data</button>
-  <button id="exportCSV">Export CSV</button>
+<div id="container">
+
+<div id="sidebar">
+
+<h3>Pali Ghat Hatchlings</h3>
+
+<select id="idSelector">
+<option value="">Select Hatchling ID</option>
+</select>
+
+<div id="tableContainer"></div>
+
 </div>
 
-<input type="file" id="fileInput" accept=".kml" multiple style="display:none">
-<div id="dropzone">Drop KML file(s) here or click to select</div>
-<div id="status" style="margin:10px; font-style:italic; color:#555;"></div>
 <div id="map"></div>
 
-<table id="data-table">
-  <thead><tr><th>Animal ID</th><th>Date</th><th>Time</th><th>Lat</th><th>Lon</th></tr></thead>
-  <tbody></tbody>
-</table>
-<button id="viewMore" style="margin:10px;">View More</button>
+</div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
-const animalIdMapping = {
-  "51923": "24-30","51924": "26-55","55061": "02-03","55062": "03-04",
-  "55063": "04-05","55064": "05-06","55065": "06-07","55069": "10-11",
-  "57723": "22-23","57724": "14-15","57725": "15-16","57727": "17-18 Sone Male",
-  "57728": "18-21","57729": "19-59","58337": "24-54","58338": "26-56","58339": "28-58"
-};
 
-const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap contributors'
-});
-const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  attribution: 'Tiles © Esri'
-});
-const google = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-  attribution: '© Google'
-});
+const sheetURL="https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv";
 
-const map = L.map('map', { layers:[osm] }).setView([25.65, 76.27], 10);
-const markersLayer = L.layerGroup().addTo(map);
+let dataset=[];
+let trackLayer=null;
 
-document.getElementById('basemapSelect').addEventListener('change', e => {
-  const selected = e.target.value;
-  map.eachLayer(l => map.removeLayer(l));
-  if (selected === 'esri') map.addLayer(esri);
-  else if (selected === 'google') map.addLayer(google);
-  else map.addLayer(osm);
-  markersLayer.addTo(map);
+const map=L.map('map',{closePopupOnClick:false}).setView([25.85,76.60],11);
+
+L.tileLayer(
+'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+{
+attribution:'Esri'
+}).addTo(map);
+
+function csvToArray(str){
+
+const rows=str.trim().split("\n");
+const headers=rows.shift().split(",");
+
+return rows.map(r=>{
+const vals=r.split(",");
+let obj={};
+headers.forEach((h,i)=>obj[h.trim().toLowerCase()]=vals[i]);
+return obj;
 });
 
-const colors = {};
-function getColor(id) {
-  if (!colors[id]) colors[id] = `hsl(${Object.keys(colors).length * 60 % 360},90%,30%)`;
-  return colors[id];
 }
 
-function julianToDate(year2d, jd) {
-  const year = 2000 + Number(year2d);
-  const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-  const monthLengths = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  let month = 0;
-  let day = parseInt(jd, 10);
-  while (day > monthLengths[month]) {
-    day -= monthLengths[month];
-    month++;
-  }
-  return `${String(day).padStart(2,'0')}-${monthNames[month]}-${String(year).slice(-2)}`;
+function getLatestPoints(data){
+
+const latest={};
+
+data.forEach(row=>{
+
+const id=row.id;
+const time=new Date(row.datetime);
+
+if(!latest[id]||new Date(latest[id].datetime)<time){
+latest[id]=row;
 }
 
-function toISODate(str) {
-  const m = str.match(/^(\d{2})-([A-Za-z]{3})-(\d{2})$/);
-  if (!m) return null;
-  const months = {Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};
-  const yyyy = 2000 + parseInt(m[3], 10);
-  const mm = String(months[m[2]]).padStart(2, '0');
-  return `${yyyy}-${mm}-${m[1]}`;
-}
-
-function parseNameForDateTime(str) {
-  const m = typeof str === 'string' && str.match(/yr:(\d+)\s+jd:(\d+)\s+hr:(\d+)\s+mn:(\d+)/i);
-  return m ? { date: julianToDate(m[1], Number(m[2])), time: `${String(m[3]).padStart(2,'0')}:${String(m[4]).padStart(2,'0')}` } : null;
-}
-function getFirstTextByLocalName(node, local) {
-  const nodes = node.getElementsByTagName('*');
-  for (let i = 0; i < nodes.length; i++) {
-    if ((nodes[i].localName || nodes[i].nodeName) === local) return nodes[i].textContent || '';
-  }
-  return '';
-}
-
-function getLonLat(pm) {
-  const coordsTxt = getFirstTextByLocalName(pm, 'coordinates').trim();
-  if (!coordsTxt) return null;
-  const [lon, lat] = coordsTxt.split(/\s+/)[0].split(',').map(Number);
-  return (isNaN(lat) || isNaN(lon)) ? null : { lon, lat };
-}
-
-function getSerialFromFilename(fn) {
-  const m = fn && fn.match(/_D0*(\d{5,6})_/i);
-  return m ? m[1] : null;
-}
-
-function parseFilenameForDateTime(filename) {
-  const m = filename && filename.match(/(\d{8})(\d{6})/);
-  return m ? {
-    date: `${m[1].slice(6,8)}-${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(m[1].slice(4,6),10)-1]}-${m[1].slice(2,4)}`,
-    time: `${m[2].slice(0,2)}:${m[2].slice(2,4)}`
-  } : null;
-}
-
-function parsePlacemarkDateTime(pm, nameText) {
-  let dt = parseNameForDateTime(nameText);
-  if (dt) return dt;
-  const descText = getFirstTextByLocalName(pm, 'description');
-  if (descText) {
-    const m = descText.match(/yr:(\d+)\s+jd:(\d+)\s+hr:(\d+)\s+mn:(\d+)/i);
-    if (m) {
-      return {
-        date: julianToDate(m[1], Number(m[2])),
-        time: `${String(m[3]).padStart(2,'0')}:${String(m[4]).padStart(2,'0')}`
-      };
-    }
-  }
-  const whenTxt = getFirstTextByLocalName(pm, 'when');
-  if (whenTxt) {
-    const [d, t] = whenTxt.split('T');
-    const [y, mth, dd] = d.split('-');
-    return {
-      date: `${dd}-${["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][parseInt(mth,10)-1]}-${y.slice(2)}`,
-      time: t.slice(0,5)
-    };
-  }
-  return null;
-}
-
-let allPoints = [];
-let currentViewCount = 10;
-
-function updateAnimalFilterOptions() {
-  const select = document.getElementById('animalFilter');
-  const ids = [...new Set(allPoints.map(p => p.animalId))].sort();
-  select.innerHTML = '<option value="all">All</option>' + ids.map(id => `<option value="${id}">${id}</option>`).join('');
-}
-
-function renderMap(points) {
-  markersLayer.clearLayers();
-  points.forEach(p => {
-    L.circleMarker([p.lat, p.lon], {
-      color: getColor(p.animalId), radius: 10, weight: 2, opacity: 0.95
-    }).bindPopup(
-      `<b>${p.animalId}</b><br>${p.date||'—'} ${p.time||'—'}<br>${p.lat.toFixed(5)}, ${p.lon.toFixed(5)}`
-    ).addTo(markersLayer);
-  });
-  if (points.length) {
-    map.fitBounds(L.latLngBounds(points.map(p => [p.lat, p.lon])).pad(0.2));
-  }
-}
-
-function renderTable(points) {
-  const tbody = document.querySelector("#data-table tbody");
-  const visiblePoints = points.slice(0, currentViewCount);
-  tbody.innerHTML = visiblePoints.map((p, idx) => `
-    <tr>
-      <td>${p.animalId}</td>
-      <td class="clickable-date" data-index="${idx}">${p.date || '—'}</td>
-      <td>${p.time || '—'}</td>
-      <td>${p.lat.toFixed(5)}</td>
-      <td>${p.lon.toFixed(5)}</td>
-    </tr>
-  `).join('');
-
-  tbody.querySelectorAll('.clickable-date').forEach(cell => {
-    cell.style.cursor = 'pointer';
-    cell.style.textDecoration = 'underline';
-    cell.addEventListener('click', () => {
-      const point = points[cell.dataset.index];
-      if (point) {
-        markersLayer.eachLayer(layer => {
-          if (layer.getLatLng &&
-              layer.getLatLng().lat.toFixed(5) == point.lat.toFixed(5) &&
-              layer.getLatLng().lng.toFixed(5) == point.lon.toFixed(5)) {
-            map.setView(layer.getLatLng(), 14, { animate: true });
-            layer.openPopup();
-          }
-        });
-      }
-    });
-  });
-
-  document.getElementById('viewMore').style.display = (points.length > currentViewCount) ? 'inline-block' : 'none';
-}
-
-document.getElementById('viewMore').addEventListener('click', () => {
-  currentViewCount += 50;
-  applyFilter();
 });
 
-function applyFilter() {
-  const animalSel = document.getElementById('animalFilter').value;
-  const from = document.getElementById('fromDate').value;
-  const to = document.getElementById('toDate').value;
-  let filtered = allPoints.filter(p => {
-    if (animalSel !== 'all' && p.animalId !== animalSel) return false;
-    const isoDate = p.date ? toISODate(p.date) : null;
-    if (from && (!isoDate || isoDate < from)) return false;
-    if (to && (!isoDate || isoDate > to)) return false;
-    return true;
-  });
-  filtered.sort((a, b) =>
-    ((b.date || '') + (b.time || '')).localeCompare((a.date || '') + (a.time || ''))
-  );
-  renderMap(filtered);
-  renderTable(filtered);
+return Object.values(latest);
+
 }
 
-function handleKMLtext(kmlString, filename) {
-  const xml = new DOMParser().parseFromString(kmlString, "application/xml");
-  const placemarks = Array.from(xml.getElementsByTagName('*'))
-    .filter(node => (node.localName || node.nodeName) === 'Placemark');
-  const serial = getSerialFromFilename(filename);
-  const mappedId = animalIdMapping[serial];
-  const animalId = mappedId || serial || 'Unknown';
-  const fileDT = parseFilenameForDateTime(filename);
+function buildTable(points){
 
-  placemarks.forEach(pm => {
-    const nameText = getFirstTextByLocalName(pm, 'name');
-    const coords = getLonLat(pm);
-    if (!coords) return;
-    let dt = parsePlacemarkDateTime(pm, nameText);
-    if (!dt && fileDT) dt = fileDT;
-    allPoints.push({
-      animalId,
-      date: dt ? dt.date : null,
-      time: dt ? dt.time : null,
-      lat: coords.lat,
-      lon: coords.lon
-    });
-  });
-}
+let html="<table>";
+html+="<tr><th>Date</th><th>Lat</th><th>Lon</th><th>Location</th></tr>";
 
-function handleFiles(files) {
-  const status = document.getElementById('status');
-  status.textContent = `Loading ${files.length} file(s)...`;
-  currentViewCount = 10;
-  let loaded = 0;
-  Array.from(files).forEach(file => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      handleKMLtext(e.target.result, file.name);
-      loaded++;
-      if (loaded === files.length) {
-        status.textContent = `${files.length} file(s) loaded.`;
-        updateAnimalFilterOptions();
-        applyFilter();
-      }
-    };
-    reader.readAsText(file);
-  });
-}
+points.forEach(p=>{
 
-function exportCSV(points) {
-  const header = ['Animal ID','Date','Time','Lat','Lon'];
-  const rows = points.map(p => [p.animalId, p.date, p.time, p.lat, p.lon]);
-  const csv = [header, ...rows].map(r => r.join(',')).join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'gharial-data.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-}
+html+=`
+<tr>
+<td>${p.datetime}</td>
+<td>${p.latitude}</td>
+<td>${p.longitude}</td>
+<td>${p.location}</td>
+</tr>
+`;
 
-document.getElementById('dropzone').addEventListener('click', () => document.getElementById('fileInput').click());
-document.getElementById('dropzone').addEventListener('dragover', e => { e.preventDefault(); dropzone.style.background = '#eef'; });
-document.getElementById('dropzone').addEventListener('dragleave', e => { e.preventDefault(); dropzone.style.background = ''; });
-document.getElementById('dropzone').addEventListener('drop', e => {
-  e.preventDefault();
-  dropzone.style.background = '';
-  handleFiles(e.dataTransfer.files);
 });
 
-document.getElementById('fileInput').addEventListener('change', e => handleFiles(e.target.files));
-document.getElementById('applyFilter').addEventListener('click', applyFilter);
-document.getElementById('clearData').addEventListener('click', () => {
-  allPoints = [];
-  currentViewCount = 10;
-  markersLayer.clearLayers();
-  document.querySelector("#data-table tbody").innerHTML = '';
-  document.getElementById('animalFilter').innerHTML = '<option value="all">All</option>';
-  document.getElementById('status').textContent = '';
+html+="</table>";
+
+document.getElementById("tableContainer").innerHTML=html;
+
+}
+
+function drawTrack(id){
+
+if(trackLayer) map.removeLayer(trackLayer);
+
+const points=dataset.filter(d=>d.id==id);
+
+const latlngs=points.map(p=>[
+parseFloat(p.latitude),
+parseFloat(p.longitude)
+]);
+
+trackLayer=L.polyline(latlngs,{color:"red",weight:3}).addTo(map);
+
+map.fitBounds(trackLayer.getBounds());
+
+buildTable(points);
+
+}
+
+fetch(sheetURL)
+.then(r=>r.text())
+.then(csv=>{
+
+dataset=csvToArray(csv);
+
+const ids=[...new Set(dataset.map(d=>d.id))];
+
+ids.forEach(id=>{
+
+const opt=document.createElement("option");
+opt.value=id;
+opt.text="ID "+id;
+
+document.getElementById("idSelector").appendChild(opt);
+
 });
-document.getElementById('exportCSV').addEventListener('click', () => exportCSV(allPoints));
+
+const latestPoints=getLatestPoints(dataset);
+
+latestPoints.forEach(point=>{
+
+const marker=L.marker([
+parseFloat(point.latitude),
+parseFloat(point.longitude)
+]).addTo(map);
+
+marker.bindPopup(`
+<b>ID ${point.id}</b><br>
+${point.datetime}<br>
+${point.location}
+`);
+
+marker.on("click",function(){
+
+if(marker.isPopupOpen()){
+marker.closePopup();
+}else{
+marker.openPopup();
+}
+
+});
+
+});
+
+});
+
+document.getElementById("idSelector")
+.addEventListener("change",function(){
+
+const id=this.value;
+
+if(id){
+drawTrack(id);
+}
+
+});
+
 </script>
+
 </body>
 </html>
