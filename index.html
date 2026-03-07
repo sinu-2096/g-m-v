@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Pali Ghat Hatchling Viewer</title>
+<title>Pali Ghat Hatchlings</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -12,7 +12,7 @@
 
 body{
 margin:0;
-font-family:Arial,Helvetica,sans-serif;
+font-family:Arial;
 }
 
 #container{
@@ -22,10 +22,9 @@ height:100vh;
 
 #sidebar{
 width:320px;
+background:#f2f2f2;
 padding:10px;
 overflow:auto;
-background:#f5f5f5;
-border-right:1px solid #ccc;
 }
 
 #map{
@@ -45,9 +44,8 @@ font-size:13px;
 }
 
 th,td{
-border:1px solid #ddd;
+border:1px solid #ccc;
 padding:6px;
-text-align:left;
 }
 
 th{
@@ -62,13 +60,11 @@ flex-direction:column;
 
 #sidebar{
 width:100%;
-height:40vh;
-border-right:none;
-border-bottom:1px solid #ccc;
+height:40%;
 }
 
 #map{
-height:60vh;
+height:60%;
 }
 
 }
@@ -85,7 +81,7 @@ height:60vh;
 <h3>Pali Ghat Hatchlings</h3>
 
 <select id="idSelector">
-<option value="">Select Hatchling ID</option>
+<option value="">Select Hatchling</option>
 </select>
 
 <div id="tableContainer"></div>
@@ -105,13 +101,19 @@ const sheetURL="https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_Bjx
 let dataset=[];
 let trackLayer=null;
 
-const map=L.map('map',{closePopupOnClick:false}).setView([25.85,76.60],11);
+const map=L.map('map',{closePopupOnClick:false}).setView([25.844,76.56],12);
+
+
+/* GOOGLE SATELLITE HYBRID */
 
 L.tileLayer(
-'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
 {
-attribution:'Esri'
+maxZoom:20,
+attribution:'Google'
 }).addTo(map);
+
+
 
 function csvToArray(str){
 
@@ -119,13 +121,21 @@ const rows=str.trim().split("\n");
 const headers=rows.shift().split(",");
 
 return rows.map(r=>{
-const vals=r.split(",");
+
+const values=r.split(",");
 let obj={};
-headers.forEach((h,i)=>obj[h.trim().toLowerCase()]=vals[i]);
+
+headers.forEach((h,i)=>{
+obj[h.trim()]=values[i];
+});
+
 return obj;
+
 });
 
 }
+
+
 
 function getLatestPoints(data){
 
@@ -133,11 +143,13 @@ const latest={};
 
 data.forEach(row=>{
 
-const id=row.id;
-const time=new Date(row.datetime);
+const id=row["Animal ID"];
+const time=new Date(row["Timestamp"]);
 
-if(!latest[id]||new Date(latest[id].datetime)<time){
+if(!latest[id] || new Date(latest[id]["Timestamp"]) < time){
+
 latest[id]=row;
+
 }
 
 });
@@ -146,19 +158,21 @@ return Object.values(latest);
 
 }
 
+
+
 function buildTable(points){
 
 let html="<table>";
-html+="<tr><th>Date</th><th>Lat</th><th>Lon</th><th>Location</th></tr>";
+html+="<tr><th>Time</th><th>Place</th><th>Activity</th><th>Signal</th></tr>";
 
 points.forEach(p=>{
 
 html+=`
 <tr>
-<td>${p.datetime}</td>
-<td>${p.latitude}</td>
-<td>${p.longitude}</td>
-<td>${p.location}</td>
+<td>${p["Timestamp"]}</td>
+<td>${p["Place"]}</td>
+<td>${p["Activity"]}</td>
+<td>${p["Signal Stength"]}</td>
 </tr>
 `;
 
@@ -170,18 +184,23 @@ document.getElementById("tableContainer").innerHTML=html;
 
 }
 
+
+
 function drawTrack(id){
 
 if(trackLayer) map.removeLayer(trackLayer);
 
-const points=dataset.filter(d=>d.id==id);
+const points=dataset.filter(d=>d["Animal ID"]==id);
 
 const latlngs=points.map(p=>[
-parseFloat(p.latitude),
-parseFloat(p.longitude)
+parseFloat(p["Latitude"]),
+parseFloat(p["Longitude"])
 ]);
 
-trackLayer=L.polyline(latlngs,{color:"red",weight:3}).addTo(map);
+trackLayer=L.polyline(latlngs,{
+color:"red",
+weight:3
+}).addTo(map);
 
 map.fitBounds(trackLayer.getBounds());
 
@@ -189,13 +208,16 @@ buildTable(points);
 
 }
 
+
+
 fetch(sheetURL)
 .then(r=>r.text())
 .then(csv=>{
 
 dataset=csvToArray(csv);
 
-const ids=[...new Set(dataset.map(d=>d.id))];
+
+const ids=[...new Set(dataset.map(d=>d["Animal ID"]))];
 
 ids.forEach(id=>{
 
@@ -207,34 +229,29 @@ document.getElementById("idSelector").appendChild(opt);
 
 });
 
+
 const latestPoints=getLatestPoints(dataset);
 
 latestPoints.forEach(point=>{
 
 const marker=L.marker([
-parseFloat(point.latitude),
-parseFloat(point.longitude)
+parseFloat(point["Latitude"]),
+parseFloat(point["Longitude"])
 ]).addTo(map);
 
 marker.bindPopup(`
-<b>ID ${point.id}</b><br>
-${point.datetime}<br>
-${point.location}
+<b>ID ${point["Animal ID"]}</b><br>
+${point["Timestamp"]}<br>
+${point["Place"]}<br>
+Activity: ${point["Activity"]}
 `);
 
-marker.on("click",function(){
+});
 
-if(marker.isPopupOpen()){
-marker.closePopup();
-}else{
-marker.openPopup();
-}
 
 });
 
-});
 
-});
 
 document.getElementById("idSelector")
 .addEventListener("change",function(){
@@ -246,6 +263,7 @@ drawTrack(id);
 }
 
 });
+
 
 </script>
 
