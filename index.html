@@ -1,396 +1,346 @@
+telemetry · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ATS Sat Real Time Viewer | Gharial Ecology Project – Live Telemetry</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ATS Sat Real Time Viewer | Gharial Ecology Project</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ══ DESIGN TOKENS ══════════════════════════════════════════════ */
+/* ══ DESIGN TOKENS (LIGHT THEME) ═══════════════════════════════ */
 :root{
-  --void:#040e08;--forest-d:#071a0f;--forest:#1b4332;
-  --forest2:#2d6a4f;--forest3:#40916c;--green:#52b788;
-  --green-pale:rgba(82,183,136,.12);--green-glow:rgba(82,183,136,.35);
-
-  --c-active:#22c55e;--c-s7:#f59e0b;--c-s30:#ef4444;--c-crit:#991b1b;
-  --c-active-bg:rgba(34,197,94,.13);--c-s7-bg:rgba(245,158,11,.13);
-  --c-s30-bg:rgba(239,68,68,.13);--c-crit-bg:rgba(153,27,27,.2);
-
-  --text:#e8f5e9;--text2:#a7f3d0;--text3:#6ee7b7;
-  --text-dim:#4b7a5e;--text-bright:#ffffff;
-  --border:rgba(82,183,136,.18);--border2:rgba(82,183,136,.38);
-
-  --font:'Exo 2',sans-serif;--mono:'IBM Plex Mono',monospace;
-  --hdr:60px;--fbar:50px;--btm:225px;--r:5px;--r2:9px;
-
-  --shadow:0 4px 20px rgba(0,0,0,.55);
-  --glow:0 0 18px rgba(82,183,136,.2);
+  --forest:#1b4332;--forest2:#2d6a4f;--forest3:#40916c;--green:#52b788;
+  --green-lt:#d8f3dc;--green-pale:rgba(82,183,136,.09);
+  --c-active:#15803d;--c-s7:#b45309;--c-s30:#b91c1c;--c-crit:#7f1d1d;
+  --c-active-lt:rgba(21,128,61,.1);--c-s7-lt:rgba(180,83,9,.1);
+  --c-s30-lt:rgba(185,28,28,.1);--c-crit-lt:rgba(127,29,29,.12);
+  --text:#111827;--text2:#374151;--text3:#6b7280;--text4:#9ca3af;
+  --border:#e5e7eb;--border2:#d1d5db;
+  --bg:#f0f4f1;--surface:#fff;--surface2:#f9fafb;
+  --font:'Inter',sans-serif;--mono:'IBM Plex Mono',monospace;
+  --hdr:56px;--fbar:46px;--btm:220px;--r:6px;
+  --shadow:0 2px 8px rgba(0,0,0,.08);
+  --shadow-md:0 4px 18px rgba(0,0,0,.11);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;background:var(--void);color:var(--text);font-family:var(--font);}
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(82,183,136,.22);border-radius:3px;}
-button{cursor:pointer;font-family:var(--font);}select{font-family:var(--mono);}
-
-/* ══ KEYFRAMES ══════════════════════════════════════════════════ */
-@keyframes spin{to{transform:rotate(360deg);}}
-@keyframes pulse-ring{0%{transform:translate(-50%,-50%) scale(1);opacity:.8}
-  70%{transform:translate(-50%,-50%) scale(3.2);opacity:0}100%{opacity:0}}
-@keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scan{0%,100%{opacity:.5}50%{opacity:1}}
-
-/* ══ HEADER ══════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+button{cursor:pointer;font-family:var(--font)}
+ 
+/* HEADER */
 #hdr{
   position:fixed;top:0;left:0;right:0;z-index:1200;height:var(--hdr);
-  background:linear-gradient(108deg,#040e08 0%,#0d2216 35%,#1b4332 70%,#0d2216 100%);
-  border-bottom:1.5px solid var(--border2);
+  background:linear-gradient(108deg,var(--forest) 0%,var(--forest2) 55%,var(--forest) 100%);
+  border-bottom:2px solid var(--green);
   display:flex;align-items:center;gap:10px;padding:0 14px;
-  box-shadow:0 3px 24px rgba(0,0,0,.7),inset 0 1px 0 rgba(82,183,136,.1);
+  box-shadow:0 2px 18px rgba(27,67,50,.3);
 }
-.hdr-logos{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-.hdr-logos img{height:36px;object-fit:contain;filter:brightness(1.1) drop-shadow(0 1px 5px rgba(0,0,0,.4));}
-.hdr-logos img.hide{display:none;}
-.vdiv{width:1px;height:30px;background:var(--border2);flex-shrink:0;}
-.hdr-brand{flex-shrink:0;}
-.hdr-main{font-family:var(--font);font-weight:800;font-size:.83rem;color:#fff;
-  letter-spacing:.03em;line-height:1.2;text-transform:uppercase;}
-.hdr-sub{font-family:var(--mono);font-size:.56rem;color:var(--text3);
-  letter-spacing:.12em;margin-top:2px;text-transform:uppercase;}
-
-/* STATUS PILLS */
-#pills{display:flex;gap:6px;align-items:center;flex:1;overflow-x:auto;scrollbar-width:none;padding:0 2px;}
-#pills::-webkit-scrollbar{display:none;}
-.pill{
-  display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:3px;
-  font-family:var(--mono);font-size:.62rem;font-weight:700;white-space:nowrap;
-  border:1.5px solid transparent;cursor:default;letter-spacing:.04em;
-  transition:opacity .3s;
-}
-.pill .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.pill .cnt{background:rgba(255,255,255,.18);border-radius:3px;padding:1px 6px;
-  font-size:.6rem;min-width:18px;text-align:center;}
-.pill-a{background:var(--c-active-bg);color:var(--c-active);border-color:rgba(34,197,94,.3);}
-.pill-a .dot{background:var(--c-active);box-shadow:0 0 6px var(--c-active);}
-.pill-s7{background:var(--c-s7-bg);color:var(--c-s7);border-color:rgba(245,158,11,.3);}
-.pill-s7 .dot{background:var(--c-s7);}
-.pill-s30{background:var(--c-s30-bg);color:var(--c-s30);border-color:rgba(239,68,68,.3);}
-.pill-s30 .dot{background:var(--c-s30);}
-.pill-crit{background:var(--c-crit-bg);color:#fca5a5;border-color:rgba(153,27,27,.45);}
-.pill-crit .dot{background:#fca5a5;box-shadow:0 0 5px #fca5a5;}
-
-/* HEADER RIGHT */
-#hdr-r{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;}
-#sync-info{font-family:var(--mono);font-size:.58rem;color:var(--text-dim);text-align:right;line-height:1.6;}
-#sync-info strong{color:var(--green);display:block;font-size:.52rem;letter-spacing:.1em;}
-.hbtn{
-  display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:var(--r);
-  border:1.5px solid var(--border2);background:var(--green-pale);
-  color:var(--text2);font-family:var(--mono);font-size:.65rem;font-weight:700;
-  transition:all .18s;white-space:nowrap;letter-spacing:.03em;
-}
-.hbtn:hover{background:rgba(82,183,136,.25);border-color:var(--green);color:#fff;}
-.hbtn .spin-i{display:inline-block;}
-.hbtn.loading .spin-i{animation:spin .75s linear infinite;}
-
-/* ══ FILTER BAR ══════════════════════════════════════════════════ */
+.hdr-logos{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hdr-logos img{height:34px;object-fit:contain;filter:brightness(1.1)}
+.hdr-logos img.hide{display:none}
+.hdr-div{width:1px;height:28px;background:rgba(255,255,255,.22);flex-shrink:0}
+.hdr-brand .hdr-title{font-weight:700;font-size:.83rem;color:#fff;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
+.hdr-brand .hdr-sub{font-size:.59rem;color:rgba(255,255,255,.55);margin-top:2px;font-family:var(--mono);letter-spacing:.08em}
+#pills{display:flex;gap:5px;align-items:center;flex:1;overflow-x:auto;scrollbar-width:none}
+#pills::-webkit-scrollbar{display:none}
+.pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:3px;
+  font-family:var(--mono);font-size:.61rem;font-weight:600;white-space:nowrap;border:1px solid transparent}
+.pill .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pill .cnt{background:rgba(255,255,255,.18);border-radius:3px;padding:0 5px;font-size:.59rem;min-width:18px;text-align:center}
+.pill-a{background:rgba(22,163,74,.22);color:#bbf7d0;border-color:rgba(22,163,74,.35)}
+.pill-a .dot{background:#86efac}
+.pill-s7{background:rgba(217,119,6,.2);color:#fde68a;border-color:rgba(217,119,6,.35)}
+.pill-s7 .dot{background:#fcd34d}
+.pill-s30{background:rgba(220,38,38,.2);color:#fecaca;border-color:rgba(220,38,38,.35)}
+.pill-s30 .dot{background:#fca5a5}
+.pill-crit{background:rgba(127,29,29,.3);color:#fca5a5;border-color:rgba(127,29,29,.45)}
+.pill-crit .dot{background:#fca5a5}
+#hdr-r{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
+#sync-info{font-family:var(--mono);font-size:.57rem;color:rgba(255,255,255,.5);text-align:right;line-height:1.6}
+#sync-info strong{color:#86efac;display:block;font-size:.51rem;letter-spacing:.1em}
+.hbtn{display:flex;align-items:center;gap:5px;padding:4px 11px;
+  border-radius:var(--r);border:1.5px solid rgba(255,255,255,.28);
+  background:rgba(255,255,255,.12);color:#fff;font-family:var(--mono);font-size:.63rem;font-weight:600;
+  transition:all .18s;white-space:nowrap;letter-spacing:.03em}
+.hbtn:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.55)}
+.hbtn.loading .spin-i{animation:spin .75s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse-ring{0%{transform:translate(-50%,-50%) scale(1);opacity:.6}70%{transform:translate(-50%,-50%) scale(2.8);opacity:0}100%{opacity:0}}
+ 
+/* FILTER BAR */
 #fbar{
-  position:fixed;top:var(--hdr);left:0;right:0;z-index:1100;height:var(--fbar);
-  background:rgba(7,26,15,.97);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;gap:7px;padding:0 14px;
-  overflow-x:auto;scrollbar-width:none;backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
+  position:fixed;top:var(--hdr);left:0;right:0;z-index:1100;
+  height:var(--fbar);
+  background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;padding:0 14px;
+  overflow-x:auto;overflow-y:visible;scrollbar-width:none;
 }
-#fbar::-webkit-scrollbar{display:none;}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.fg label{font-family:var(--mono);font-size:.56rem;font-weight:700;
-  color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
+#fbar::-webkit-scrollbar{display:none}
+.fg{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.fg label{font-family:var(--mono);font-size:.55rem;font-weight:700;
+  color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .fsel{
-  padding:4px 24px 4px 9px;background:rgba(0,0,0,.45);
-  border:1px solid var(--border);border-radius:var(--r);
-  color:var(--text);font-family:var(--mono);font-size:.66rem;
-  cursor:pointer;min-width:120px;max-width:190px;
+  padding:4px 22px 4px 8px;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:var(--mono);font-size:.64rem;cursor:pointer;min-width:118px;
   appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2352b788'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;background-size:9px;
-  transition:border-color .15s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;background-size:8px;
+  transition:border-color .15s
 }
-.fsel:focus{outline:none;border-color:var(--green);}
-.fsel option{background:#1b4332;color:var(--text);}
-.fsep{width:1px;height:22px;background:var(--border);flex-shrink:0;}
-
-/* Zone multi-select */
-.zone-wrap{position:relative;flex-shrink:0;}
-.zone-btn{
-  display:flex;align-items:center;gap:6px;padding:4px 24px 4px 9px;
-  background:rgba(0,0,0,.45);border:1px solid var(--border);border-radius:var(--r);
-  color:var(--text);font-family:var(--mono);font-size:.66rem;cursor:pointer;
-  min-width:130px;text-align:left;white-space:nowrap;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2352b788'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 8px center;background-size:9px;
-  transition:border-color .15s;
+.fsel:focus{outline:none;border-color:var(--forest3)}
+.fsep{width:1px;height:20px;background:var(--border);flex-shrink:0}
+ 
+/* Multi-select dropdowns (fixed-position to escape overflow clip) */
+.mdd-wrap{position:relative;flex-shrink:0}
+.mdd-btn{
+  display:flex;align-items:center;gap:5px;padding:4px 22px 4px 8px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:var(--mono);font-size:.64rem;cursor:pointer;
+  min-width:120px;text-align:left;white-space:nowrap;transition:border-color .15s;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 7px center;background-size:8px
 }
-.zone-btn:hover,.zone-btn.open{border-color:var(--green);}
-.zone-dd{
-  display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:2100;
-  background:#0d2216;border:1px solid var(--border2);border-radius:var(--r2);
-  min-width:200px;max-height:230px;overflow-y:auto;
-  box-shadow:var(--shadow);scrollbar-width:thin;
-  scrollbar-color:rgba(82,183,136,.25) transparent;
+.mdd-btn:hover,.mdd-btn.open{border-color:var(--forest3);background:var(--green-pale)}
+/* Panel uses position:fixed to escape overflow-x:auto clipping on fbar */
+.mdd-panel{
+  display:none;position:fixed;z-index:2500;
+  background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);
+  min-width:210px;max-height:280px;overflow:hidden;
+  box-shadow:var(--shadow-md);flex-direction:column
 }
-.zone-dd.open{display:block;animation:fade-in .15s ease;}
-.zone-opt{
-  display:flex;align-items:center;gap:8px;padding:7px 13px;
-  font-family:var(--mono);font-size:.65rem;color:var(--text);
-  cursor:pointer;transition:background .1s;
+.mdd-panel.open{display:flex}
+.mdd-search{
+  padding:6px 9px;border:none;border-bottom:1px solid var(--border);
+  background:var(--surface2);color:var(--text);font-family:var(--mono);
+  font-size:.63rem;outline:none;flex-shrink:0
 }
-.zone-opt:hover{background:var(--green-pale);}
-.zone-opt input[type=checkbox]{accent-color:var(--green);width:13px;height:13px;}
-.zone-opt label{cursor:pointer;flex:1;user-select:none;}
-.zone-divider{height:1px;background:var(--border);margin:2px 0;}
-
+.mdd-search:focus{background:var(--surface)}
+.mdd-scroll{overflow-y:auto;flex:1}
+.mdd-opt{
+  display:flex;align-items:center;gap:7px;padding:6px 10px;
+  font-family:var(--mono);font-size:.63rem;color:var(--text);
+  cursor:pointer;transition:background .1s
+}
+.mdd-opt:hover{background:var(--green-pale)}
+.mdd-opt input[type=checkbox]{accent-color:var(--forest3);width:12px;height:12px;flex-shrink:0;cursor:pointer}
+.mdd-opt .mdd-label{flex:1;user-select:none}
+.mdd-cnt{color:var(--text4);font-size:.57rem}
+.mdd-div{height:1px;background:var(--border);flex-shrink:0;margin:2px 0}
+ 
+/* Apply / Clear */
 #btn-apply{
-  padding:6px 20px;border-radius:var(--r);
-  background:linear-gradient(135deg,var(--forest2),var(--forest3));
-  border:1.5px solid var(--green);color:#fff;
-  font-family:var(--mono);font-size:.7rem;font-weight:700;
-  letter-spacing:.06em;cursor:pointer;white-space:nowrap;
-  box-shadow:0 2px 10px rgba(0,0,0,.3);transition:all .18s;
+  padding:5px 16px;border-radius:var(--r);background:var(--forest2);border:none;
+  color:#fff;font-family:var(--mono);font-size:.67rem;font-weight:700;
+  letter-spacing:.05em;cursor:pointer;white-space:nowrap;transition:background .18s
 }
-#btn-apply:hover{background:linear-gradient(135deg,var(--forest3),#52b788);
-  box-shadow:0 3px 16px rgba(82,183,136,.35);}
+#btn-apply:hover{background:var(--forest3)}
 .clr-btn{
   padding:5px 10px;border-radius:var(--r);background:transparent;
-  border:1px solid var(--border);color:var(--text-dim);
-  font-family:var(--mono);font-size:.63rem;transition:all .15s;white-space:nowrap;
+  border:1px solid var(--border2);color:var(--text3);font-family:var(--mono);
+  font-size:.63rem;transition:all .15s;white-space:nowrap
 }
-.clr-btn:hover{border-color:var(--border2);color:var(--text2);background:var(--green-pale);}
-
-/* ══ MAP ══════════════════════════════════════════════════════════ */
+.clr-btn:hover{border-color:var(--forest3);color:var(--text);background:var(--green-pale)}
+ 
+/* MAP */
 #map-wrap{
   position:fixed;top:calc(var(--hdr) + var(--fbar));
-  left:0;right:0;bottom:var(--btm);z-index:1;
+  left:0;right:0;bottom:var(--btm);z-index:1
 }
-#map{width:100%;height:100%;}
-
-/* blank state overlay */
-#map-blank{
-  position:absolute;inset:0;z-index:400;
-  display:flex;align-items:center;justify-content:center;
-  pointer-events:none;background:rgba(4,14,8,.25);
-  transition:opacity .4s;
-}
-#map-blank.gone{opacity:0;pointer-events:none;}
-.mb-card{
-  background:rgba(7,26,15,.92);border:1.5px solid var(--border2);
-  border-radius:var(--r2);padding:24px 32px;text-align:center;
-  backdrop-filter:blur(12px);box-shadow:var(--glow),var(--shadow);
-  animation:scan 3s ease-in-out infinite;
-}
-.mb-glyph{font-size:2.4rem;margin-bottom:10px;}
-.mb-title{font-family:var(--font);font-weight:800;font-size:.9rem;
-  color:var(--text);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;}
-.mb-hint{font-family:var(--mono);font-size:.63rem;color:var(--text-dim);}
-.mb-hint strong{color:var(--green);}
-
-/* Leaflet overrides */
-.leaflet-container{background:var(--void) !important;}
+#map{width:100%;height:100%}
+.leaflet-container{background:#d4ddd6 !important}
+ 
+/* Leaflet popup – light */
 .leaflet-popup-content-wrapper{
-  background:rgba(7,26,15,.97) !important;border:1.5px solid var(--border2) !important;
-  border-radius:var(--r2) !important;box-shadow:var(--shadow),var(--glow) !important;
-  color:var(--text) !important;padding:0 !important;min-width:245px;
+  background:#fff !important;border:1px solid var(--border2) !important;
+  border-radius:10px !important;box-shadow:var(--shadow-md) !important;
+  color:var(--text) !important;padding:0 !important;min-width:242px
 }
-.leaflet-popup-tip{background:rgba(7,26,15,.97) !important;}
-.leaflet-popup-close-button{color:var(--text-dim) !important;top:8px !important;right:10px !important;font-size:15px !important;}
-.leaflet-popup-close-button:hover{color:var(--green) !important;}
+.leaflet-popup-tip{background:#fff !important}
+.leaflet-popup-close-button{color:var(--text3) !important;top:8px !important;right:10px !important;font-size:16px !important}
+.leaflet-popup-close-button:hover{color:var(--text) !important}
 .zone-lbl{
-  background:rgba(7,26,15,.9) !important;border:1px solid var(--border2) !important;
-  color:var(--text3) !important;font-family:var(--mono) !important;font-size:.63rem !important;
-  font-weight:700 !important;border-radius:4px !important;padding:3px 8px !important;
+  background:rgba(255,255,255,.92) !important;border:1px solid var(--border) !important;
+  color:var(--forest) !important;font-family:var(--mono) !important;
+  font-size:.62rem !important;font-weight:700 !important;
+  border-radius:4px !important;padding:3px 7px !important
 }
-
-/* POPUP CONTENT */
-.pop-inner{padding:13px 15px 10px;}
+ 
+/* Popup content */
+.pop-inner{padding:12px 14px 9px}
 .pop-id{
-  font-family:var(--font);font-weight:800;font-size:.95rem;color:var(--green);
-  margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;gap:6px;
+  font-family:var(--mono);font-weight:700;font-size:.98rem;color:var(--forest);
+  margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid var(--green-lt);
+  display:flex;align-items:center;justify-content:space-between;gap:6px
 }
-.pop-row{
-  display:flex;justify-content:space-between;align-items:baseline;
-  margin-bottom:4px;gap:8px;
-}
-.pop-lbl{font-family:var(--mono);font-size:.56rem;font-weight:700;
-  color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;white-space:nowrap;}
-.pop-val{font-family:var(--mono);font-size:.67rem;color:var(--text);text-align:right;}
+.pop-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:8px}
+.pop-lbl{font-size:.55rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
+.pop-val{font-family:var(--mono);font-size:.66rem;color:var(--text);text-align:right}
 .pop-days{
-  display:inline-block;margin-top:7px;padding:3px 10px;
-  border-radius:3px;font-family:var(--mono);font-size:.63rem;font-weight:700;
+  display:inline-block;margin-top:5px;padding:2px 8px;border-radius:3px;
+  font-family:var(--mono);font-size:.61rem;font-weight:700
 }
 .pop-acts{
-  display:flex;gap:4px;padding:8px 15px;border-top:1px solid var(--border);
-  background:rgba(0,0,0,.2);border-radius:0 0 var(--r2) var(--r2);
+  display:flex;gap:4px;padding:7px 14px;
+  border-top:1px solid var(--border);background:var(--surface2);
+  border-radius:0 0 10px 10px
 }
 .pab{
-  flex:1;padding:5px;text-align:center;background:var(--green-pale);
-  border:1px solid var(--border);color:var(--text2);border-radius:4px;
-  font-family:var(--mono);font-size:.62rem;font-weight:700;cursor:pointer;transition:all .15s;
+  flex:1;padding:5px;text-align:center;background:var(--green-lt);
+  border:1px solid var(--border);color:var(--forest);border-radius:4px;
+  font-family:var(--mono);font-size:.61rem;font-weight:700;cursor:pointer;transition:all .14s
 }
-.pab:hover{background:rgba(82,183,136,.28);color:#fff;border-color:var(--green);}
-
-/* STATUS BADGES */
+.pab:hover{background:var(--green);color:#fff;border-color:var(--green)}
 .sbadge{
-  display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
-  border-radius:3px;font-family:var(--mono);font-size:.57rem;font-weight:700;white-space:nowrap;
-  letter-spacing:.03em;
+  display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;
+  font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.03em
 }
-.sb-a{background:var(--c-active-bg);color:var(--c-active);border:1px solid rgba(34,197,94,.3);}
-.sb-s7{background:var(--c-s7-bg);color:var(--c-s7);border:1px solid rgba(245,158,11,.3);}
-.sb-s30{background:var(--c-s30-bg);color:var(--c-s30);border:1px solid rgba(239,68,68,.3);}
-.sb-crit{background:var(--c-crit-bg);color:#fca5a5;border:1px solid rgba(153,27,27,.4);}
-.src-tag{
-  display:inline-block;padding:1px 6px;border-radius:3px;
-  font-family:var(--mono);font-size:.54rem;font-weight:700;letter-spacing:.04em;
-}
-.sr-ats{background:rgba(14,116,144,.3);color:#67e8f9;border:1px solid rgba(14,116,144,.4);}
-.sr-fl{background:rgba(124,58,237,.3);color:#c4b5fd;border:1px solid rgba(124,58,237,.35);}
-.sr-pali{background:rgba(27,67,50,.5);color:#6ee7b7;border:1px solid rgba(82,183,136,.3);}
-
-/* ══ LEGEND ══════════════════════════════════════════════════════ */
+.sb-a{background:var(--c-active-lt);color:var(--c-active);border:1px solid rgba(21,128,61,.2)}
+.sb-s7{background:var(--c-s7-lt);color:var(--c-s7);border:1px solid rgba(180,83,9,.2)}
+.sb-s30{background:var(--c-s30-lt);color:var(--c-s30);border:1px solid rgba(185,28,28,.2)}
+.sb-crit{background:var(--c-crit-lt);color:var(--c-crit);border:1px solid rgba(127,29,29,.2)}
+.src-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-family:var(--mono);font-size:.53rem;font-weight:700;letter-spacing:.04em}
+.sr-ats{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
+.sr-fl{background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe}
+.sr-pali{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
+ 
+/* LEGEND */
 #legend{
   position:absolute;bottom:14px;left:14px;z-index:500;
-  background:rgba(4,14,8,.92);border:1px solid var(--border);
-  border-radius:var(--r);padding:10px 13px;backdrop-filter:blur(10px);
+  background:rgba(255,255,255,.94);border:1px solid var(--border);
+  border-radius:var(--r);padding:9px 12px;box-shadow:var(--shadow)
 }
-#legend-hdr{font-family:var(--mono);font-size:.52rem;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px;}
+#legend-hdr{font-family:var(--mono);font-size:.51rem;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
 .leg-row{display:flex;align-items:center;gap:7px;margin-bottom:4px;
-  font-family:var(--mono);font-size:.61rem;color:var(--text);}
-.leg-row:last-child{margin-bottom:0;}
-.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;border:1.5px solid rgba(255,255,255,.4);}
-
-/* ══ BOTTOM TABLE ════════════════════════════════════════════════ */
+  font-family:var(--mono);font-size:.6rem;color:var(--text)}
+.leg-row:last-child{margin-bottom:0}
+.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+#track-badge{
+  position:absolute;top:12px;left:14px;z-index:500;
+  background:var(--forest2);color:#fff;border-radius:var(--r);
+  padding:4px 10px;font-family:var(--mono);font-size:.63rem;font-weight:700;
+  letter-spacing:.04em;box-shadow:var(--shadow);display:none
+}
+ 
+/* MAP BLANK */
+#map-blank{
+  position:absolute;inset:0;z-index:400;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s
+}
+#map-blank.gone{opacity:0;pointer-events:none}
+.mb-card{
+  background:rgba(255,255,255,.94);border:1px solid var(--border);
+  border-radius:10px;padding:20px 28px;text-align:center;box-shadow:var(--shadow-md)
+}
+.mb-glyph{font-size:2rem;margin-bottom:8px}
+.mb-title{font-weight:700;font-size:.86rem;color:var(--text);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
+.mb-hint{font-family:var(--mono);font-size:.62rem;color:var(--text3)}
+ 
+/* BOTTOM TABLE */
 #btm{
   position:fixed;bottom:0;left:0;right:0;height:var(--btm);z-index:800;
-  background:rgba(4,14,8,.98);border-top:1.5px solid var(--border2);
-  display:flex;flex-direction:column;backdrop-filter:blur(16px);
+  background:var(--surface);border-top:2px solid var(--border2);
+  display:flex;flex-direction:column
 }
+#rbar{height:5px;flex-shrink:0;cursor:ns-resize;background:var(--bg);border-bottom:1px solid var(--border)}
 #btm-hdr{
   display:flex;align-items:center;justify-content:space-between;
   padding:5px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:var(--forest)
 }
-.btm-title{
-  display:flex;align-items:center;gap:8px;
-  font-family:var(--mono);font-size:.67rem;font-weight:700;
-  color:var(--green);letter-spacing:.07em;text-transform:uppercase;
-}
-.tbl-badge{
-  background:var(--green-pale);border:1px solid var(--border);
-  color:var(--text2);border-radius:3px;padding:1px 8px;
-  font-size:.58rem;font-weight:600;
-}
-.btm-ctrls{display:flex;gap:4px;align-items:center;}
-.bc{
-  padding:3px 10px;border-radius:var(--r);background:var(--green-pale);
-  border:1px solid var(--border);color:var(--text2);
-  font-family:var(--mono);font-size:.59rem;font-weight:600;
-  cursor:pointer;transition:all .15s;white-space:nowrap;
-}
-.bc:hover{background:rgba(82,183,136,.25);color:#fff;}
-#rbar{
-  height:5px;flex-shrink:0;cursor:ns-resize;
-  background:linear-gradient(180deg,rgba(82,183,136,.12),transparent);
-  border-bottom:1px solid var(--border);
-}
-#btm-scroll{flex:1;overflow:auto;}
-.dtbl{width:100%;border-collapse:collapse;font-family:var(--mono);
-  font-size:.66rem;white-space:nowrap;}
+.btm-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);
+  font-size:.65rem;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase}
+.tbl-badge{background:rgba(255,255,255,.18);border-radius:3px;padding:1px 8px;
+  font-size:.57rem;color:rgba(255,255,255,.8)}
+.btm-ctrls{display:flex;gap:4px}
+.bc{padding:3px 9px;border-radius:var(--r);background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--mono);
+  font-size:.59rem;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap}
+.bc:hover{background:rgba(255,255,255,.26)}
+#btm-scroll{flex:1;overflow:auto}
+.dtbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.65rem;white-space:nowrap}
 .dtbl thead th{
-  background:rgba(27,67,50,.95);color:var(--text2);
-  padding:6px 12px;text-align:left;position:sticky;top:0;z-index:5;
-  border-bottom:1px solid var(--border2);font-size:.57rem;font-weight:700;
-  letter-spacing:.07em;cursor:pointer;user-select:none;text-transform:uppercase;
-  transition:background .1s;
+  background:var(--surface2);color:var(--text2);
+  padding:5px 11px;text-align:left;position:sticky;top:0;z-index:5;
+  border-bottom:2px solid var(--border2);font-size:.56rem;font-weight:700;
+  letter-spacing:.07em;cursor:pointer;user-select:none;text-transform:uppercase;transition:background .1s
 }
-.dtbl thead th:hover{background:rgba(45,106,79,.95);}
-.dtbl tbody td{padding:5px 12px;border-bottom:1px solid rgba(82,183,136,.06);color:var(--text);vertical-align:middle;}
-.dtbl tbody tr{cursor:pointer;transition:background .1s;}
-.dtbl tbody tr:hover{background:rgba(82,183,136,.07);}
-.dtbl tbody tr.sel{background:rgba(34,197,94,.1) !important;}
-.dtbl tbody tr.r-crit td{background:rgba(153,27,27,.07);}
-.no-data{text-align:center;color:var(--text-dim);padding:22px !important;font-size:.7rem !important;}
-
-/* ══ LOADING OVERLAY ═════════════════════════════════════════════ */
+.dtbl thead th:hover{background:var(--green-lt)}
+.dtbl tbody td{padding:5px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.dtbl tbody tr{cursor:pointer;transition:background .1s}
+.dtbl tbody tr:hover{background:var(--green-pale)}
+.dtbl tbody tr.sel{background:var(--green-lt) !important}
+.no-data{text-align:center;color:var(--text3);padding:20px !important;font-size:.68rem !important}
+ 
+/* LOADING */
 #loading{
-  position:fixed;inset:0;z-index:9000;background:var(--void);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
-  transition:opacity .5s,visibility .5s;
+  position:fixed;inset:0;z-index:9000;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;
+  transition:opacity .5s,visibility .5s
 }
-#loading.hide{opacity:0;visibility:hidden;}
-.ld-ring{width:42px;height:42px;border:3px solid rgba(82,183,136,.12);
-  border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
-.ld-title{font-family:var(--mono);font-size:.72rem;font-weight:700;
-  color:var(--text);letter-spacing:.1em;text-transform:uppercase;}
-.ld-sub{font-family:var(--mono);font-size:.58rem;color:var(--text-dim);}
-.ld-sources{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
-.ld-src{font-family:var(--mono);font-size:.58rem;padding:2px 10px;
-  border-radius:3px;text-align:center;transition:all .3s;}
-.ld-src.ok{color:var(--c-active);background:rgba(34,197,94,.1);}
-.ld-src.err{color:var(--c-s30);}
-.ld-src.wait{color:var(--text-dim);}
-
-/* ══ TOAST ═══════════════════════════════════════════════════════ */
+#loading.hide{opacity:0;visibility:hidden}
+.ld-ring{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
+.ld-title{font-weight:700;font-size:.84rem;color:var(--forest);letter-spacing:.06em;text-transform:uppercase}
+.ld-sub{font-family:var(--mono);font-size:.59rem;color:var(--text3)}
+.ld-sources{display:flex;flex-direction:column;gap:3px;margin-top:4px}
+.ld-src{font-family:var(--mono);font-size:.57rem;padding:2px 10px;border-radius:3px;
+  text-align:center;transition:all .3s;color:var(--text3)}
+.ld-src.ok{color:var(--c-active);background:rgba(21,128,61,.07)}
+.ld-src.err{color:var(--c-s30)}
+ 
+/* TOAST */
 #toast{
   position:fixed;bottom:calc(var(--btm) + 10px);left:50%;
   transform:translateX(-50%) translateY(10px);z-index:9999;
-  background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);
-  color:#f87171;padding:8px 18px;border-radius:var(--r);
-  font-family:var(--mono);font-size:.67rem;letter-spacing:.04em;
-  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;
+  background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.3);
+  color:var(--c-s30);padding:7px 16px;border-radius:var(--r);
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s
 }
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
-#toast.ok{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.35);color:#4ade80;}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.3);color:var(--c-active)}
 </style>
 </head>
 <body>
-
-<!-- ══ LOADING ════════════════════════════════════════════════════ -->
+ 
+<!-- LOADING -->
 <div id="loading">
   <div class="ld-ring"></div>
   <div class="ld-title">Gharial Ecology Project</div>
   <div class="ld-sub" id="ld-sub">Initialising telemetry systems…</div>
   <div class="ld-sources">
-    <div class="ld-src wait" id="ls-master">◌  Radio Master Database</div>
-    <div class="ld-src wait" id="ls-ats">◌  ATS Satellite Telemetry</div>
-    <div class="ld-src wait" id="ls-fl">◌  Field Log (AppSheet)</div>
-    <div class="ld-src wait" id="ls-pali">◌  Pali FT Manual Log</div>
-    <div class="ld-src wait" id="ls-gj">◌  River Zone GeoJSON</div>
+    <div class="ld-src" id="ls-master">◌  Radio Master Database</div>
+    <div class="ld-src" id="ls-ats">◌  ATS Satellite Telemetry</div>
+    <div class="ld-src" id="ls-fl">◌  Field Log (AppSheet)</div>
+    <div class="ld-src" id="ls-pali">◌  Pali FT Manual Log</div>
+    <div class="ld-src" id="ls-gj">◌  River Zone GeoJSON</div>
   </div>
 </div>
-
-<!-- ══ TOAST ══════════════════════════════════════════════════════ -->
 <div id="toast"></div>
-
-<!-- ══ HEADER ════════════════════════════════════════════════════ -->
+ 
+<!-- HEADER -->
 <header id="hdr">
   <div class="hdr-logos">
     <img src="mcbt.png" alt="MCBT" onerror="this.classList.add('hide')">
     <img src="gep.png"  alt="GEP"  onerror="this.classList.add('hide')">
   </div>
-  <div class="vdiv"></div>
+  <div class="hdr-div"></div>
   <div class="hdr-brand">
-    <div class="hdr-main">ATS Sat Real Time Viewer &nbsp;|&nbsp; Gharial Ecology Project</div>
-    <div class="hdr-sub">🐊 Live Multi-Source Telemetry – Live Telemetry</div>
+    <div class="hdr-title">ATS Sat Real Time Viewer &nbsp;|&nbsp; Gharial Ecology Project</div>
+    <div class="hdr-sub">🐊 Live Multi-Source Telemetry – Field Monitoring Dashboard</div>
   </div>
-
   <div id="pills">
     <div class="pill pill-a"><div class="dot"></div><span>Active ≤7d</span><span class="cnt" id="c-a">—</span></div>
     <div class="pill pill-s7"><div class="dot"></div><span>Silent &gt;7d</span><span class="cnt" id="c-s7">—</span></div>
     <div class="pill pill-s30"><div class="dot"></div><span>Silent &gt;30d</span><span class="cnt" id="c-s30">—</span></div>
     <div class="pill pill-crit"><div class="dot"></div><span>Crit ≥45d</span><span class="cnt" id="c-crit">—</span></div>
   </div>
-
   <div id="hdr-r">
     <div id="sync-info"><strong>Last Sync</strong><span id="sync-t">—</span></div>
     <button class="hbtn" id="btn-refresh" onclick="loadAllData()">
@@ -398,14 +348,35 @@ button{cursor:pointer;font-family:var(--font);}select{font-family:var(--mono);}
     </button>
   </div>
 </header>
-
-<!-- ══ FILTER BAR ═════════════════════════════════════════════════ -->
+ 
+<!-- FILTER BAR -->
 <div id="fbar">
+  <!-- Category (from Master Radio) -->
   <div class="fg">
-    <label>Tag Type</label>
-    <select class="fsel" id="f-type"><option value="all">All Types</option></select>
+    <label>Category</label>
+    <select class="fsel" id="f-cat" onchange="onCategoryChange()">
+      <option value="all">All Categories</option>
+    </select>
   </div>
   <div class="fsep"></div>
+ 
+  <!-- Radio ID multi-select (dependent on Category) -->
+  <div class="fg">
+    <label>Radio ID</label>
+    <div class="mdd-wrap" id="rid-wrap">
+      <button class="mdd-btn" id="rid-btn" onclick="toggleMDD('rid')">
+        <span id="rid-lbl">All IDs</span>
+      </button>
+      <div class="mdd-panel" id="rid-panel">
+        <input class="mdd-search" id="rid-search" placeholder="Search ID…"
+               oninput="onMDDSearch('rid',this.value)">
+        <div class="mdd-scroll" id="rid-list"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fsep"></div>
+ 
+  <!-- Status -->
   <div class="fg">
     <label>Status</label>
     <select class="fsel" id="f-status">
@@ -417,6 +388,8 @@ button{cursor:pointer;font-family:var(--font);}select{font-family:var(--mono);}
     </select>
   </div>
   <div class="fsep"></div>
+ 
+  <!-- Source -->
   <div class="fg">
     <label>Source</label>
     <select class="fsel" id="f-source">
@@ -427,56 +400,52 @@ button{cursor:pointer;font-family:var(--font);}select{font-family:var(--mono);}
     </select>
   </div>
   <div class="fsep"></div>
+ 
+  <!-- Zone multi-select (with search, sorted by count) -->
   <div class="fg">
     <label>Zone / Stretch</label>
-    <div class="zone-wrap" id="zone-wrap">
-      <button class="zone-btn" id="zone-btn" onclick="toggleZoneDD()">
+    <div class="mdd-wrap" id="zone-wrap">
+      <button class="mdd-btn" id="zone-btn" onclick="toggleMDD('zone')">
         <span id="zone-lbl">All Zones</span>
       </button>
-      <div class="zone-dd" id="zone-dd">
-        <div class="zone-opt">
-          <input type="checkbox" id="zAll" checked onchange="toggleAllZones(this)">
-          <label for="zAll">All Zones</label>
-        </div>
-        <div class="zone-divider"></div>
-        <div id="zone-opts"></div>
+      <div class="mdd-panel" id="zone-panel">
+        <input class="mdd-search" id="zone-search" placeholder="Search zone…"
+               oninput="onMDDSearch('zone',this.value)">
+        <div class="mdd-scroll" id="zone-list"></div>
       </div>
     </div>
   </div>
   <div class="fsep"></div>
+ 
   <button id="btn-apply" onclick="applyFilters()">▶ APPLY</button>
   <button class="clr-btn" onclick="clearFilters()">✕ Clear</button>
 </div>
-
-<!-- ══ MAP ════════════════════════════════════════════════════════ -->
+ 
+<!-- MAP -->
 <div id="map-wrap">
   <div id="map"></div>
-
   <div id="map-blank">
     <div class="mb-card">
       <div class="mb-glyph">🐊</div>
       <div class="mb-title">Data Loaded — Awaiting Filter</div>
-      <div class="mb-hint">Set filters above and click <strong>▶ APPLY</strong> to render markers</div>
+      <div class="mb-hint">Set filters above and click <strong>▶ APPLY</strong></div>
     </div>
   </div>
-
+  <div id="track-badge">🗺 Track Mode</div>
   <div id="legend">
     <div id="legend-hdr">Days Since Fix</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#22c55e"></div>Active (≤ 7 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#f59e0b"></div>Silent (8 – 30 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#ef4444"></div>Silent (31 – 44 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#991b1b"></div>Crit (≥ 45 d)</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#15803d"></div>Active (≤ 7 d)</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#b45309"></div>Silent (8 – 30 d)</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#b91c1c"></div>Silent (31 – 44 d)</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#7f1d1d"></div>Crit (≥ 45 d)</div>
   </div>
 </div>
-
-<!-- ══ BOTTOM TABLE ═══════════════════════════════════════════════ -->
+ 
+<!-- BOTTOM TABLE -->
 <div id="btm">
   <div id="rbar"></div>
   <div id="btm-hdr">
-    <div class="btm-title">
-      📡 Telemetry Records
-      <span class="tbl-badge" id="tbl-badge">0 animals</span>
-    </div>
+    <div class="btm-title">📡 Telemetry Records <span class="tbl-badge" id="tbl-badge">0 animals</span></div>
     <div class="btm-ctrls">
       <button class="bc" onclick="exportCSV()">📤 Export</button>
       <button class="bc" id="btm-tog" onclick="toggleBtm()">▼ Hide</button>
@@ -489,685 +458,897 @@ button{cursor:pointer;font-family:var(--font);}select{font-family:var(--mono);}
         <th onclick="sortTbl(1)">Last Fix</th>
         <th onclick="sortTbl(2)">Days ↕</th>
         <th onclick="sortTbl(3)">Status</th>
-        <th onclick="sortTbl(4)">Tag Type</th>
-        <th onclick="sortTbl(5)">Source</th>
-        <th onclick="sortTbl(6)">Zone</th>
-        <th onclick="sortTbl(7)">Days Since Release</th>
+        <th onclick="sortTbl(4)">Category</th>
+        <th onclick="sortTbl(5)">Sex</th>
+        <th onclick="sortTbl(6)">Source</th>
+        <th onclick="sortTbl(7)">Zone</th>
+        <th onclick="sortTbl(8)">Days Since Release</th>
         <th>Latitude</th><th>Longitude</th>
-        <th>Activity / Place</th><th>Signal</th><th>Remarks</th>
+        <th>Tag Place</th><th>T.L (cm)</th><th>Remarks</th>
       </tr></thead>
       <tbody id="tbl-body">
-        <tr><td class="no-data" colspan="13">Apply filters to display telemetry records</td></tr>
+        <tr><td class="no-data" colspan="14">Apply filters to display telemetry records</td></tr>
       </tbody>
     </table>
   </div>
 </div>
-
-<!-- ══ SCRIPTS ════════════════════════════════════════════════════ -->
+ 
+<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
-
+ 
 <script>
 /* ══ CONFIG ══════════════════════════════════════════════════════ */
 const URLS = {
-  master : 'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
-  ats    : 'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
-  fl     : 'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
-  pali   : 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  geojson: 'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
+  master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
+  ats   :'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
+  fl    :'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
+  pali  :'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  geojson:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
 };
 const MAP_CENTER = [25.84, 76.56];
 const MAP_ZOOM   = 12;
 const TODAY      = new Date();
-
+ 
+/*
+ * Placeholder Chambal river centreline for river-curve distance calculation.
+ * Replace coordinate array with a real GPS-traced centreline for production.
+ * Coordinates are [lng, lat] (GeoJSON convention required by Turf.js).
+ */
+const RIVER_LINE = turf.lineString([
+  [76.478,25.922],[76.492,25.910],[76.505,25.899],[76.517,25.889],
+  [76.528,25.880],[76.537,25.872],[76.545,25.864],[76.552,25.856],
+  [76.558,25.847],[76.563,25.838],[76.568,25.829],[76.574,25.820],
+  [76.581,25.810],[76.590,25.800],[76.600,25.790],[76.612,25.779],
+  [76.625,25.768],[76.638,25.757],[76.651,25.746],[76.665,25.735],
+]);
+ 
 /* ══ STATE ═══════════════════════════════════════════════════════ */
-let map, markerLayer, zoneLayer = null;
-let allAnimals = [], displayed = [];
+let map, markerLayer, trackLayer, zoneLayer;
+let allAnimals = [], allFixes = {}, masterMap = {};
+let displayed  = [];
 let geojsonData = null;
 let sortCol = 2, sortDir = 1;
-let btmCollapsed = false;
-let mapMarkers = [];  // {id, marker}
-
+let btmCollapsed = false, btmH = 220;
+let mapMarkers = []; // {id, marker}
+ 
+// Multi-select filter state
+const S = {
+  ridPool   : [],  // IDs currently selectable in Radio ID dropdown
+  ridSel    : null, // Set<id> or null (null = all selected)
+  zoneSel   : null, // Set<zone> or null
+  allZones  : [],   // sorted zone names
+  zoneCounts: {},   // zone → animal count
+};
+ 
 /* ══ UTILITIES ═══════════════════════════════════════════════════ */
-
-// Flexible column extractor – matches despite spacing/underscore/case variations
+ 
+/** Flexible column accessor – ignores spacing/underscore/slash differences */
 function gc(row, ...keys) {
   const rowKeys = Object.keys(row);
   for (const k of keys) {
-    const norm = k.toLowerCase().replace(/[\s_\-\.]+/g,'');
+    const norm = k.toLowerCase().replace(/[\s_\-\.\/]+/g, '');
     for (const rk of rowKeys) {
-      if (rk.trim().toLowerCase().replace(/[\s_\-\.]+/g,'') === norm) {
+      if (rk.trim().toLowerCase().replace(/[\s_\-\.\/]+/g, '') === norm) {
         const v = String(row[rk] || '').trim();
-        if (v && v.toLowerCase() !== 'na' && v !== '-' && v !== '—') return v;
+        if (v && !['na','n/a','-','—',''].includes(v.toLowerCase())) return v;
       }
     }
   }
   return '';
 }
-
-// Normalize ID – trim + uppercase
-function nid(raw) {
-  return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
-}
-
-// Parse timestamp from many formats
+ 
+/** Normalise ID – uppercase, no spaces */
+function nid(raw) { return String(raw||'').trim().toUpperCase().replace(/\s+/g,''); }
+ 
+/**
+ * Robust timestamp parser.
+ *
+ * ORDER IS CRITICAL:
+ *   1. DD-MM-YYYY … must be tested FIRST. If we call new Date("01-12-2025")
+ *      the JS engine reads it as MM-DD-YYYY (Jan 12) not Dec 1 – the infamous
+ *      "Pali FT December-2026 bug". By matching the dash-delimited regex
+ *      before the native parser we always get the correct DD-MM-YYYY result.
+ *   2. M/D/YYYY HH:MM:SS  (Field Log Datetime column)
+ *   3. ISO 8601 / native Date()  (ATS Date column)
+ */
 function pts(s) {
   if (!s || !String(s).trim()) return null;
   s = String(s).trim();
-  // ISO 8601
-  let d = new Date(s); if (!isNaN(d.getTime()) && d.getFullYear() > 2000) return d;
-  // DD-MM-YYYY[ HH:MM[:SS]]
-  let m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if (m) return new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
-  // YYYY-MM-DD HH:MM
-  m = s.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{1,2}):(\d{2})/);
-  if (m) return new Date(+m[1], +m[2]-1, +m[3], +m[4], +m[5]);
+ 
+  // 1 ── DD-MM-YYYY [HH:MM[:SS]]  ← Pali FT; match 1-2 digit day/month first
+  let m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (m && +m[3] > 2000) {
+    const d = new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    if (!isNaN(d)) return d;
+  }
+ 
+  // 2 ── M/D/YYYY [HH:MM[:SS]]  ← Field Log
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m) {
+    const d = new Date(+m[3], +m[1]-1, +m[2], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    if (!isNaN(d)) return d;
+  }
+ 
+  // 3 ── ISO 8601 / default JS  ← ATS (YYYY-MM-DDTHH:MM:SS)
+  const d = new Date(s);
+  if (!isNaN(d) && d.getFullYear() > 2000) return d;
+ 
   return null;
 }
-
+ 
 function daysSince(ts) {
-  if (!ts) return 9999;
-  const d = Math.floor((TODAY - ts) / 86400000);
-  return Math.max(0, d);
+  if (!ts || isNaN(ts)) return 9999;
+  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
 }
-
 function getStatus(days) {
   if (days <= 7)  return 'active';
   if (days <= 30) return 's7';
   if (days < 45)  return 's30';
   return 'crit';
 }
-
-function statusLabel(s) {
-  return {active:'Active ≤7d', s7:'Silent >7d', s30:'Silent >30d', crit:'Crit ≥45d'}[s] || s;
-}
-function statusBadge(s) {
-  const mp = {active:'sb-a', s7:'sb-s7', s30:'sb-s30', crit:'sb-crit'};
-  return `<span class="sbadge ${mp[s]||''}">${statusLabel(s)}</span>`;
-}
 function markerColor(s) {
-  return {active:'#22c55e', s7:'#f59e0b', s30:'#ef4444', crit:'#991b1b'}[s] || '#6b7280';
+  return {active:'#15803d',s7:'#b45309',s30:'#b91c1c',crit:'#7f1d1d'}[s]||'#6b7280';
 }
-
 function fmtDT(ts) {
-  if (!ts) return '—';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) +
-    ' ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  if (!ts||isNaN(ts)) return '—';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+
+    ' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
-
-function setLdSub(msg) { const e=document.getElementById('ld-sub'); if(e) e.textContent=msg; }
-function setLdSrc(id,ok) {
-  const e=document.getElementById(id); if(!e) return;
-  e.className='ld-src '+(ok?'ok':'err');
-  e.textContent = (ok?'✓':'✗') + '  ' + e.textContent.replace(/^[◌✓✗]\s*/,'');
+function setLdSrc(id, ok) {
+  const e = document.getElementById(id); if (!e) return;
+  e.className = 'ld-src '+(ok?'ok':'err');
+  e.textContent = (ok?'✓  ':'✗  ')+e.textContent.replace(/^[◌✓✗]\s*/,'');
 }
-
 function toast(msg, ok=false) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='on'+(ok?' ok':'');
-  clearTimeout(t._to); t._to=setTimeout(()=>t.className='', 4000);
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className='on'+(ok?' ok':'');
+  clearTimeout(t._to); t._to = setTimeout(()=>t.className='',4000);
 }
-
+ 
 /* ══ MAP INIT ════════════════════════════════════════════════════ */
 function initMap() {
-  map = L.map('map', { zoomControl:false, attributionControl:false })
-    .setView(MAP_CENTER, MAP_ZOOM);
-  L.control.zoom({ position:'bottomright' }).addTo(map);
-
-  // Satellite base
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    { maxZoom:19, attribution:'© Esri' }
-  ).addTo(map);
-  // Labels overlay
-  L.tileLayer(
-    'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-    { maxZoom:19, opacity:0.8 }
-  ).addTo(map);
-
+  map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+ 
+  // Google Hybrid Satellite (as specified)
+  L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+    {maxZoom:21,attribution:'© Google'}).addTo(map);
+ 
   markerLayer = L.layerGroup().addTo(map);
-  map.on('click', closeZoneDD);
+  trackLayer  = L.layerGroup().addTo(map);
+ 
+  map.on('click', () => { closeMDD('rid'); closeMDD('zone'); });
 }
-
+ 
 /* ══ DATA LOADING ════════════════════════════════════════════════ */
 function fetchCSV(url) {
-  return new Promise((res, rej) => {
-    Papa.parse(url + '&_t=' + Date.now(), {
+  return new Promise((res,rej) => {
+    Papa.parse(url+'&_t='+Date.now(), {
       download:true, header:true, skipEmptyLines:true,
-      complete: r => res(r.data),
-      error:    e => rej(e),
+      complete: r => res(r.data), error: e => rej(e),
     });
   });
 }
-
+ 
 async function loadAllData() {
   const btn = document.getElementById('btn-refresh');
   btn.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
-  setLdSub('Fetching all 4 sheets + GeoJSON in parallel…');
-
-  // Reset source indicators
+  document.getElementById('ld-sub').textContent = 'Fetching all 4 sheets + GeoJSON…';
   ['ls-master','ls-ats','ls-fl','ls-pali','ls-gj'].forEach(id => {
-    const e=document.getElementById(id); if(e) {e.className='ld-src wait'; e.textContent='◌  '+e.textContent.replace(/^[◌✓✗]\s*/,'');}
+    const e = document.getElementById(id); if (!e) return;
+    e.className='ld-src'; e.textContent='◌  '+e.textContent.replace(/^[◌✓✗]\s*/,'');
   });
-
+ 
   try {
-    // Promise.all for parallel fetch
     const [masterR, atsR, flR, paliR, gjRaw] = await Promise.all([
-      fetchCSV(URLS.master).then(d=>{setLdSrc('ls-master',true);return d;}).catch(e=>{setLdSrc('ls-master',false);console.warn('Master:',e);return[];}),
-      fetchCSV(URLS.ats).then(d=>{setLdSrc('ls-ats',true);return d;}).catch(e=>{setLdSrc('ls-ats',false);console.warn('ATS:',e);return[];}),
-      fetchCSV(URLS.fl).then(d=>{setLdSrc('ls-fl',true);return d;}).catch(e=>{setLdSrc('ls-fl',false);console.warn('FL:',e);return[];}),
-      fetchCSV(URLS.pali).then(d=>{setLdSrc('ls-pali',true);return d;}).catch(e=>{setLdSrc('ls-pali',false);console.warn('Pali:',e);return[];}),
-      fetch(URLS.geojson).then(r=>r.json()).then(d=>{setLdSrc('ls-gj',true);return d;}).catch(e=>{setLdSrc('ls-gj',false);console.warn('GeoJSON:',e);return null;}),
+      fetchCSV(URLS.master).then(d=>{setLdSrc('ls-master',true);return d;})
+        .catch(e=>{setLdSrc('ls-master',false);console.warn('Master:',e);return[];}),
+      fetchCSV(URLS.ats).then(d=>{setLdSrc('ls-ats',true);return d;})
+        .catch(e=>{setLdSrc('ls-ats',false);console.warn('ATS:',e);return[];}),
+      fetchCSV(URLS.fl).then(d=>{setLdSrc('ls-fl',true);return d;})
+        .catch(e=>{setLdSrc('ls-fl',false);console.warn('FL:',e);return[];}),
+      fetchCSV(URLS.pali).then(d=>{setLdSrc('ls-pali',true);return d;})
+        .catch(e=>{setLdSrc('ls-pali',false);console.warn('Pali:',e);return[];}),
+      fetch(URLS.geojson).then(r=>r.json()).then(d=>{setLdSrc('ls-gj',true);return d;})
+        .catch(e=>{setLdSrc('ls-gj',false);console.warn('GeoJSON:',e);return null;}),
     ]);
-
-    setLdSub('Building master lookup…');
-    const master = buildMaster(masterR);
-
-    setLdSub('Processing telemetry sources…');
-    const fixes = {};  // id → array of fix objects
-    ingestATS(atsR, fixes);
-    ingestFL(flR, fixes);
-    ingestPali(paliR, fixes);
-
-    setLdSub('Merging & computing metrics…');
+ 
+    document.getElementById('ld-sub').textContent='Building master lookup…';
+    masterMap = buildMaster(masterR);
+ 
+    document.getElementById('ld-sub').textContent='Processing telemetry…';
+    allFixes = {};
+    ingestATS(atsR);
+    ingestFL(flR);
+    ingestPali(paliR);
+ 
+    document.getElementById('ld-sub').textContent='Merging animals…';
     geojsonData = gjRaw;
-    allAnimals  = mergeAnimals(fixes, master);
-
+    allAnimals  = mergeAnimals();
+ 
     if (geojsonData?.features?.length) {
-      setLdSub('Assigning river zones with Turf.js…');
+      document.getElementById('ld-sub').textContent='Assigning zones (Turf.js)…';
       assignZones();
-      buildZoneUI();
     }
-
-    populateTypeDD(master);
+ 
+    populateCategoryDD();
+    rebuildZoneState();
+    rebuildRIDState();
+    renderZoneList('');
+    renderRIDList('');
+    updateZoneLbl();
+    updateRIDLbl();
+    drawZonePolygons();
     updatePills();
-
+ 
     document.getElementById('sync-t').textContent =
-      new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-
-    toast(`✓ Loaded ${allAnimals.length} animals from ${Object.keys(fixes).length} unique IDs`, true);
-
+      new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    toast(`✓ Loaded ${allAnimals.length} animals from ${Object.keys(allFixes).length} unique IDs`,true);
+ 
   } catch(err) {
-    console.error(err);
-    toast('Error: ' + err.message);
+    console.error(err); toast('Error: '+err.message);
   } finally {
     btn.classList.remove('loading');
     document.getElementById('loading').classList.add('hide');
   }
 }
-
+ 
 /* ══ MASTER LOOKUP ═══════════════════════════════════════════════ */
 function buildMaster(rows) {
   const m = {};
   rows.forEach(row => {
-    const id = nid(gc(row,
-      'Radio_ID','RadioID','Radio ID','ID','Animal_ID','AnimalID','Animal ID',
-      'Collar_ID','CollarID','Tag_ID','TagID','Transmitter_ID'
-    ));
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID'));
     if (id) m[id] = row;
   });
   return m;
 }
-
-/* ══ INGEST ATS ══════════════════════════════════════════════════ */
-function ingestATS(rows, fixes) {
+ 
+/* ══ INGEST ATS LOG ══════════════════════════════════════════════
+   Columns: RadioID, Date (ISO 8601), Latitude, Longitude         */
+function ingestATS(rows) {
   rows.forEach(row => {
-    const id = nid(gc(row,'RadioID','Radio_ID','CollarSerialNumber','Collar_Serial_Number','ID'));
+    const id = nid(gc(row,'RadioID','Radio_ID','CollarSerialNumber','ID'));
     if (!id) return;
     const lat = parseFloat(gc(row,'Latitude','Lat','latitude'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long','longitude'));
     if (isNaN(lat)||isNaN(lon)) return;
-    const ts = pts(gc(row,'Date','Timestamp','DateTime','date_time','date','timestamp'));
-    if (!fixes[id]) fixes[id] = [];
-    fixes[id].push({ lat, lon, ts, source:'ATS',
-      remarks: gc(row,'Remarks','Notes','Remark','note') });
+    const ts = pts(gc(row,'Date','Timestamp','DateTime','date','timestamp'));
+    if (!allFixes[id]) allFixes[id]=[];
+    allFixes[id].push({lat,lon,ts,source:'ATS',
+      remarks:gc(row,'Remarks','Notes')});
   });
 }
-
-/* ══ INGEST FIELD LOG ════════════════════════════════════════════ */
-function ingestFL(rows, fixes) {
+ 
+/* ══ INGEST FIELD LOG ════════════════════════════════════════════
+   Columns: Radio_ID, Datetime (M/D/YYYY HH:MM:SS), LatLong
+   LatLong arrives as a single "25.842, 76.563" string → split it */
+function ingestFL(rows) {
   rows.forEach(row => {
-    const id = nid(gc(row,
-      'RadioID','Radio_ID','Radio ID','Animal_ID','AnimalID','Animal ID',
-      'ID','Tag_ID','TagID','Collar_ID','CollarID'
-    ));
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID'));
     if (!id) return;
-    const lat = parseFloat(gc(row,'Latitude','Lat','GPS_Lat','GPSLat','latitude'));
-    const lon = parseFloat(gc(row,'Longitude','Lon','GPS_Lon','GPSLon','longitude','Long'));
+ 
+    let lat, lon;
+    // Primary: combined "LatLong" column
+    const ll = gc(row,'LatLong','Lat_Long','LatLng','GPS_Coordinates','Coordinates');
+    if (ll && ll.includes(',')) {
+      const parts = ll.split(',');
+      lat = parseFloat(parts[0].trim());
+      lon = parseFloat(parts[1].trim());
+    } else {
+      // Fallback: separate columns
+      lat = parseFloat(gc(row,'Latitude','Lat','GPS_Lat'));
+      lon = parseFloat(gc(row,'Longitude','Lon','Long','GPS_Lon'));
+    }
     if (isNaN(lat)||isNaN(lon)) return;
-    const ts = pts(gc(row,'Timestamp','Date','DateTime','Date_Time','timestamp','date'));
-    if (!fixes[id]) fixes[id] = [];
-    fixes[id].push({ lat, lon, ts, source:'FieldLog',
-      activity: gc(row,'Activity','Behavior','Behaviour','activity'),
-      signal:   gc(row,'Signal','signal','SignalStrength'),
-      place:    gc(row,'Place','Location','Site','place','location'),
-      remarks:  gc(row,'Remarks','Notes','remarks','notes'),
-    });
+ 
+    const ts = pts(gc(row,'Datetime','DateTime','Date','Timestamp'));
+    if (!allFixes[id]) allFixes[id]=[];
+    allFixes[id].push({lat,lon,ts,source:'FieldLog',
+      activity:gc(row,'Activity','Behavior','Behaviour'),
+      signal  :gc(row,'Signal','SignalStrength'),
+      place   :gc(row,'Place','Location','Site'),
+      remarks :gc(row,'Remarks','Notes')});
   });
 }
-
-/* ══ INGEST PALI FT ══════════════════════════════════════════════ */
-function ingestPali(rows, fixes) {
+ 
+/* ══ INGEST PALI FT ══════════════════════════════════════════════
+   Columns: Animal ID, Timestamp (DD-MM-YYYY HH:MM), Lat, Lng
+   CRITICAL: pts() tests DD-MM-YYYY regex BEFORE calling new Date()
+   to prevent the MM-DD misparse (December → "month 01" bug).       */
+function ingestPali(rows) {
   rows.forEach(row => {
     const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','RadioID','Radio_ID','ID'));
     if (!id) return;
     const lat = parseFloat(gc(row,'Latitude','Lat','latitude'));
     const lon = parseFloat(gc(row,'Longitude','Lon','longitude'));
     if (isNaN(lat)||isNaN(lon)) return;
+    // pts() with DD-MM-YYYY-first ordering handles the format correctly
     const ts = pts(gc(row,'Timestamp','Date','timestamp','date'));
-    if (!fixes[id]) fixes[id] = [];
-    fixes[id].push({ lat, lon, ts, source:'PaliFT',
-      activity: gc(row,'Activity','activity'),
-      signal:   gc(row,'Signal','signal'),
-      place:    gc(row,'Place','place','Location'),
-      remarks:  gc(row,'Remarks','Notes','remarks'),
-    });
+    if (!allFixes[id]) allFixes[id]=[];
+    allFixes[id].push({lat,lon,ts,source:'PaliFT',
+      activity:gc(row,'Activity','activity'),
+      signal  :gc(row,'Signal','signal'),
+      place   :gc(row,'Place','Location','place'),
+      remarks :gc(row,'Remarks','Notes','remarks')});
   });
 }
-
-/* ══ MERGE ═══════════════════════════════════════════════════════ */
-function mergeAnimals(fixes, master) {
+ 
+/* ══ MERGE ANIMALS ═══════════════════════════════════════════════ */
+function mergeAnimals() {
   const out = [];
-
-  Object.entries(fixes).forEach(([id, arr]) => {
-    // Sort all fixes, most recent first (nulls last)
+  Object.entries(allFixes).forEach(([id,arr]) => {
+    // Sort: most-recent first for latest fix; we'll also keep a chrono history
     arr.sort((a,b) => {
-      if (!a.ts && !b.ts) return 0;
+      if (!a.ts&&!b.ts) return 0;
       if (!a.ts) return 1; if (!b.ts) return -1;
       return b.ts - a.ts;
     });
     const latest = arr[0];
-    const mr = master[id] || {};
-
-    const tagType       = gc(mr,'Tag_Type','TagType','Tag Type','Type','Transmitter_Type','Device_Type') || 'Unknown';
-    const releaseDateRaw= gc(mr,'Release_Date','ReleaseDate','Release Date','Date_Released','Deployment_Date','DeploymentDate','Release');
-    const releaseDate   = pts(releaseDateRaw);
-    const category      = gc(mr,'Category','category','Behavior','Type2');
-    const species       = gc(mr,'Species','species','Animal','Common_Name');
-    const sex           = gc(mr,'Sex','Gender','sex','gender');
-    const size          = gc(mr,'Size','SVL','Length','TL','Total_Length','size');
-    const site          = gc(mr,'Release_Location','ReleaseLocation','Release_Site','Site','Location');
-
+    const mr     = masterMap[id] || {};
+ 
+    // Master sheet fields
+    const tagDateRaw = gc(mr,
+      'Tag Date/Release Date','TagDate','ReleaseDate','Release_Date',
+      'Tag_Date','DeploymentDate','Deployment_Date','Release');
+    const tagDate  = pts(tagDateRaw);
+    const tagPlace = gc(mr,'Tag Place','Tag_Place','TagPlace','Release_Location','Site');
+    const sex      = gc(mr,'Sex','Gender');
+    const category = gc(mr,'Category','Type','Tag_Type','TagType');
+    const tl       = gc(mr,'T.L','TL','Total_Length','TotalLength','Total Length','Length');
+    const remarks  = gc(mr,'Remarks','Notes');
+    const sat      = gc(mr,'SAT','Sat','Satellite');
+ 
     const daysFix = daysSince(latest.ts);
-    const daysRel = releaseDate ? daysSince(releaseDate) : null;
+    // Days since release: use tagDate if available, else earliest recorded fix
+    const oldest  = arr[arr.length-1];
+    const relDate = tagDate || oldest?.ts || null;
+    const daysRel = relDate ? daysSince(relDate) : null;
     const status  = getStatus(daysFix);
-
+ 
+    // Full chronological history for tracking mode (oldest → newest)
+    const history = [...arr].reverse();
+ 
     out.push({
       id, lat:latest.lat, lon:latest.lon, ts:latest.ts,
       source:latest.source,
-      tagType, category, species, sex, size, site,
-      releaseDate, daysFix, daysRel, status,
-      zone:'—',
-      activity: latest.activity||'', signal:latest.signal||'',
-      place:    latest.place||'',    remarks:latest.remarks||'',
-      totalFixes: arr.length,
+      category, sex, tl, tagPlace, tagDate, sat, remarks,
+      daysFix, daysRel, status, zone:'—',
+      activity:latest.activity||'',
+      signal  :latest.signal||'',
+      place   :latest.place||'',
+      totalFixes:arr.length,
+      history,
     });
   });
-
   out.sort((a,b) => a.daysFix - b.daysFix);
   return out;
 }
-
-/* ══ ZONE ASSIGNMENT (Turf.js) ═══════════════════════════════════ */
+ 
+/* ══ ZONE ASSIGNMENT (Turf.js booleanPointInPolygon) ════════════ */
 function assignZones() {
   if (!geojsonData?.features) return;
   const polys = geojsonData.features.filter(
-    f => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon'
-  );
+    f => f.geometry?.type==='Polygon'||f.geometry?.type==='MultiPolygon');
   allAnimals.forEach(a => {
     const pt = turf.point([a.lon, a.lat]);
     for (const feat of polys) {
       try {
         if (turf.booleanPointInPolygon(pt, feat)) {
           a.zone = feat.properties?.name || feat.properties?.Name ||
-                   feat.properties?.ZONE || feat.properties?.zone || '—';
+                   feat.properties?.ZONE || feat.properties?.zone ||
+                   feat.properties?.STRETCH || feat.properties?.stretch || '—';
           break;
         }
       } catch(e) {}
     }
   });
 }
-
-/* ══ ZONE UI ═════════════════════════════════════════════════════ */
-function buildZoneUI() {
-  if (!geojsonData?.features) return;
-  const names = [...new Set(
-    geojsonData.features
-      .map(f => f.properties?.name || f.properties?.Name || f.properties?.ZONE || f.properties?.zone || '')
-      .filter(Boolean)
-  )].sort();
-
-  const cont = document.getElementById('zone-opts');
-  cont.innerHTML = '';
-  names.forEach(n => {
-    const d = document.createElement('div'); d.className = 'zone-opt';
-    const sid = 'z-' + n.replace(/\W/g,'_');
-    d.innerHTML = `<input type="checkbox" id="${sid}" value="${n}" checked onchange="onZoneChange()">
-      <label for="${sid}">${n}</label>`;
-    cont.appendChild(d);
+ 
+/* ══ RIVER CURVE DISTANCE (Turf.js) ════════════════════════════
+   Snaps both points onto the river centreline, slices the segment
+   between them, and returns its true along-river length in metres.  */
+function calcRiverDistance(fix1, fix2) {
+  try {
+    const p1   = turf.point([fix1.lon, fix1.lat]);
+    const p2   = turf.point([fix2.lon, fix2.lat]);
+    const s1   = turf.nearestPointOnLine(RIVER_LINE, p1);
+    const s2   = turf.nearestPointOnLine(RIVER_LINE, p2);
+    const seg  = turf.lineSlice(s1, s2, RIVER_LINE);
+    return Math.round(turf.length(seg, {units:'meters'}));
+  } catch(e) { return null; }
+}
+ 
+/* ══ ZONE UI ════════════════════════════════════════════════════ */
+function rebuildZoneState() {
+  // Count animals per zone
+  const counts = {};
+  allAnimals.forEach(a => {
+    if (a.zone && a.zone!=='—') counts[a.zone]=(counts[a.zone]||0)+1;
   });
-
-  // Draw zone polygons
+  // All zone names from GeoJSON + those assigned to animals
+  const gzones = (geojsonData?.features||[]).map(f =>
+    f.properties?.name || f.properties?.Name ||
+    f.properties?.ZONE || f.properties?.zone ||
+    f.properties?.STRETCH || f.properties?.stretch || '').filter(Boolean);
+  const allZ = [...new Set([...Object.keys(counts),...gzones])];
+  // Sort by count desc, then alpha
+  allZ.sort((a,b) => (counts[b]||0)-(counts[a]||0) || a.localeCompare(b));
+  S.allZones   = allZ;
+  S.zoneCounts = counts;
+  S.zoneSel    = null; // all selected
+}
+ 
+function drawZonePolygons() {
   if (zoneLayer) map.removeLayer(zoneLayer);
+  if (!geojsonData) return;
   zoneLayer = L.geoJSON(geojsonData, {
-    style: {
-      color:'rgba(82,183,136,.55)', weight:1.5, dashArray:'5,9',
-      fillColor:'rgba(82,183,136,.04)', fillOpacity:1,
-    },
-    onEachFeature(feat, layer) {
-      const n = feat.properties?.name || feat.properties?.Name ||
-                feat.properties?.ZONE || feat.properties?.zone || 'Zone';
-      layer.bindTooltip(n, { className:'zone-lbl', direction:'center', permanent:false });
+    style:{color:'rgba(27,67,50,.55)',weight:1.5,dashArray:'5,10',
+           fillColor:'rgba(27,67,50,.04)',fillOpacity:1},
+    onEachFeature(feat,layer){
+      const n = feat.properties?.name||feat.properties?.Name||
+                feat.properties?.ZONE||feat.properties?.zone||'Zone';
+      layer.bindTooltip(n,{className:'zone-lbl',direction:'center',permanent:false});
     }
   }).addTo(map);
 }
-
-/* ══ FILTER & RENDER ═════════════════════════════════════════════ */
+ 
+function renderZoneList(search) {
+  const list = document.getElementById('zone-list');
+  const zones = S.allZones.filter(z => !search||z.toLowerCase().includes(search.toLowerCase()));
+  const allChk = !S.zoneSel;
+  list.innerHTML = '';
+ 
+  // "All Zones" header checkbox
+  const allDiv = document.createElement('div');
+  allDiv.className = 'mdd-opt';
+  allDiv.innerHTML =
+    `<input type="checkbox" ${allChk?'checked':''}><span class="mdd-label">All Zones</span>`;
+  allDiv.querySelector('input').addEventListener('change', e => {
+    S.zoneSel = e.target.checked ? null : new Set();
+    renderZoneList(document.getElementById('zone-search').value);
+    updateZoneLbl();
+  });
+  list.appendChild(allDiv);
+ 
+  const divEl = document.createElement('div'); divEl.className='mdd-div';
+  list.appendChild(divEl);
+ 
+  zones.forEach(z => {
+    const cnt  = S.zoneCounts[z]||0;
+    const chk  = !S.zoneSel || S.zoneSel.has(z);
+    const row  = document.createElement('div'); row.className='mdd-opt';
+    row.innerHTML =
+      `<input type="checkbox" ${chk?'checked':''} data-v="${z}">
+       <span class="mdd-label">${z}</span>
+       <span class="mdd-cnt">${cnt||''}</span>`;
+    row.querySelector('input').addEventListener('change', e => {
+      const v = e.target.getAttribute('data-v');
+      if (!S.zoneSel) S.zoneSel = new Set(S.allZones);
+      if (e.target.checked) S.zoneSel.add(v); else S.zoneSel.delete(v);
+      if (S.zoneSel.size === S.allZones.length) S.zoneSel = null;
+      updateZoneLbl();
+    });
+    list.appendChild(row);
+  });
+}
+ 
+function updateZoneLbl() {
+  const lbl = document.getElementById('zone-lbl');
+  if (!S.zoneSel) lbl.textContent = 'All Zones';
+  else if (S.zoneSel.size===0) lbl.textContent = 'No Zone';
+  else lbl.textContent = `${S.zoneSel.size} / ${S.allZones.length} zones`;
+}
+ 
+/* ══ CATEGORY DROPDOWN ══════════════════════════════════════════ */
+function populateCategoryDD() {
+  const cats = new Set();
+  Object.values(masterMap).forEach(r => {
+    const c = gc(r,'Category','Type','Tag_Type','TagType');
+    if (c) cats.add(c);
+  });
+  allAnimals.forEach(a => { if (a.category) cats.add(a.category); });
+  const sel = document.getElementById('f-cat');
+  while (sel.options.length>1) sel.remove(1);
+  [...cats].sort().forEach(c => {
+    const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+  });
+}
+ 
+function onCategoryChange() {
+  rebuildRIDState();
+  renderRIDList('');
+  updateRIDLbl();
+}
+ 
+/* ══ RADIO ID DEPENDENT MULTI-SELECT ════════════════════════════ */
+function rebuildRIDState() {
+  const cat = document.getElementById('f-cat').value;
+  S.ridPool = allAnimals
+    .filter(a => cat==='all' || a.category===cat)
+    .map(a => a.id)
+    .sort();
+  S.ridSel = null; // reset to all
+}
+ 
+function renderRIDList(search) {
+  const list = document.getElementById('rid-list');
+  const ids  = S.ridPool.filter(id => !search||id.toLowerCase().includes(search.toLowerCase()));
+  const allChk = !S.ridSel;
+  list.innerHTML = '';
+ 
+  // "All IDs" header
+  const allDiv = document.createElement('div'); allDiv.className='mdd-opt';
+  allDiv.innerHTML =
+    `<input type="checkbox" ${allChk?'checked':''}><span class="mdd-label">All IDs (${S.ridPool.length})</span>`;
+  allDiv.querySelector('input').addEventListener('change', e => {
+    S.ridSel = e.target.checked ? null : new Set();
+    renderRIDList(document.getElementById('rid-search').value);
+    updateRIDLbl();
+  });
+  list.appendChild(allDiv);
+  const divEl=document.createElement('div'); divEl.className='mdd-div'; list.appendChild(divEl);
+ 
+  ids.forEach(id => {
+    const a   = allAnimals.find(x=>x.id===id);
+    const col = markerColor(a?.status||'crit');
+    const chk = !S.ridSel || S.ridSel.has(id);
+    const row = document.createElement('div'); row.className='mdd-opt';
+    row.innerHTML =
+      `<input type="checkbox" ${chk?'checked':''} data-v="${id}">
+       <span class="mdd-label">
+         <span style="color:${col};font-weight:700">${id}</span>
+         ${a?.category?`<span style="color:var(--text4);font-size:.55rem"> · ${a.category}</span>`:''}
+       </span>`;
+    row.querySelector('input').addEventListener('change', e => {
+      const v = e.target.getAttribute('data-v');
+      if (!S.ridSel) S.ridSel = new Set(S.ridPool);
+      if (e.target.checked) S.ridSel.add(v); else S.ridSel.delete(v);
+      if (S.ridSel.size===S.ridPool.length) S.ridSel=null;
+      updateRIDLbl();
+    });
+    list.appendChild(row);
+  });
+}
+ 
+function updateRIDLbl() {
+  const lbl = document.getElementById('rid-lbl');
+  if (!S.ridSel) lbl.textContent = S.ridPool.length ? `All IDs (${S.ridPool.length})` : 'All IDs';
+  else if (S.ridSel.size===0) lbl.textContent='No IDs';
+  else lbl.textContent=`${S.ridSel.size} selected`;
+}
+ 
+/* ══ MULTI-SELECT DROPDOWN TOGGLE ═══════════════════════════════ */
+function toggleMDD(which) {
+  const panel = document.getElementById(which+'-panel');
+  const btn   = document.getElementById(which+'-btn');
+  const isOpen = panel.classList.contains('open');
+ 
+  // Close all panels first
+  document.querySelectorAll('.mdd-panel').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.mdd-btn').forEach(b => b.classList.remove('open'));
+ 
+  if (!isOpen) {
+    // Use fixed positioning to escape overflow-x:auto clipping on #fbar
+    const rect = btn.getBoundingClientRect();
+    panel.style.top  = (rect.bottom+4)+'px';
+    panel.style.left = Math.min(rect.left, window.innerWidth-220)+'px';
+    panel.classList.add('open');
+    btn.classList.add('open');
+    const si = document.getElementById(which+'-search');
+    if (si) { si.value=''; si.focus(); onMDDSearch(which,''); }
+  }
+}
+ 
+function closeMDD(which) {
+  document.getElementById(which+'-panel')?.classList.remove('open');
+  document.getElementById(which+'-btn')?.classList.remove('open');
+}
+ 
+function onMDDSearch(which, val) {
+  if (which==='zone') renderZoneList(val);
+  else if (which==='rid') renderRIDList(val);
+}
+ 
+// Close dropdowns when clicking outside them
+document.addEventListener('click', e => {
+  if (!document.getElementById('zone-wrap')?.contains(e.target)) closeMDD('zone');
+  if (!document.getElementById('rid-wrap')?.contains(e.target))  closeMDD('rid');
+});
+ 
+/* ══ FILTER & APPLY ══════════════════════════════════════════════ */
 function applyFilters() {
-  closeZoneDD();
-
-  const typeF   = document.getElementById('f-type').value;
+  closeMDD('zone'); closeMDD('rid');
+ 
+  const catF    = document.getElementById('f-cat').value;
   const statusF = document.getElementById('f-status').value;
   const sourceF = document.getElementById('f-source').value;
-  const allZonesChk = document.getElementById('zAll').checked;
-  const checkedZones = new Set(
-    [...document.querySelectorAll('#zone-opts input:checked')].map(i => i.value)
-  );
-
+ 
   displayed = allAnimals.filter(a => {
-    if (typeF   !== 'all' && a.tagType !== typeF)   return false;
-    if (statusF !== 'all' && a.status  !== statusF)  return false;
-    if (sourceF !== 'all' && a.source  !== sourceF)  return false;
-    if (!allZonesChk && a.zone !== '—' && !checkedZones.has(a.zone)) return false;
+    if (catF    !=='all' && a.category!==catF)   return false;
+    if (statusF !=='all' && a.status  !==statusF) return false;
+    if (sourceF !=='all' && a.source  !==sourceF) return false;
+    if (S.ridSel  && !S.ridSel.has(a.id))         return false;
+    if (S.zoneSel && a.zone!=='—' && !S.zoneSel.has(a.zone)) return false;
     return true;
   });
-
-  renderMarkers();
+ 
+  // Tracking mode: when specific Radio IDs are selected (not all/none)
+  const trackIDs = (S.ridSel && S.ridSel.size>0) ? S.ridSel : null;
+ 
+  renderMarkers(trackIDs);
   renderTable();
   document.getElementById('map-blank').classList.add('gone');
+  document.getElementById('track-badge').style.display = trackIDs ? 'block' : 'none';
 }
-
+ 
 function clearFilters() {
-  document.getElementById('f-type').value   = 'all';
+  document.getElementById('f-cat').value    = 'all';
   document.getElementById('f-status').value = 'all';
   document.getElementById('f-source').value = 'all';
-  document.getElementById('zAll').checked   = true;
-  document.querySelectorAll('#zone-opts input').forEach(i => i.checked = true);
-  updateZoneLbl();
+  S.zoneSel = null; S.ridSel = null;
+  rebuildRIDState();
+  renderZoneList(''); renderRIDList('');
+  updateZoneLbl(); updateRIDLbl();
 }
-
-/* ══ MARKERS ══════════════════════════════════════════════════════ */
-function buildIcon(a) {
-  const c = markerColor(a.status);
-  const sz = a.status === 'active' ? 16 : 13;
-  const pulse = a.status === 'active'
+ 
+/* ══ MARKERS ═════════════════════════════════════════════════════ */
+function buildLatestIcon(a) {
+  const c  = markerColor(a.status);
+  const sz = a.status==='active' ? 16 : 13;
+  const pulse = a.status==='active'
     ? `<div style="position:absolute;top:50%;left:50%;width:${sz}px;height:${sz}px;
-        border-radius:50%;background:${c};opacity:.38;
-        animation:pulse-ring 2.2s ease-out infinite;"></div>` : '';
+        border-radius:50%;background:${c};opacity:.28;
+        animation:pulse-ring 2.3s ease-out infinite;"></div>` : '';
   return L.divIcon({
     html:`<div style="position:relative;width:${sz}px;height:${sz}px;">${pulse}
-      <svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}">
-        <circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1.5}"
-          fill="${c}" stroke="rgba(255,255,255,.65)" stroke-width="1.8"/>
-      </svg></div>`,
+      <svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1.5}"
+        fill="${c}" stroke="rgba(255,255,255,.85)" stroke-width="2"/></svg></div>`,
     className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-(sz/2+8)],
   });
 }
-
+ 
+function buildHistIcon(color, sz) {
+  return L.divIcon({
+    html:`<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}"
+      fill="${color}" fill-opacity=".7" stroke="white" stroke-width="1.2"/></svg>`,
+    className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-(sz/2+5)],
+  });
+}
+ 
 function buildPopup(a) {
-  const c = markerColor(a.status);
-  const srcCls = {ATS:'sr-ats', FieldLog:'sr-fl', PaliFT:'sr-pali'}[a.source] || 'sr-pali';
+  const c   = markerColor(a.status);
+  const sc  = {active:'sb-a',s7:'sb-s7',s30:'sb-s30',crit:'sb-crit'}[a.status]||'';
+  const sl  = {active:'Active ≤7d',s7:'Silent >7d',s30:'Silent >30d',crit:'Crit ≥45d'}[a.status]||'';
+  const src = {ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali';
   const rows = [
-    a.tagType && a.tagType !== 'Unknown' ? ['Tag Type', a.tagType] : null,
-    a.species  ? ['Species', a.species]  : null,
-    a.sex      ? ['Sex',     a.sex]      : null,
-    a.size     ? ['Size',    a.size]     : null,
+    a.category  ? ['Category',       a.category]                          : null,
+    a.sex       ? ['Sex',            a.sex]                               : null,
+    a.tl        ? ['Total Length',   a.tl+' cm']                          : null,
+    a.tagPlace  ? ['Tag Place',      a.tagPlace]                          : null,
+    a.tagDate   ? ['Tag / Release',  fmtDT(a.tagDate)]                    : null,
     ['Last Fix',    fmtDT(a.ts)],
     ['Coordinates', `${a.lat.toFixed(5)}°, ${a.lon.toFixed(5)}°`],
-    a.zone !== '—' ? ['Zone', a.zone] : null,
-    a.place    ? ['Place',    a.place]   : null,
-    a.activity ? ['Activity', a.activity] : null,
-    a.signal   ? ['Signal',   a.signal]   : null,
-    a.releaseDate ? ['Released', `${fmtDT(a.releaseDate)} (${a.daysRel}d ago)`] : null,
+    a.zone!=='—' ? ['Zone',          a.zone]                              : null,
+    a.daysRel!==null ? ['Days Since Release', a.daysRel+'d']              : null,
     ['Total Fixes', a.totalFixes],
   ].filter(Boolean);
-
   return `<div class="pop-inner">
-    <div class="pop-id">
-      <span>📡 ${a.id}</span>
-      ${statusBadge(a.status)}
+    <div class="pop-id"><span>📡 ${a.id}</span><span class="sbadge ${sc}">${sl}</span></div>
+    ${rows.map(([l,v])=>`<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
+    <div style="margin-top:5px;display:flex;align-items:center;gap:6px;">
+      <span class="pop-days" style="background:${c}18;color:${c};border:1px solid ${c}44;">
+        ${a.daysFix===0?'Today':a.daysFix+'d ago'}</span>
+      <span class="src-tag ${src}">${a.source}</span>
     </div>
-    ${rows.map(([l,v]) => `<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
-    <div style="margin-top:7px;display:flex;align-items:center;gap:6px;">
-      <span class="pop-days" style="background:${c}22;color:${c};border:1px solid ${c}44;">
-        ${a.daysFix === 0 ? 'Fix: Today' : a.daysFix + 'd ago'}
-      </span>
-      <span class="src-tag ${srcCls}">${a.source}</span>
-    </div>
-    ${a.remarks ? `<div style="margin-top:5px;font-size:.61rem;color:var(--text-dim);font-style:italic;">${a.remarks}</div>` : ''}
+    ${a.remarks?`<div style="margin-top:5px;font-size:.6rem;color:var(--text3);font-style:italic;">${a.remarks}</div>`:''}
   </div>
   <div class="pop-acts">
     <button class="pab" onclick="flyTo('${a.id}')">🗺 Focus</button>
     <button class="pab" onclick="hiliteRow('${a.id}')">📋 Table</button>
   </div>`;
 }
-
-function renderMarkers() {
+ 
+function renderMarkers(trackIDs) {
   markerLayer.clearLayers();
+  trackLayer.clearLayers();
   mapMarkers = [];
+ 
+  // ── TRACKING MODE: draw polylines + historical fix dots ─────────
+  if (trackIDs && trackIDs.size>0) {
+    trackIDs.forEach(id => {
+      const a = allAnimals.find(x=>x.id===id);
+      if (!a || !a.history?.length) return;
+      const color = markerColor(a.status);
+ 
+      // Build valid latlngs from history (oldest→newest)
+      const pts2 = a.history.filter(f=>!isNaN(f.lat)&&!isNaN(f.lon)&&f.ts);
+ 
+      if (pts2.length>1) {
+        L.polyline(pts2.map(f=>[f.lat,f.lon]),
+          {color,weight:2.5,opacity:.75,dashArray:'8,14'}).addTo(trackLayer);
+      }
+ 
+      // Historical dots
+      pts2.forEach((fix,idx) => {
+        const isLast = idx===pts2.length-1;
+        const sz = isLast ? 14 : 7;
+        const m  = L.marker([fix.lat,fix.lon],{
+          icon:buildHistIcon(color,sz), zIndexOffset:isLast?200:0
+        });
+ 
+        // River distance from previous fix
+        let rivRow = '';
+        if (idx>0) {
+          const prev = pts2[idx-1];
+          const rd   = calcRiverDistance(prev,fix);
+          if (rd!==null) rivRow=`<div class="pop-row"><span class="pop-lbl">River Dist (prev)</span><span class="pop-val">${rd} m</span></div>`;
+        }
+ 
+        m.bindPopup(`<div class="pop-inner">
+          <div class="pop-id"><span>📍 ${id}</span>
+            <span style="font-size:.58rem;color:var(--text3)">Fix ${idx+1}/${pts2.length}</span></div>
+          <div class="pop-row"><span class="pop-lbl">Time</span><span class="pop-val">${fmtDT(fix.ts)}</span></div>
+          <div class="pop-row"><span class="pop-lbl">Coords</span><span class="pop-val">${fix.lat.toFixed(5)}, ${fix.lon.toFixed(5)}</span></div>
+          <div class="pop-row"><span class="pop-lbl">Source</span><span class="pop-val">${fix.source}</span></div>
+          ${rivRow}
+          ${fix.place?`<div class="pop-row"><span class="pop-lbl">Place</span><span class="pop-val">${fix.place}</span></div>`:''}
+          ${fix.activity?`<div class="pop-row"><span class="pop-lbl">Activity</span><span class="pop-val">${fix.activity}</span></div>`:''}
+        </div>`,{maxWidth:260});
+        trackLayer.addLayer(m);
+      });
+    });
+  }
+ 
+  // ── LATEST LOCATION markers for all displayed animals ────────────
   displayed.forEach(a => {
     if (isNaN(a.lat)||isNaN(a.lon)) return;
-    const m = L.marker([a.lat, a.lon], { icon:buildIcon(a) })
-      .bindPopup(buildPopup(a), { maxWidth:295, className:'gep-popup' });
+    const m = L.marker([a.lat,a.lon],{icon:buildLatestIcon(a)})
+      .bindPopup(buildPopup(a),{maxWidth:290});
     m._aid = a.id;
     markerLayer.addLayer(m);
     mapMarkers.push(m);
   });
-  if (mapMarkers.length > 0) {
-    const lls = mapMarkers.map(m => m.getLatLng());
-    try { map.fitBounds(L.latLngBounds(lls), { padding:[50,50], maxZoom:16 }); } catch(e){}
+ 
+  if (mapMarkers.length>0) {
+    try { map.fitBounds(L.latLngBounds(mapMarkers.map(m=>m.getLatLng())),{padding:[50,50],maxZoom:16}); }
+    catch(e) {}
   }
 }
-
+ 
 /* ══ TABLE ═══════════════════════════════════════════════════════ */
 function renderTable() {
-  document.getElementById('tbl-badge').textContent = displayed.length + ' animals';
+  document.getElementById('tbl-badge').textContent = displayed.length+' animals';
   const body = document.getElementById('tbl-body');
   body.innerHTML = '';
-
   if (!displayed.length) {
-    body.innerHTML = '<tr><td class="no-data" colspan="13">No animals match selected filters</td></tr>';
+    body.innerHTML='<tr><td class="no-data" colspan="14">No animals match selected filters</td></tr>';
     return;
   }
-
-  const srcCls = { ATS:'sr-ats', FieldLog:'sr-fl', PaliFT:'sr-pali' };
-
+  const sc={ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'};
+  const sb={active:'sb-a',s7:'sb-s7',s30:'sb-s30',crit:'sb-crit'};
+  const sl={active:'Active',s7:'>7d',s30:'>30d',crit:'≥45d'};
   displayed.forEach(a => {
-    const tr = document.createElement('tr');
-    tr.dataset.id = a.id;
-    if (a.status === 'crit') tr.classList.add('r-crit');
-    tr.innerHTML = `
+    const tr = document.createElement('tr'); tr.dataset.id=a.id;
+    tr.innerHTML=`
       <td><b>${a.id}</b></td>
-      <td>${fmtDT(a.ts)}</td>
+      <td style="font-size:.62rem">${fmtDT(a.ts)}</td>
       <td><b style="color:${markerColor(a.status)}">${a.daysFix}</b></td>
-      <td>${statusBadge(a.status)}</td>
-      <td>${a.tagType}</td>
-      <td><span class="src-tag ${srcCls[a.source]||'sr-pali'}">${a.source}</span></td>
+      <td><span class="sbadge ${sb[a.status]}">${sl[a.status]}</span></td>
+      <td>${a.category||'—'}</td>
+      <td>${a.sex||'—'}</td>
+      <td><span class="src-tag ${sc[a.source]||'sr-pali'}">${a.source}</span></td>
       <td>${a.zone}</td>
-      <td>${a.daysRel !== null ? a.daysRel+'d' : '—'}</td>
-      <td style="font-size:.62rem">${a.lat.toFixed(5)}</td>
-      <td style="font-size:.62rem">${a.lon.toFixed(5)}</td>
-      <td style="color:var(--text2)">${a.activity||a.place||'—'}</td>
-      <td style="color:var(--text-dim)">${a.signal||'—'}</td>
-      <td style="color:var(--text-dim);font-size:.61rem">${a.remarks||'—'}</td>
-    `;
-    tr.onclick = () => flyTo(a.id, tr);
+      <td>${a.daysRel!==null?a.daysRel+'d':'—'}</td>
+      <td style="font-size:.6rem">${a.lat.toFixed(5)}</td>
+      <td style="font-size:.6rem">${a.lon.toFixed(5)}</td>
+      <td>${a.tagPlace||'—'}</td>
+      <td>${a.tl||'—'}</td>
+      <td style="font-size:.6rem;color:var(--text3)">${a.remarks||'—'}</td>`;
+    tr.onclick = () => flyTo(a.id,tr);
     body.appendChild(tr);
   });
 }
-
+ 
 function sortTbl(col) {
-  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
-  const keys = ['id','ts','daysFix','status','tagType','source','zone','daysRel'];
-  const k = keys[col];
-  if (!k) return;
+  if (sortCol===col) sortDir*=-1; else {sortCol=col;sortDir=1;}
+  const keys=['id','ts','daysFix','status','category','sex','source','zone','daysRel'];
+  const k=keys[col]; if (!k) return;
   displayed.sort((a,b) => {
     let va=a[k], vb=b[k];
-    if (va===null||va===undefined) va = sortDir>0 ? Infinity : -Infinity;
-    if (vb===null||vb===undefined) vb = sortDir>0 ? Infinity : -Infinity;
+    if (va==null) va=sortDir>0?Infinity:-Infinity;
+    if (vb==null) vb=sortDir>0?Infinity:-Infinity;
     if (va instanceof Date) va=va.getTime();
     if (vb instanceof Date) vb=vb.getTime();
-    return (typeof va==='string' ? va.localeCompare(vb) : va-vb) * sortDir;
+    return (typeof va==='string'?va.localeCompare(String(vb)):va-vb)*sortDir;
   });
   renderTable();
 }
-
-/* ══ FLY TO / HIGHLIGHT ══════════════════════════════════════════ */
+ 
+/* ══ FLY TO ══════════════════════════════════════════════════════ */
 function flyTo(id, tr) {
-  const a = allAnimals.find(x => x.id === id);
-  if (!a) return;
-  map.flyTo([a.lat, a.lon], 16, { duration:1.1 });
+  const a = allAnimals.find(x=>x.id===id); if (!a) return;
+  map.flyTo([a.lat,a.lon],16,{duration:1.1});
   setTimeout(() => {
-    const m = mapMarkers.find(m => m._aid === id);
+    const m = mapMarkers.find(m=>m._aid===id);
     if (m) m.openPopup();
   }, 1200);
   if (tr) {
-    document.querySelectorAll('#tbl-body tr').forEach(r => r.classList.remove('sel'));
+    document.querySelectorAll('#tbl-body tr').forEach(r=>r.classList.remove('sel'));
     tr.classList.add('sel');
   }
 }
-
 function hiliteRow(id) {
   document.querySelectorAll('#tbl-body tr').forEach(r => {
-    if (r.dataset.id === id) {
-      r.classList.add('sel');
-      r.scrollIntoView({ block:'center', behavior:'smooth' });
-    } else r.classList.remove('sel');
+    if (r.dataset.id===id) { r.classList.add('sel'); r.scrollIntoView({block:'center',behavior:'smooth'}); }
+    else r.classList.remove('sel');
   });
 }
-
+ 
 /* ══ PILLS ═══════════════════════════════════════════════════════ */
 function updatePills() {
-  const c = {active:0, s7:0, s30:0, crit:0};
-  allAnimals.forEach(a => c[a.status]++);
+  const c={active:0,s7:0,s30:0,crit:0};
+  allAnimals.forEach(a=>c[a.status]++);
   document.getElementById('c-a').textContent    = c.active;
   document.getElementById('c-s7').textContent   = c.s7;
   document.getElementById('c-s30').textContent  = c.s30;
   document.getElementById('c-crit').textContent = c.crit;
 }
-
-/* ══ TYPE DROPDOWN ═══════════════════════════════════════════════ */
-function populateTypeDD(master) {
-  const types = new Set();
-  Object.values(master).forEach(r => {
-    const t = gc(r,'Tag_Type','TagType','Tag Type','Type','Transmitter_Type','Device_Type');
-    if (t) types.add(t);
-  });
-  allAnimals.forEach(a => { if (a.tagType && a.tagType !== 'Unknown') types.add(a.tagType); });
-
-  const sel = document.getElementById('f-type');
-  while (sel.options.length > 1) sel.remove(1);
-  [...types].sort().forEach(t => {
-    const o = document.createElement('option'); o.value=t; o.textContent=t; sel.appendChild(o);
-  });
-}
-
-/* ══ ZONE DROPDOWN ═══════════════════════════════════════════════ */
-function toggleZoneDD() {
-  document.getElementById('zone-dd').classList.toggle('open');
-  document.getElementById('zone-btn').classList.toggle('open');
-}
-function closeZoneDD() {
-  document.getElementById('zone-dd').classList.remove('open');
-  document.getElementById('zone-btn').classList.remove('open');
-}
-function toggleAllZones(cb) {
-  document.querySelectorAll('#zone-opts input').forEach(i => i.checked=cb.checked);
-  updateZoneLbl();
-}
-function onZoneChange() {
-  const all = document.querySelectorAll('#zone-opts input');
-  const chk = [...all].filter(i => i.checked);
-  document.getElementById('zAll').checked = chk.length === all.length;
-  updateZoneLbl();
-}
-function updateZoneLbl() {
-  const all = document.querySelectorAll('#zone-opts input');
-  const chk = [...all].filter(i => i.checked);
-  const lbl = document.getElementById('zone-lbl');
-  if (!all.length || chk.length === all.length) lbl.textContent='All Zones';
-  else if (!chk.length) lbl.textContent='No Zone';
-  else lbl.textContent=`${chk.length} / ${all.length} zones`;
-}
-document.addEventListener('click', e => {
-  if (!document.getElementById('zone-wrap').contains(e.target)) closeZoneDD();
-});
-
-/* ══ BOTTOM PANEL ════════════════════════════════════════════════ */
+ 
+/* ══ BOTTOM PANEL RESIZE & TOGGLE ═══════════════════════════════ */
 function toggleBtm() {
-  btmCollapsed = !btmCollapsed;
-  const btm = document.getElementById('btm');
-  const mw  = document.getElementById('map-wrap');
-  const btn = document.getElementById('btm-tog');
+  btmCollapsed=!btmCollapsed;
+  const btm=document.getElementById('btm');
+  const mw=document.getElementById('map-wrap');
+  const btn=document.getElementById('btm-tog');
   if (btmCollapsed) {
-    btm.style.height='33px'; mw.style.bottom='33px'; btn.textContent='▲ Show';
+    btm.style.height='32px'; mw.style.bottom='32px'; btn.textContent='▲ Show';
   } else {
-    btm.style.height='var(--btm)'; mw.style.bottom='var(--btm)'; btn.textContent='▼ Hide';
+    btm.style.height=btmH+'px'; mw.style.bottom=btmH+'px'; btn.textContent='▼ Hide';
   }
-  setTimeout(() => map.invalidateSize(), 280);
+  setTimeout(()=>map.invalidateSize(),280);
 }
-
-/* ══ RESIZE HANDLE ═══════════════════════════════════════════════ */
 function initResize() {
-  const rbar = document.getElementById('rbar');
-  const btm  = document.getElementById('btm');
-  const mw   = document.getElementById('map-wrap');
-  let drag=false, sy=0, sh=0;
-
-  const start = y => { if(btmCollapsed)return; drag=true; sy=y; sh=btm.offsetHeight; document.body.style.cursor='ns-resize'; };
-  const move  = y => {
-    if (!drag) return;
-    const h = Math.min(Math.max(40, sh+(sy-y)), window.innerHeight*.65);
-    btm.style.height=h+'px'; mw.style.bottom=h+'px';
-  };
-  const end   = () => { drag=false; document.body.style.cursor=''; setTimeout(()=>map.invalidateSize(),80); };
-
-  rbar.addEventListener('mousedown',  e=>{start(e.clientY);e.preventDefault();});
-  document.addEventListener('mousemove', e=>move(e.clientY));
-  document.addEventListener('mouseup',   end);
-  rbar.addEventListener('touchstart',  e=>start(e.touches[0].clientY), {passive:true});
-  document.addEventListener('touchmove', e=>{if(drag)move(e.touches[0].clientY);}, {passive:true});
-  document.addEventListener('touchend', end);
+  const rbar=document.getElementById('rbar');
+  const btm=document.getElementById('btm');
+  const mw=document.getElementById('map-wrap');
+  let drag=false,sy=0,sh=0;
+  const start=y=>{if(btmCollapsed)return;drag=true;sy=y;sh=btm.offsetHeight;document.body.style.cursor='ns-resize';};
+  const move=y=>{if(!drag)return;const h=Math.min(Math.max(40,sh+(sy-y)),window.innerHeight*.65);btmH=h;btm.style.height=h+'px';mw.style.bottom=h+'px';};
+  const end=()=>{drag=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),80);};
+  rbar.addEventListener('mousedown',e=>{start(e.clientY);e.preventDefault();});
+  document.addEventListener('mousemove',e=>move(e.clientY));
+  document.addEventListener('mouseup',end);
+  rbar.addEventListener('touchstart',e=>start(e.touches[0].clientY),{passive:true});
+  document.addEventListener('touchmove',e=>{if(drag)move(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchend',end);
 }
-
+ 
 /* ══ EXPORT ══════════════════════════════════════════════════════ */
 function exportCSV() {
-  if (!displayed.length) { toast('Apply filters first to generate export'); return; }
-  const rows = [
-    ['Radio_ID','Last_Fix','Days_Since_Fix','Status','Tag_Type','Source','Zone',
-     'Latitude','Longitude','Release_Date','Days_Since_Release',
-     'Activity','Signal','Place','Remarks','Total_Fixes']
-  ];
-  displayed.forEach(a => rows.push([
-    a.id, fmtDT(a.ts), a.daysFix, a.status, a.tagType, a.source, a.zone,
-    a.lat, a.lon,
-    a.releaseDate ? fmtDT(a.releaseDate) : '—',
-    a.daysRel!==null ? a.daysRel : '—',
-    a.activity, a.signal, a.place, a.remarks, a.totalFixes,
+  if (!displayed.length) { toast('Apply filters first'); return; }
+  const rows=[['Radio_ID','Last_Fix','Days_Since_Fix','Status','Category','Sex','Source',
+    'Zone','Latitude','Longitude','Tag_Place','T.L','Tag_Date','Days_Since_Release','Remarks']];
+  displayed.forEach(a=>rows.push([
+    a.id,fmtDT(a.ts),a.daysFix,a.status,a.category||'',a.sex||'',a.source,a.zone,
+    a.lat,a.lon,a.tagPlace||'',a.tl||'',
+    a.tagDate?fmtDT(a.tagDate):'—',a.daysRel!==null?a.daysRel:'—',a.remarks||'',
   ]));
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const el = document.createElement('a');
-  el.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
-  el.download = `gep_telemetry_${new Date().toISOString().slice(0,10)}.csv`;
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const el=document.createElement('a');
+  el.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  el.download=`gep_telemetry_${new Date().toISOString().slice(0,10)}.csv`;
   el.click(); URL.revokeObjectURL(el.href);
 }
-
+ 
 /* ══ BOOT ════════════════════════════════════════════════════════ */
 (async function boot() {
   initMap();
   initResize();
+  // Initialise multi-select state to "all selected"
+  S.ridPool=[]; S.ridSel=null; S.zoneSel=null; S.allZones=[]; S.zoneCounts={};
   await loadAllData();
 })();
 </script>
