@@ -3,496 +3,563 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>ATS Sat Real Time Viewer | Gharial Ecology Project</title>
+<title>🐊 Gharial Ecology Project — Multi-Source Telemetry Dashboard</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ══ DESIGN TOKENS (LIGHT THEME) ═══════════════════════════════ */
-:root{
-  --forest:#1b4332;--forest2:#2d6a4f;--forest3:#40916c;--green:#52b788;
-  --green-lt:#d8f3dc;--green-pale:rgba(82,183,136,.09);
-  --c-active:#15803d;--c-s7:#b45309;--c-s30:#b91c1c;--c-crit:#7f1d1d;
-  --c-active-lt:rgba(21,128,61,.1);--c-s7-lt:rgba(180,83,9,.1);
-  --c-s30-lt:rgba(185,28,28,.1);--c-crit-lt:rgba(127,29,29,.12);
-  --text:#111827;--text2:#374151;--text3:#6b7280;--text4:#9ca3af;
-  --border:#e5e7eb;--border2:#d1d5db;
-  --bg:#f0f4f1;--surface:#fff;--surface2:#f9fafb;
-  --font:'Inter',sans-serif;--mono:'IBM Plex Mono',monospace;
-  --hdr:56px;--fbar:46px;--btm:220px;--r:6px;
-  --shadow:0 2px 8px rgba(0,0,0,.08);
-  --shadow-md:0 4px 18px rgba(0,0,0,.11);
+/* ══ DESIGN TOKENS ═══════════════════════════════════════════════ */
+:root {
+  --forest:#1b4332; --forest2:#2d6a4f; --forest3:#40916c; --green:#52b788;
+  --green-lt:#d8f3dc; --green-pale:#f0f9f5; --green-mid:rgba(82,183,136,.12);
+  --s-a:#1565c0;  --s-a-lt:#dbeafe;  --s-a-br:#bfdbfe;
+  --s-7:#b45309;  --s-7-lt:#fef3c7;  --s-7-br:#fde68a;
+  --s-30:#b91c1c; --s-30-lt:#fee2e2; --s-30-br:#fecaca;
+  --s-crit:#7f1d1d; --s-crit-lt:#fee2e2; --s-crit-br:#fca5a5;
+  --text:#111827; --text2:#374151; --text3:#6b7280; --text4:#9ca3af;
+  --border:#e5e7eb; --border2:#d1d5db;
+  --bg:#f0f5f1; --surface:#fff; --surface2:#f8faf9;
+  --shadow:0 2px 8px rgba(0,0,0,.07);
+  --shadow-md:0 4px 18px rgba(0,0,0,.10);
+  --shadow-lg:0 8px 36px rgba(0,0,0,.14);
+  --font:'Inter',sans-serif; --mono:'IBM Plex Mono',monospace;
+  --r:6px; --r-lg:12px;
+  --hdr:56px; --fbar:46px; --btm:220px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font)}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-button{cursor:pointer;font-family:var(--font)}
- 
-/* HEADER */
-#hdr{
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text);}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+button{cursor:pointer;font-family:var(--font);}
+
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.5);}50%{box-shadow:0 0 0 5px transparent;}}
+@keyframes mPulse{0%{transform:scale(1);opacity:.5;}70%{transform:scale(2.6);opacity:0;}100%{opacity:0;}}
+
+/* ══ HEADER ══════════════════════════════════════════════════════ */
+#hdr {
   position:fixed;top:0;left:0;right:0;z-index:1200;height:var(--hdr);
-  background:linear-gradient(108deg,var(--forest) 0%,var(--forest2) 55%,var(--forest) 100%);
+  background:linear-gradient(108deg,#1b4332 0%,#2d6a4f 55%,#1b5e43 100%);
   border-bottom:2px solid var(--green);
   display:flex;align-items:center;gap:10px;padding:0 14px;
-  box-shadow:0 2px 18px rgba(27,67,50,.3);
+  box-shadow:0 3px 18px rgba(27,67,50,.35);
 }
-.hdr-logos{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.hdr-logos img{height:34px;object-fit:contain;filter:brightness(1.1)}
-.hdr-logos img.hide{display:none}
-.hdr-div{width:1px;height:28px;background:rgba(255,255,255,.22);flex-shrink:0}
-.hdr-brand .hdr-title{font-weight:700;font-size:.83rem;color:#fff;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
-.hdr-brand .hdr-sub{font-size:.59rem;color:rgba(255,255,255,.55);margin-top:2px;font-family:var(--mono);letter-spacing:.08em}
-#pills{display:flex;gap:5px;align-items:center;flex:1;overflow-x:auto;scrollbar-width:none}
-#pills::-webkit-scrollbar{display:none}
-.pill{display:flex;align-items:center;gap:5px;padding:3px 9px;border-radius:3px;
-  font-family:var(--mono);font-size:.61rem;font-weight:600;white-space:nowrap;border:1px solid transparent}
-.pill .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.pill .cnt{background:rgba(255,255,255,.18);border-radius:3px;padding:0 5px;font-size:.59rem;min-width:18px;text-align:center}
-.pill-a{background:rgba(22,163,74,.22);color:#bbf7d0;border-color:rgba(22,163,74,.35)}
-.pill-a .dot{background:#86efac}
-.pill-s7{background:rgba(217,119,6,.2);color:#fde68a;border-color:rgba(217,119,6,.35)}
-.pill-s7 .dot{background:#fcd34d}
-.pill-s30{background:rgba(220,38,38,.2);color:#fecaca;border-color:rgba(220,38,38,.35)}
-.pill-s30 .dot{background:#fca5a5}
-.pill-crit{background:rgba(127,29,29,.3);color:#fca5a5;border-color:rgba(127,29,29,.45)}
-.pill-crit .dot{background:#fca5a5}
-#hdr-r{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto}
-#sync-info{font-family:var(--mono);font-size:.57rem;color:rgba(255,255,255,.5);text-align:right;line-height:1.6}
-#sync-info strong{color:#86efac;display:block;font-size:.51rem;letter-spacing:.1em}
-.hbtn{display:flex;align-items:center;gap:5px;padding:4px 11px;
-  border-radius:var(--r);border:1.5px solid rgba(255,255,255,.28);
-  background:rgba(255,255,255,.12);color:#fff;font-family:var(--mono);font-size:.63rem;font-weight:600;
-  transition:all .18s;white-space:nowrap;letter-spacing:.03em}
-.hbtn:hover{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.55)}
-.hbtn.loading .spin-i{animation:spin .75s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse-ring{0%{transform:translate(-50%,-50%) scale(1);opacity:.6}70%{transform:translate(-50%,-50%) scale(2.8);opacity:0}100%{opacity:0}}
- 
-/* FILTER BAR */
-#fbar{
+.hdr-logos{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.hdr-logos img{height:34px;object-fit:contain;filter:brightness(1.1) drop-shadow(0 1px 3px rgba(0,0,0,.3));}
+.hdr-div{width:1px;height:28px;background:rgba(255,255,255,.22);flex-shrink:0;}
+.hdr-brand .hdr-title{font-family:var(--mono);font-size:.82rem;font-weight:700;color:#fff;letter-spacing:.03em;}
+.hdr-brand .hdr-sub{font-size:.58rem;color:rgba(255,255,255,.52);margin-top:2px;font-family:var(--mono);letter-spacing:.06em;}
+#pills{display:flex;gap:5px;align-items:center;flex:1;overflow-x:auto;scrollbar-width:none;padding:0 4px;}
+#pills::-webkit-scrollbar{display:none;}
+.hpill{
+  display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:3px;
+  font-family:var(--mono);font-size:.61rem;font-weight:600;white-space:nowrap;
+  border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.85);cursor:pointer;user-select:none;transition:all .18s;flex-shrink:0;
+}
+.hpill:hover,.hpill.on{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.22);color:#fff;}
+.pill-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.pill-cnt{background:rgba(255,255,255,.2);border-radius:3px;padding:0 5px;font-size:.58rem;font-weight:800;min-width:18px;text-align:center;}
+#hdr-r{display:flex;align-items:center;gap:7px;flex-shrink:0;margin-left:auto;}
+.hbtn{
+  display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r);
+  border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);
+  color:#fff;font-family:var(--mono);font-size:.63rem;font-weight:600;
+  transition:all .18s;white-space:nowrap;
+}
+.hbtn:hover,.hbtn.on{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);}
+.hbtn.loading .spin-ic{animation:spin .75s linear infinite;display:inline-block;}
+
+/* ══ FILTER BAR ══════════════════════════════════════════════════ */
+#fbar {
   position:fixed;top:var(--hdr);left:0;right:0;z-index:1100;
   height:var(--fbar);
   background:var(--surface);border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:6px;padding:0 14px;
   overflow-x:auto;overflow-y:visible;scrollbar-width:none;
 }
-#fbar::-webkit-scrollbar{display:none}
-.fg{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.fg label{font-family:var(--mono);font-size:.55rem;font-weight:700;
-  color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+#fbar::-webkit-scrollbar{display:none;}
+#fbar.hidden{height:0;padding:0;overflow:hidden;opacity:0;pointer-events:none;transition:height .2s,opacity .2s,padding .2s;}
+.fg{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.fg label{font-family:var(--mono);font-size:.54rem;font-weight:700;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .fsel{
-  padding:4px 22px 4px 8px;background:var(--surface2);
-  border:1px solid var(--border2);border-radius:var(--r);
-  color:var(--text);font-family:var(--mono);font-size:.64rem;cursor:pointer;min-width:118px;
-  appearance:none;-webkit-appearance:none;
+  padding:4px 22px 4px 8px;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:.64rem;
+  cursor:pointer;min-width:118px;appearance:none;-webkit-appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 7px center;background-size:8px;
-  transition:border-color .15s
+  transition:border-color .15s;
 }
-.fsel:focus{outline:none;border-color:var(--forest3)}
-.fsep{width:1px;height:20px;background:var(--border);flex-shrink:0}
- 
-/* Multi-select dropdowns (fixed-position to escape overflow clip) */
-.mdd-wrap{position:relative;flex-shrink:0}
+.fsel:focus{outline:none;border-color:var(--forest3);}
+.fsep{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.fbtn{
+  display:flex;align-items:center;gap:4px;padding:4px 10px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--text);font-family:var(--mono);font-size:.63rem;font-weight:600;
+  transition:all .16s;white-space:nowrap;
+}
+.fbtn:hover{background:var(--green-lt);border-color:var(--forest3);color:var(--forest);}
+.fbtn.on{background:var(--green-lt);border-color:var(--forest3);color:var(--forest);}
+.fbtn-apply{background:var(--forest2);color:#fff;border-color:var(--forest2);}
+.fbtn-apply:hover{background:var(--forest3);border-color:var(--forest3);color:#fff;}
+.fbtn-clr{color:var(--text3);}
+
+/* Multi-select dropdown */
+.mdd-wrap{position:relative;flex-shrink:0;}
 .mdd-btn{
   display:flex;align-items:center;gap:5px;padding:4px 22px 4px 8px;
   background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
   color:var(--text);font-family:var(--mono);font-size:.64rem;cursor:pointer;
   min-width:120px;text-align:left;white-space:nowrap;transition:border-color .15s;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 7px center;background-size:8px
+  background-repeat:no-repeat;background-position:right 7px center;background-size:8px;
 }
-.mdd-btn:hover,.mdd-btn.open{border-color:var(--forest3);background:var(--green-pale)}
-/* Panel uses position:fixed to escape overflow-x:auto clipping on fbar */
+.mdd-btn:hover,.mdd-btn.open{border-color:var(--forest3);background:var(--green-pale);}
 .mdd-panel{
   display:none;position:fixed;z-index:2500;
   background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);
-  min-width:210px;max-height:280px;overflow:hidden;
-  box-shadow:var(--shadow-md);flex-direction:column
+  min-width:210px;max-height:290px;overflow:hidden;
+  box-shadow:var(--shadow-md);flex-direction:column;
 }
-.mdd-panel.open{display:flex}
+.mdd-panel.open{display:flex;animation:fadeIn .14s ease;}
 .mdd-search{
   padding:6px 9px;border:none;border-bottom:1px solid var(--border);
-  background:var(--surface2);color:var(--text);font-family:var(--mono);
-  font-size:.63rem;outline:none;flex-shrink:0
+  background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:.63rem;outline:none;flex-shrink:0;
 }
-.mdd-search:focus{background:var(--surface)}
-.mdd-scroll{overflow-y:auto;flex:1}
+.mdd-search:focus{background:var(--surface);}
+.mdd-ctrl{display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;}
+.mdd-ctrl button{flex:1;padding:4px;font-family:var(--mono);font-size:.57rem;font-weight:700;border:none;background:var(--surface2);color:var(--text3);cursor:pointer;transition:all .13s;}
+.mdd-ctrl button:hover{background:var(--green-lt);color:var(--forest);}
+.mdd-ctrl button:first-child{border-right:1px solid var(--border);}
+.mdd-scroll{overflow-y:auto;flex:1;max-height:200px;}
 .mdd-opt{
-  display:flex;align-items:center;gap:7px;padding:6px 10px;
-  font-family:var(--mono);font-size:.63rem;color:var(--text);
-  cursor:pointer;transition:background .1s
+  display:flex;align-items:center;gap:7px;padding:5px 9px;
+  font-family:var(--mono);font-size:.63rem;color:var(--text);cursor:pointer;transition:background .1s;
 }
-.mdd-opt:hover{background:var(--green-pale)}
-.mdd-opt input[type=checkbox]{accent-color:var(--forest3);width:12px;height:12px;flex-shrink:0;cursor:pointer}
-.mdd-opt .mdd-label{flex:1;user-select:none}
-.mdd-cnt{color:var(--text4);font-size:.57rem}
-.mdd-div{height:1px;background:var(--border);flex-shrink:0;margin:2px 0}
- 
-/* Apply / Clear */
-#btn-apply{
-  padding:5px 16px;border-radius:var(--r);background:var(--forest2);border:none;
-  color:#fff;font-family:var(--mono);font-size:.67rem;font-weight:700;
-  letter-spacing:.05em;cursor:pointer;white-space:nowrap;transition:background .18s
-}
-#btn-apply:hover{background:var(--forest3)}
-.clr-btn{
-  padding:5px 10px;border-radius:var(--r);background:transparent;
-  border:1px solid var(--border2);color:var(--text3);font-family:var(--mono);
-  font-size:.63rem;transition:all .15s;white-space:nowrap
-}
-.clr-btn:hover{border-color:var(--forest3);color:var(--text);background:var(--green-pale)}
- 
-/* MAP */
+.mdd-opt:hover{background:var(--green-pale);}
+.mdd-opt input[type=checkbox]{accent-color:var(--forest3);width:12px;height:12px;flex-shrink:0;cursor:pointer;}
+.mdd-label{flex:1;user-select:none;}
+.mdd-cnt{color:var(--text4);font-size:.57rem;flex-shrink:0;}
+.mdd-sep{height:1px;background:var(--border);margin:2px 0;flex-shrink:0;}
+
+/* ══ MAP ══════════════════════════════════════════════════════════ */
 #map-wrap{
-  position:fixed;top:calc(var(--hdr) + var(--fbar));
-  left:0;right:0;bottom:var(--btm);z-index:1
+  position:fixed;
+  top:calc(var(--hdr) + var(--fbar));
+  left:0;right:0;bottom:var(--btm);z-index:1;
 }
-#map{width:100%;height:100%}
-.leaflet-container{background:#d4ddd6 !important}
- 
-/* Leaflet popup – light */
+#map{width:100%;height:100%;}
+
+/* Leaflet overrides — light theme */
 .leaflet-popup-content-wrapper{
   background:#fff !important;border:1px solid var(--border2) !important;
-  border-radius:10px !important;box-shadow:var(--shadow-md) !important;
-  color:var(--text) !important;padding:0 !important;min-width:242px
+  border-radius:var(--r-lg) !important;box-shadow:var(--shadow-lg) !important;
+  color:var(--text) !important;padding:0 !important;min-width:260px;
 }
-.leaflet-popup-tip{background:#fff !important}
-.leaflet-popup-close-button{color:var(--text3) !important;top:8px !important;right:10px !important;font-size:16px !important}
-.leaflet-popup-close-button:hover{color:var(--text) !important}
+.leaflet-popup-content{margin:0 !important;}
+.leaflet-popup-tip{background:#fff !important;}
+.leaflet-popup-close-button{color:var(--text3) !important;top:9px !important;right:11px !important;font-size:16px !important;}
+.leaflet-popup-close-button:hover{color:var(--text) !important;}
+.leaflet-container a.leaflet-popup-close-button:hover{background:none !important;}
+
+/* Map controls */
+.map-fab{position:absolute;top:10px;left:10px;z-index:500;display:flex;flex-direction:column;gap:4px;}
+.fab{
+  width:30px;height:30px;background:white;border:1px solid var(--border);
+  border-radius:var(--r);font-size:.8rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow);transition:all .15s;
+}
+.fab:hover,.fab.on{background:var(--green-lt);border-color:var(--forest3);color:var(--forest);}
+
+/* Zone labels */
 .zone-lbl{
   background:rgba(255,255,255,.92) !important;border:1px solid var(--border) !important;
   color:var(--forest) !important;font-family:var(--mono) !important;
-  font-size:.62rem !important;font-weight:700 !important;
-  border-radius:4px !important;padding:3px 7px !important
+  font-size:.59rem !important;font-weight:700 !important;
+  border-radius:3px !important;padding:2px 6px !important;
 }
- 
-/* Popup content */
-.pop-inner{padding:12px 14px 9px}
-.pop-id{
-  font-family:var(--mono);font-weight:700;font-size:.98rem;color:var(--forest);
-  margin-bottom:8px;padding-bottom:7px;border-bottom:2px solid var(--green-lt);
-  display:flex;align-items:center;justify-content:space-between;gap:6px
+
+/* Track badge */
+#track-badge{
+  position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:500;
+  background:var(--forest2);color:#fff;border-radius:var(--r);
+  padding:4px 12px;font-family:var(--mono);font-size:.63rem;font-weight:700;
+  box-shadow:var(--shadow);display:none;
 }
-.pop-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;gap:8px}
-.pop-lbl{font-size:.55rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
-.pop-val{font-family:var(--mono);font-size:.66rem;color:var(--text);text-align:right}
+
+/* Legend */
+#legend{
+  position:absolute;bottom:10px;left:10px;z-index:500;
+  background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:var(--r);
+  padding:9px 12px;box-shadow:var(--shadow);
+}
+#legend-title{font-family:var(--mono);font-size:.5rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+.leg-row{display:flex;align-items:center;gap:7px;margin-bottom:4px;font-family:var(--mono);font-size:.59rem;color:var(--text2);}
+.leg-row:last-child{margin-bottom:0;}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.55);}
+
+/* Map footer */
+#mfoot{
+  position:absolute;bottom:0;left:0;right:0;z-index:400;
+  background:rgba(255,255,255,.93);backdrop-filter:blur(8px);
+  padding:3px 12px;font-family:var(--mono);font-size:.61rem;color:var(--text3);
+  border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;
+}
+.mf-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
+
+/* ══ POPUP CONTENT ═══════════════════════════════════════════════ */
+.pop-top{
+  background:linear-gradient(108deg,var(--forest),var(--forest2));
+  padding:11px 36px 10px 13px;border-bottom:2px solid var(--green);
+  display:flex;align-items:center;gap:11px;
+}
+.pop-badge{
+  width:44px;height:44px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:8px;font-weight:800;color:#fff;
+  line-height:1.2;text-align:center;letter-spacing:-.3px;
+  border:2.5px solid rgba(255,255,255,.65);box-shadow:0 3px 10px rgba(0,0,0,.4);
+}
+.pop-title{flex:1;}
+.pop-id{font-family:var(--mono);font-size:.88rem;font-weight:800;color:#fff;line-height:1.2;}
+.pop-sub{font-size:.6rem;color:rgba(255,255,255,.65);margin-top:2px;font-family:var(--mono);}
+.pop-body{padding:9px 13px;}
+.pop-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;gap:6px;}
+.pop-lbl{font-size:.52rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap;}
+.pop-val{font-family:var(--mono);font-size:.65rem;color:var(--text);text-align:right;}
 .pop-days{
   display:inline-block;margin-top:5px;padding:2px 8px;border-radius:3px;
-  font-family:var(--mono);font-size:.61rem;font-weight:700
+  font-family:var(--mono);font-size:.62rem;font-weight:700;
 }
+.pop-src{display:inline-block;padding:1px 6px;border-radius:3px;font-family:var(--mono);font-size:.54rem;font-weight:700;letter-spacing:.04em;margin-left:5px;}
+.sr-ats{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;}
+.sr-fl{background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;}
+.sr-pali{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
+.sr-merged{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
 .pop-acts{
-  display:flex;gap:4px;padding:7px 14px;
-  border-top:1px solid var(--border);background:var(--surface2);
-  border-radius:0 0 10px 10px
+  display:flex;gap:4px;padding:7px 13px;border-top:1px solid var(--border);
+  background:var(--surface2);border-radius:0 0 var(--r-lg) var(--r-lg);
 }
 .pab{
   flex:1;padding:5px;text-align:center;background:var(--green-lt);
   border:1px solid var(--border);color:var(--forest);border-radius:4px;
-  font-family:var(--mono);font-size:.61rem;font-weight:700;cursor:pointer;transition:all .14s
+  font-family:var(--mono);font-size:.6rem;font-weight:700;cursor:pointer;transition:all .14s;
 }
-.pab:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.pab:hover{background:var(--green);color:#fff;border-color:var(--green);}
 .sbadge{
   display:inline-flex;align-items:center;padding:1px 6px;border-radius:3px;
-  font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.03em
+  font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.03em;
 }
-.sb-a{background:var(--c-active-lt);color:var(--c-active);border:1px solid rgba(21,128,61,.2)}
-.sb-s7{background:var(--c-s7-lt);color:var(--c-s7);border:1px solid rgba(180,83,9,.2)}
-.sb-s30{background:var(--c-s30-lt);color:var(--c-s30);border:1px solid rgba(185,28,28,.2)}
-.sb-crit{background:var(--c-crit-lt);color:var(--c-crit);border:1px solid rgba(127,29,29,.2)}
-.src-tag{display:inline-block;padding:1px 6px;border-radius:3px;font-family:var(--mono);font-size:.53rem;font-weight:700;letter-spacing:.04em}
-.sr-ats{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}
-.sr-fl{background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe}
-.sr-pali{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}
- 
-/* LEGEND */
-#legend{
-  position:absolute;bottom:14px;left:14px;z-index:500;
-  background:rgba(255,255,255,.94);border:1px solid var(--border);
-  border-radius:var(--r);padding:9px 12px;box-shadow:var(--shadow)
-}
-#legend-hdr{font-family:var(--mono);font-size:.51rem;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
-.leg-row{display:flex;align-items:center;gap:7px;margin-bottom:4px;
-  font-family:var(--mono);font-size:.6rem;color:var(--text)}
-.leg-row:last-child{margin-bottom:0}
-.leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-#track-badge{
-  position:absolute;top:12px;left:14px;z-index:500;
-  background:var(--forest2);color:#fff;border-radius:var(--r);
-  padding:4px 10px;font-family:var(--mono);font-size:.63rem;font-weight:700;
-  letter-spacing:.04em;box-shadow:var(--shadow);display:none
-}
- 
-/* MAP BLANK */
-#map-blank{
-  position:absolute;inset:0;z-index:400;
-  display:flex;align-items:center;justify-content:center;pointer-events:none;transition:opacity .4s
-}
-#map-blank.gone{opacity:0;pointer-events:none}
-.mb-card{
-  background:rgba(255,255,255,.94);border:1px solid var(--border);
-  border-radius:10px;padding:20px 28px;text-align:center;box-shadow:var(--shadow-md)
-}
-.mb-glyph{font-size:2rem;margin-bottom:8px}
-.mb-title{font-weight:700;font-size:.86rem;color:var(--text);letter-spacing:.04em;text-transform:uppercase;margin-bottom:3px}
-.mb-hint{font-family:var(--mono);font-size:.62rem;color:var(--text3)}
- 
-/* BOTTOM TABLE */
+.sb-a{background:var(--s-a-lt);color:var(--s-a);border:1px solid var(--s-a-br);}
+.sb-7{background:var(--s-7-lt);color:var(--s-7);border:1px solid var(--s-7-br);}
+.sb-30{background:var(--s-30-lt);color:var(--s-30);border:1px solid var(--s-30-br);}
+.sb-crit{background:var(--s-crit-lt);color:var(--s-crit);border:1px solid var(--s-crit-br);}
+
+/* ══ BOTTOM TABLE ═════════════════════════════════════════════════ */
 #btm{
-  position:fixed;bottom:0;left:0;right:0;height:var(--btm);z-index:800;
+  position:fixed;bottom:0;left:0;right:0;z-index:800;
   background:var(--surface);border-top:2px solid var(--border2);
-  display:flex;flex-direction:column
+  height:var(--btm);display:flex;flex-direction:column;
 }
-#rbar{height:5px;flex-shrink:0;cursor:ns-resize;background:var(--bg);border-bottom:1px solid var(--border)}
+#rbar{
+  height:6px;flex-shrink:0;cursor:ns-resize;
+  background:linear-gradient(180deg,#eaede8,#dde2da);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+}
+#rbar::after{content:'';width:36px;height:3px;background:var(--border2);border-radius:2px;}
 #btm-hdr{
   display:flex;align-items:center;justify-content:space-between;
   padding:5px 14px;border-bottom:1px solid var(--border);flex-shrink:0;
-  background:var(--forest)
+  background:var(--forest);
 }
-.btm-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);
-  font-size:.65rem;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase}
-.tbl-badge{background:rgba(255,255,255,.18);border-radius:3px;padding:1px 8px;
-  font-size:.57rem;color:rgba(255,255,255,.8)}
-.btm-ctrls{display:flex;gap:4px}
-.bc{padding:3px 9px;border-radius:var(--r);background:rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--mono);
-  font-size:.59rem;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap}
-.bc:hover{background:rgba(255,255,255,.26)}
-#btm-scroll{flex:1;overflow:auto}
-.dtbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.65rem;white-space:nowrap}
-.dtbl thead th{
-  background:var(--surface2);color:var(--text2);
-  padding:5px 11px;text-align:left;position:sticky;top:0;z-index:5;
-  border-bottom:2px solid var(--border2);font-size:.56rem;font-weight:700;
-  letter-spacing:.07em;cursor:pointer;user-select:none;text-transform:uppercase;transition:background .1s
+.btm-title{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:.64rem;font-weight:700;color:#fff;letter-spacing:.07em;text-transform:uppercase;}
+.tbl-badge{background:rgba(255,255,255,.18);border-radius:3px;padding:1px 8px;font-size:.56rem;color:rgba(255,255,255,.8);}
+.btm-ctrls{display:flex;gap:4px;}
+.bc{padding:3px 9px;border-radius:var(--r);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--mono);font-size:.58rem;font-weight:600;cursor:pointer;transition:all .14s;white-space:nowrap;}
+.bc:hover{background:rgba(255,255,255,.26);}
+#btm-scroll{flex:1;overflow:auto;}
+.dtbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.64rem;white-space:nowrap;}
+.dtbl thead th{background:var(--surface2);color:var(--text2);padding:5px 10px;text-align:left;position:sticky;top:0;z-index:5;border-bottom:2px solid var(--border2);font-size:.54rem;font-weight:700;letter-spacing:.07em;cursor:pointer;user-select:none;text-transform:uppercase;transition:background .1s;}
+.dtbl thead th:hover{background:var(--green-lt);}
+.dtbl tbody td{padding:5px 10px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+.dtbl tbody tr{cursor:pointer;transition:background .1s;}
+.dtbl tbody tr:hover{background:var(--green-pale);}
+.dtbl tbody tr.sel{background:var(--green-lt) !important;}
+.no-data-row td{text-align:center;color:var(--text3);padding:20px !important;font-size:.67rem !important;}
+
+/* ══ FIELD PANEL ═════════════════════════════════════════════════ */
+#fp-bg{display:none;position:fixed;inset:0;background:rgba(15,30,20,.4);z-index:1099;}
+#fp-bg.open{display:block;}
+#fp{
+  position:fixed;top:0;right:-360px;width:345px;height:100%;
+  background:white;border-left:1px solid var(--border2);
+  box-shadow:-5px 0 24px rgba(0,0,0,.14);
+  transition:right .26s ease;z-index:1100;display:flex;flex-direction:column;
 }
-.dtbl thead th:hover{background:var(--green-lt)}
-.dtbl tbody td{padding:5px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
-.dtbl tbody tr{cursor:pointer;transition:background .1s}
-.dtbl tbody tr:hover{background:var(--green-pale)}
-.dtbl tbody tr.sel{background:var(--green-lt) !important}
-.no-data{text-align:center;color:var(--text3);padding:20px !important;font-size:.68rem !important}
- 
-/* LOADING */
+#fp.open{right:0;}
+.fp-hdr{background:linear-gradient(108deg,var(--forest),var(--forest2));color:white;padding:11px 15px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--green);}
+.fp-hdr h3{font-size:.82rem;font-weight:700;font-family:var(--mono);}
+.fp-cl{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.1rem;cursor:pointer;}
+.fp-cl:hover{color:white;}
+.fp-latest{padding:11px 15px;background:#f9fde7;border-bottom:2px solid #c5e1a5;flex-shrink:0;}
+.fpl .fll{font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--forest3);margin-bottom:2px;}
+.fpl .fld{font-weight:700;color:var(--forest);font-size:.76rem;font-family:var(--mono);}
+.fpl .flt{margin-top:3px;font-size:.76rem;line-height:1.45;color:var(--text);}
+.fp-scroll{flex:1;overflow-y:auto;padding:9px 15px;}
+.fp-scroll h4{font-size:.57rem;color:var(--text4);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-family:var(--mono);}
+.fu{padding:7px 0;border-bottom:1px solid var(--border);}
+.fu .fd{font-weight:700;color:var(--text2);font-size:.67rem;font-family:var(--mono);}
+.fu .ft{margin-top:2px;font-size:.74rem;line-height:1.4;color:var(--text);}
+
+/* ══ LOADING ══════════════════════════════════════════════════════ */
 #loading{
-  position:fixed;inset:0;z-index:9000;background:#fff;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;
-  transition:opacity .5s,visibility .5s
+  position:fixed;inset:0;z-index:9000;
+  background:linear-gradient(108deg,#1b4332 0%,#2d6a4f 55%,#1b5e43 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  transition:opacity .5s,visibility .5s;
 }
-#loading.hide{opacity:0;visibility:hidden}
-.ld-ring{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
-.ld-title{font-weight:700;font-size:.84rem;color:var(--forest);letter-spacing:.06em;text-transform:uppercase}
-.ld-sub{font-family:var(--mono);font-size:.59rem;color:var(--text3)}
-.ld-sources{display:flex;flex-direction:column;gap:3px;margin-top:4px}
-.ld-src{font-family:var(--mono);font-size:.57rem;padding:2px 10px;border-radius:3px;
-  text-align:center;transition:all .3s;color:var(--text3)}
-.ld-src.ok{color:var(--c-active);background:rgba(21,128,61,.07)}
-.ld-src.err{color:var(--c-s30)}
- 
-/* TOAST */
+#loading.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.ld-ring{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+.ld-title{font-family:var(--mono);font-size:.88rem;font-weight:700;color:#fff;}
+.ld-sub{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.55);}
+.ld-srcs{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
+.ld-s{font-family:var(--mono);font-size:.58rem;padding:2px 10px;border-radius:3px;text-align:center;color:rgba(255,255,255,.45);transition:all .3s;}
+.ld-s.ok{color:#86efac;background:rgba(134,239,172,.1);}
+.ld-s.err{color:#fca5a5;}
+
+/* ══ TOAST ════════════════════════════════════════════════════════ */
 #toast{
   position:fixed;bottom:calc(var(--btm) + 10px);left:50%;
-  transform:translateX(-50%) translateY(10px);z-index:9999;
-  background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.3);
-  color:var(--c-s30);padding:7px 16px;border-radius:var(--r);
-  font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;
-  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s
+  transform:translateX(-50%) translateY(8px);z-index:9999;
+  background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.3);color:#991b1b;
+  padding:7px 16px;border-radius:var(--r);font-family:var(--mono);font-size:.65rem;letter-spacing:.04em;
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;
 }
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.ok{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.3);color:var(--c-active)}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.ok{background:rgba(21,128,61,.08);border-color:rgba(21,128,61,.3);color:#14532d;}
 </style>
 </head>
 <body>
- 
-<!-- LOADING -->
+
+<!-- ══ LOADING ═══════════════════════════════════════════════════ -->
 <div id="loading">
   <div class="ld-ring"></div>
-  <div class="ld-title">Gharial Ecology Project</div>
-  <div class="ld-sub" id="ld-sub">Initialising telemetry systems…</div>
-  <div class="ld-sources">
-    <div class="ld-src" id="ls-master">◌  Radio Master Database</div>
-    <div class="ld-src" id="ls-ats">◌  ATS Satellite Telemetry</div>
-    <div class="ld-src" id="ls-fl">◌  Field Log (AppSheet)</div>
-    <div class="ld-src" id="ls-pali">◌  Pali FT Manual Log</div>
-    <div class="ld-src" id="ls-gj">◌  River Zone GeoJSON</div>
+  <div class="ld-title">🐊 Gharial Ecology Project</div>
+  <div class="ld-sub" id="ld-sub">Initialising multi-source telemetry…</div>
+  <div class="ld-srcs">
+    <div class="ld-s" id="ls-m">◌ Master Radio Database</div>
+    <div class="ld-s" id="ls-a">◌ ATS Satellite Log</div>
+    <div class="ld-s" id="ls-f">◌ Field Log (VHF)</div>
+    <div class="ld-s" id="ls-p">◌ Pali FT Hatchlings</div>
+    <div class="ld-s" id="ls-g">◌ River Zone GeoJSON</div>
   </div>
 </div>
 <div id="toast"></div>
- 
-<!-- HEADER -->
+
+<!-- ══ HEADER ════════════════════════════════════════════════════ -->
 <header id="hdr">
   <div class="hdr-logos">
-    <img src="mcbt.png" alt="MCBT" onerror="this.classList.add('hide')">
-    <img src="gep.png"  alt="GEP"  onerror="this.classList.add('hide')">
+    <img src="image.png"   alt="Logo" onerror="this.style.display='none'">
+    <img src="unnamed.png" alt="Logo" onerror="this.style.display='none'">
   </div>
   <div class="hdr-div"></div>
   <div class="hdr-brand">
-    <div class="hdr-title">ATS Sat Real Time Viewer &nbsp;|&nbsp; Gharial Ecology Project</div>
-    <div class="hdr-sub">🐊 Live Multi-Source Telemetry – Field Monitoring Dashboard</div>
+    <div class="hdr-title">🐊 Gharial Ecology Project — Real-Time Telemetry</div>
+    <div class="hdr-sub">Multi-Source Monitoring · VHF + SAT + Hatchling Tracking</div>
   </div>
   <div id="pills">
-    <div class="pill pill-a"><div class="dot"></div><span>Active ≤7d</span><span class="cnt" id="c-a">—</span></div>
-    <div class="pill pill-s7"><div class="dot"></div><span>Silent &gt;7d</span><span class="cnt" id="c-s7">—</span></div>
-    <div class="pill pill-s30"><div class="dot"></div><span>Silent &gt;30d</span><span class="cnt" id="c-s30">—</span></div>
-    <div class="pill pill-crit"><div class="dot"></div><span>Crit ≥45d</span><span class="cnt" id="c-crit">—</span></div>
+    <div class="hpill" id="pill-a"    onclick="setPill('active')"><div class="pill-dot" style="background:#86efac;box-shadow:0 0 5px #86efac66;"></div>Active ≤7d<span class="pill-cnt" id="c-a">—</span></div>
+    <div class="hpill" id="pill-s7"   onclick="setPill('s7')"><div class="pill-dot" style="background:#fcd34d;box-shadow:0 0 5px #fcd34d66;"></div>Silent &gt;7d<span class="pill-cnt" id="c-s7">—</span></div>
+    <div class="hpill" id="pill-s30"  onclick="setPill('s30')"><div class="pill-dot" style="background:#fca5a5;box-shadow:0 0 5px #fca5a566;"></div>Silent &gt;30d<span class="pill-cnt" id="c-s30">—</span></div>
+    <div class="hpill" id="pill-crit" onclick="setPill('crit')"><div class="pill-dot" style="background:#f97316;box-shadow:0 0 5px #f9731666;"></div>Crit ≥45d<span class="pill-cnt" id="c-crit">—</span></div>
   </div>
   <div id="hdr-r">
-    <div id="sync-info"><strong>Last Sync</strong><span id="sync-t">—</span></div>
-    <button class="hbtn" id="btn-refresh" onclick="loadAllData()">
-      <span class="spin-i">⟳</span>&nbsp;Refresh
-    </button>
+    <div style="font-family:var(--mono);font-size:.56rem;color:rgba(255,255,255,.45);text-align:right;line-height:1.5;">
+      <strong style="display:block;font-size:.49rem;letter-spacing:.1em;color:rgba(255,255,255,.32);text-transform:uppercase;">Last Sync</strong>
+      <span id="sync-t">—</span>
+    </div>
+    <button class="hbtn" id="btn-ref" onclick="loadAllData()"><span class="spin-ic">⟳</span> Refresh</button>
+    <button class="hbtn on" onclick="toggleFBar()" id="fbtn">⚙ Filters</button>
+    <button class="hbtn" onclick="toggleFP()">📋 Field Updates</button>
   </div>
 </header>
- 
-<!-- FILTER BAR -->
+
+<!-- ══ FILTER BAR ════════════════════════════════════════════════ -->
 <div id="fbar">
-  <!-- Category (from Master Radio) -->
+  <!-- 1. Source -->
   <div class="fg">
-    <label>Category</label>
-    <select class="fsel" id="f-cat" onchange="onCategoryChange()">
-      <option value="all">All Categories</option>
+    <label>Source</label>
+    <select class="fsel" id="f-source" onchange="onSourceChange()">
+      <option value="all">All Sources</option>
+      <option value="ATS">ATS Satellite</option>
+      <option value="FieldLog">Field Log (VHF)</option>
+      <option value="PaliFT">Pali FT (Hatchlings)</option>
     </select>
   </div>
   <div class="fsep"></div>
- 
-  <!-- Radio ID multi-select (dependent on Category) -->
+
+  <!-- 2. Radio ID (cascades from Source) -->
   <div class="fg">
     <label>Radio ID</label>
     <div class="mdd-wrap" id="rid-wrap">
-      <button class="mdd-btn" id="rid-btn" onclick="toggleMDD('rid')">
-        <span id="rid-lbl">All IDs</span>
-      </button>
+      <button class="mdd-btn" id="rid-btn" onclick="toggleMDD('rid')"><span id="rid-lbl">All IDs</span></button>
       <div class="mdd-panel" id="rid-panel">
-        <input class="mdd-search" id="rid-search" placeholder="Search ID…"
-               oninput="onMDDSearch('rid',this.value)">
+        <input class="mdd-search" id="rid-search" placeholder="Search ID…" oninput="onMDDSearch('rid',this.value)">
+        <div class="mdd-ctrl">
+          <button onclick="mddSelectAll('rid')">✓ Select All</button>
+          <button onclick="mddClearAll('rid')">✕ Clear All</button>
+        </div>
         <div class="mdd-scroll" id="rid-list"></div>
       </div>
     </div>
   </div>
   <div class="fsep"></div>
- 
-  <!-- Status -->
+
+  <!-- 3. Category (cascades from Source + RID) -->
   <div class="fg">
-    <label>Status</label>
-    <select class="fsel" id="f-status">
-      <option value="all">All Statuses</option>
-      <option value="active">Active (≤7d)</option>
-      <option value="s7">Silent (&gt;7d)</option>
-      <option value="s30">Silent (&gt;30d)</option>
-      <option value="crit">Crit (≥45d)</option>
-    </select>
+    <label>Category</label>
+    <div class="mdd-wrap" id="cat-wrap">
+      <button class="mdd-btn" id="cat-btn" onclick="toggleMDD('cat')"><span id="cat-lbl">All Categories</span></button>
+      <div class="mdd-panel" id="cat-panel">
+        <div class="mdd-ctrl">
+          <button onclick="mddSelectAll('cat')">✓ Select All</button>
+          <button onclick="mddClearAll('cat')">✕ Clear All</button>
+        </div>
+        <div class="mdd-scroll" id="cat-list"></div>
+      </div>
+    </div>
   </div>
   <div class="fsep"></div>
- 
-  <!-- Source -->
-  <div class="fg">
-    <label>Source</label>
-    <select class="fsel" id="f-source">
-      <option value="all">All Sources</option>
-      <option value="ATS">ATS Auto</option>
-      <option value="FieldLog">Field Log</option>
-      <option value="PaliFT">Pali FT</option>
-    </select>
-  </div>
-  <div class="fsep"></div>
- 
-  <!-- Zone multi-select (with search, sorted by count) -->
+
+  <!-- 4. Zone (cascades from Source + RID + Category, shows counts, flies map) -->
   <div class="fg">
     <label>Zone / Stretch</label>
     <div class="mdd-wrap" id="zone-wrap">
-      <button class="mdd-btn" id="zone-btn" onclick="toggleMDD('zone')">
-        <span id="zone-lbl">All Zones</span>
-      </button>
+      <button class="mdd-btn" id="zone-btn" onclick="toggleMDD('zone')"><span id="zone-lbl">All Zones</span></button>
       <div class="mdd-panel" id="zone-panel">
-        <input class="mdd-search" id="zone-search" placeholder="Search zone…"
-               oninput="onMDDSearch('zone',this.value)">
+        <input class="mdd-search" id="zone-search" placeholder="Search zone…" oninput="onMDDSearch('zone',this.value)">
+        <div class="mdd-ctrl">
+          <button onclick="mddSelectAll('zone')">✓ Select All</button>
+          <button onclick="mddClearAll('zone')">✕ Clear All</button>
+        </div>
         <div class="mdd-scroll" id="zone-list"></div>
       </div>
     </div>
   </div>
   <div class="fsep"></div>
- 
-  <button id="btn-apply" onclick="applyFilters()">▶ APPLY</button>
-  <button class="clr-btn" onclick="clearFilters()">✕ Clear</button>
-</div>
- 
-<!-- MAP -->
-<div id="map-wrap">
-  <div id="map"></div>
-  <div id="map-blank">
-    <div class="mb-card">
-      <div class="mb-glyph">🐊</div>
-      <div class="mb-title">Data Loaded — Awaiting Filter</div>
-      <div class="mb-hint">Set filters above and click <strong>▶ APPLY</strong></div>
+
+  <!-- 5. Status -->
+  <div class="fg">
+    <label>Status</label>
+    <div class="mdd-wrap" id="status-wrap">
+      <button class="mdd-btn" id="status-btn" onclick="toggleMDD('status')"><span id="status-lbl">All Statuses</span></button>
+      <div class="mdd-panel" id="status-panel">
+        <div class="mdd-ctrl">
+          <button onclick="mddSelectAll('status')">✓ Select All</button>
+          <button onclick="mddClearAll('status')">✕ Clear All</button>
+        </div>
+        <div class="mdd-scroll" id="status-list"></div>
+      </div>
     </div>
   </div>
-  <div id="track-badge">🗺 Track Mode</div>
+  <div class="fsep"></div>
+
+  <button class="fbtn fbtn-apply" onclick="applyFilters()">▶ Apply</button>
+  <button class="fbtn fbtn-clr" onclick="clearFilters()">✕ Clear</button>
+  <div class="fsep"></div>
+  <button class="fbtn" id="btnHeat" onclick="toggleHeatmap()">🌡 Heatmap</button>
+  <button class="fbtn" id="btnKDE"  onclick="toggleKDE()">📍 KDE</button>
+  <div class="fsep"></div>
+  <button class="fbtn" onclick="exportCSV()">📤 Export CSV</button>
+</div>
+
+<!-- ══ MAP ════════════════════════════════════════════════════════ -->
+<div id="map-wrap">
+  <div id="map"></div>
+  <div class="map-fab">
+    <button class="fab" onclick="resetView()" title="Reset view">🏠</button>
+  </div>
+  <div id="track-badge">🗺 Track Mode — <span id="track-lbl"></span></div>
   <div id="legend">
-    <div id="legend-hdr">Days Since Fix</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#15803d"></div>Active (≤ 7 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#b45309"></div>Silent (8 – 30 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#b91c1c"></div>Silent (31 – 44 d)</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#7f1d1d"></div>Crit (≥ 45 d)</div>
+    <div id="legend-title">Days Since Fix</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#1565c0;"></div>Active ≤ 7 days</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#b45309;"></div>Silent 8 – 30 days</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#b91c1c;"></div>Silent 31 – 44 days</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#7f1d1d;"></div>Crit ≥ 45 days</div>
+  </div>
+  <div id="mfoot">
+    <div class="mf-dot"></div>
+    <span id="mf-txt">Loading telemetry…</span>
+    <span style="margin-left:auto;font-size:.58rem;color:var(--text4);" id="mf-cnt"></span>
   </div>
 </div>
- 
-<!-- BOTTOM TABLE -->
+
+<!-- ══ FIELD PANEL ═══════════════════════════════════════════════ -->
+<div id="fp-bg" onclick="closeFP()"></div>
+<div id="fp">
+  <div class="fp-hdr"><h3>📋 Field Updates</h3><button class="fp-cl" onclick="closeFP()">✕</button></div>
+  <div class="fp-latest fpl" id="fpLatest">
+    <div class="fll">Latest Update</div>
+    <div class="fld" id="fuDate">Loading…</div>
+    <div class="flt" id="fuText"></div>
+  </div>
+  <div class="fp-scroll"><h4>Previous Updates</h4><div id="fuList"></div></div>
+</div>
+
+<!-- ══ BOTTOM TABLE ══════════════════════════════════════════════ -->
 <div id="btm">
   <div id="rbar"></div>
   <div id="btm-hdr">
-    <div class="btm-title">📡 Telemetry Records <span class="tbl-badge" id="tbl-badge">0 animals</span></div>
+    <div class="btm-title">📡 Telemetry Records <span class="tbl-badge" id="tbl-badge">—</span></div>
     <div class="btm-ctrls">
-      <button class="bc" onclick="exportCSV()">📤 Export</button>
       <button class="bc" id="btm-tog" onclick="toggleBtm()">▼ Hide</button>
     </div>
   </div>
   <div id="btm-scroll">
-    <table class="dtbl" id="dtbl">
+    <table class="dtbl">
       <thead><tr>
-        <th onclick="sortTbl(0)">Radio ID</th>
-        <th onclick="sortTbl(1)">Last Fix</th>
+        <th onclick="sortTbl(0)">Radio ID ↕</th>
+        <th onclick="sortTbl(1)">Last Fix ↕</th>
         <th onclick="sortTbl(2)">Days ↕</th>
-        <th onclick="sortTbl(3)">Status</th>
-        <th onclick="sortTbl(4)">Category</th>
+        <th onclick="sortTbl(3)">Status ↕</th>
+        <th onclick="sortTbl(4)">Category ↕</th>
         <th onclick="sortTbl(5)">Sex</th>
-        <th onclick="sortTbl(6)">Source</th>
-        <th onclick="sortTbl(7)">Zone</th>
+        <th onclick="sortTbl(6)">Source ↕</th>
+        <th onclick="sortTbl(7)">Zone ↕</th>
         <th onclick="sortTbl(8)">Days Since Release</th>
+        <th>Collar #</th>
         <th>Latitude</th><th>Longitude</th>
         <th>Tag Place</th><th>T.L (cm)</th><th>Remarks</th>
       </tr></thead>
-      <tbody id="tbl-body">
-        <tr><td class="no-data" colspan="14">Apply filters to display telemetry records</td></tr>
-      </tbody>
+      <tbody id="tbl-body"><tr class="no-data-row"><td colspan="15">Apply filters to display telemetry records</td></tr></tbody>
     </table>
   </div>
 </div>
- 
-<!-- SCRIPTS -->
+
+<!-- ══ SCRIPTS ═══════════════════════════════════════════════════ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
- 
 <script>
-/* ══ CONFIG ══════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════════════ */
 const URLS = {
-  master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
-  ats   :'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
-  fl    :'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
-  pali  :'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  master :'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
+  ats    :'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
+  fl     :'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
+  pali   :'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
   geojson:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
 };
 const MAP_CENTER = [25.84, 76.56];
 const MAP_ZOOM   = 12;
 const TODAY      = new Date();
- 
-/*
- * Placeholder Chambal river centreline for river-curve distance calculation.
- * Replace coordinate array with a real GPS-traced centreline for production.
- * Coordinates are [lng, lat] (GeoJSON convention required by Turf.js).
- */
+
+/* Placeholder Chambal River centreline — [lng, lat] for Turf.js */
 const RIVER_LINE = turf.lineString([
   [76.478,25.922],[76.492,25.910],[76.505,25.899],[76.517,25.889],
   [76.528,25.880],[76.537,25.872],[76.545,25.864],[76.552,25.856],
@@ -500,191 +567,258 @@ const RIVER_LINE = turf.lineString([
   [76.581,25.810],[76.590,25.800],[76.600,25.790],[76.612,25.779],
   [76.625,25.768],[76.638,25.757],[76.651,25.746],[76.665,25.735],
 ]);
- 
-/* ══ STATE ═══════════════════════════════════════════════════════ */
-let map, markerLayer, trackLayer, zoneLayer;
-let allAnimals = [], allFixes = {}, masterMap = {};
+
+const STATUS_META = {
+  active:{ color:'#1565c0', lt:'#dbeafe', br:'#bfdbfe', cls:'sb-a',    label:'Active ≤7d'  },
+  s7:    { color:'#b45309', lt:'#fef3c7', br:'#fde68a', cls:'sb-7',    label:'Silent >7d'  },
+  s30:   { color:'#b91c1c', lt:'#fee2e2', br:'#fecaca', cls:'sb-30',   label:'Silent >30d' },
+  crit:  { color:'#7f1d1d', lt:'#fee2e2', br:'#fca5a5', cls:'sb-crit', label:'Crit ≥45d'  },
+};
+
+/* ════════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════════ */
+let map, oms, heatLayer = null, kdeLayer = null, zoneGeoLayer = null;
+let markerLayer, trackLayer;
+let masterMap  = {};
+let allFixes   = {};  // {radioId: fix[]}
+let allAnimals = [];  // merged/latest per radio ID
 let displayed  = [];
 let geojsonData = null;
-let sortCol = 2, sortDir = 1;
+let mapMarkers  = []; // {id, marker}
+let justSpider  = false;
 let btmCollapsed = false, btmH = 220;
-let mapMarkers = []; // {id, marker}
- 
-// Multi-select filter state
-const S = {
-  ridPool   : [],  // IDs currently selectable in Radio ID dropdown
-  ridSel    : null, // Set<id> or null (null = all selected)
-  zoneSel   : null, // Set<zone> or null
-  allZones  : [],   // sorted zone names
-  zoneCounts: {},   // zone → animal count
+let activePill   = null;
+let sortCol = 2, sortDir = 1;
+let fbarHidden = false;
+
+// Multi-select filter state per dropdown key
+const MDD = {
+  rid   :{ pool:[], sel:null, search:'' },
+  cat   :{ pool:[], sel:null, search:'' },
+  zone  :{ pool:[], sel:null, search:'', counts:{} },
+  status:{ pool:['active','s7','s30','crit'], sel:null, search:'' },
 };
- 
-/* ══ UTILITIES ═══════════════════════════════════════════════════ */
- 
-/** Flexible column accessor – ignores spacing/underscore/slash differences */
+
+/* ════════════════════════════════════════════════════════════════
+   UTILITIES
+════════════════════════════════════════════════════════════════ */
+/** Flexible column getter — ignores case, spaces, underscores, hyphens */
 function gc(row, ...keys) {
   const rowKeys = Object.keys(row);
   for (const k of keys) {
-    const norm = k.toLowerCase().replace(/[\s_\-\.\/]+/g, '');
+    const norm = k.toLowerCase().replace(/[\s_\-\.\/]+/g,'');
     for (const rk of rowKeys) {
-      if (rk.trim().toLowerCase().replace(/[\s_\-\.\/]+/g, '') === norm) {
-        const v = String(row[rk] || '').trim();
+      if (rk.trim().toLowerCase().replace(/[\s_\-\.\/]+/g,'') === norm) {
+        const v = String(row[rk]||'').trim();
         if (v && !['na','n/a','-','—',''].includes(v.toLowerCase())) return v;
       }
     }
   }
   return '';
 }
- 
-/** Normalise ID – uppercase, no spaces */
+
+/** Normalise ID — uppercase, no spaces */
 function nid(raw) { return String(raw||'').trim().toUpperCase().replace(/\s+/g,''); }
- 
+
 /**
- * Robust timestamp parser.
- *
- * ORDER IS CRITICAL:
- *   1. DD-MM-YYYY … must be tested FIRST. If we call new Date("01-12-2025")
- *      the JS engine reads it as MM-DD-YYYY (Jan 12) not Dec 1 – the infamous
- *      "Pali FT December-2026 bug". By matching the dash-delimited regex
- *      before the native parser we always get the correct DD-MM-YYYY result.
- *   2. M/D/YYYY HH:MM:SS  (Field Log Datetime column)
- *   3. ISO 8601 / native Date()  (ATS Date column)
+ * ROBUST TIMESTAMP PARSER — order matters!
+ * 1. DD-MM-YYYY HH:MM  (Pali FT)  — MUST be tested FIRST to prevent month/day swap
+ * 2. M/D/YYYY HH:MM:SS             (Field Log)
+ * 3. ISO 8601 / native Date()       (ATS)
  */
 function pts(s) {
   if (!s || !String(s).trim()) return null;
   s = String(s).trim();
- 
-  // 1 ── DD-MM-YYYY [HH:MM[:SS]]  ← Pali FT; match 1-2 digit day/month first
-  let m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-  if (m && +m[3] > 2000) {
+
+  // 1. DD-MM-YYYY or D-M-YYYY [HH:MM[:SS]]
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (m && +m[3] >= 2000) {
+    // Determine if DD-MM-YYYY or MM-DD-YYYY based on value ranges
+    // Day > 12 is unambiguously DD-MM-YYYY
+    // Default to DD-MM-YYYY (Indian convention)
     const d = new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
     if (!isNaN(d)) return d;
   }
- 
-  // 2 ── M/D/YYYY [HH:MM[:SS]]  ← Field Log
+
+  // 2. M/D/YYYY HH:MM:SS (Field Log)
   m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if (m) {
     const d = new Date(+m[3], +m[1]-1, +m[2], +(m[4]||0), +(m[5]||0), +(m[6]||0));
     if (!isNaN(d)) return d;
   }
- 
-  // 3 ── ISO 8601 / default JS  ← ATS (YYYY-MM-DDTHH:MM:SS)
+
+  // 3. ISO 8601
   const d = new Date(s);
-  if (!isNaN(d) && d.getFullYear() > 2000) return d;
- 
+  if (!isNaN(d) && d.getFullYear() >= 2000) return d;
   return null;
 }
- 
+
 function daysSince(ts) {
   if (!ts || isNaN(ts)) return 9999;
   return Math.max(0, Math.floor((TODAY - ts) / 86400000));
 }
-function getStatus(days) {
+function sKey(days) {
   if (days <= 7)  return 'active';
   if (days <= 30) return 's7';
   if (days < 45)  return 's30';
   return 'crit';
 }
-function markerColor(s) {
-  return {active:'#15803d',s7:'#b45309',s30:'#b91c1c',crit:'#7f1d1d'}[s]||'#6b7280';
+function markerColor(st) {
+  return { active:'#1565c0', s7:'#b45309', s30:'#b91c1c', crit:'#7f1d1d' }[st] || '#6b7280';
 }
 function fmtDT(ts) {
   if (!ts||isNaN(ts)) return '—';
   return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+
     ' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
-function setLdSrc(id, ok) {
-  const e = document.getElementById(id); if (!e) return;
-  e.className = 'ld-src '+(ok?'ok':'err');
-  e.textContent = (ok?'✓  ':'✗  ')+e.textContent.replace(/^[◌✓✗]\s*/,'');
+function fmtDateOnly(ts) {
+  if (!ts||isNaN(ts)) return '—';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
 }
+function setLd(id, ok) {
+  const e = document.getElementById(id); if (!e) return;
+  e.className='ld-s '+(ok?'ok':'err');
+  e.textContent=(ok?'✓  ':'✗  ')+e.textContent.replace(/^[◌✓✗]\s*/,'');
+}
+
+/** Turf.js river-curve distance between two fix objects */
+function calcRiverDist(fix1, fix2) {
+  try {
+    const p1 = turf.point([fix1.lon, fix1.lat]);
+    const p2 = turf.point([fix2.lon, fix2.lat]);
+    const s1 = turf.nearestPointOnLine(RIVER_LINE, p1);
+    const s2 = turf.nearestPointOnLine(RIVER_LINE, p2);
+    const seg= turf.lineSlice(s1, s2, RIVER_LINE);
+    return Math.round(turf.length(seg, {units:'meters'}));
+  } catch(e) { return null; }
+}
+
 function toast(msg, ok=false) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className='on'+(ok?' ok':'');
-  clearTimeout(t._to); t._to = setTimeout(()=>t.className='',4000);
+  t.textContent = msg; t.className = 'on'+(ok?' ok':'');
+  clearTimeout(t._t); t._t = setTimeout(()=>t.className='', 4000);
 }
- 
-/* ══ MAP INIT ════════════════════════════════════════════════════ */
+
+function getZoneName(feat) {
+  return feat?.properties?.name || feat?.properties?.Name ||
+         feat?.properties?.ZONE || feat?.properties?.zone ||
+         feat?.properties?.STRETCH || feat?.properties?.stretch || null;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAP INIT
+════════════════════════════════════════════════════════════════ */
 function initMap() {
-  map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
-  L.control.zoom({position:'bottomright'}).addTo(map);
- 
+  map = L.map('map', { zoomControl:false, attributionControl:false })
+    .setView(MAP_CENTER, MAP_ZOOM);
+  L.control.zoom({ position:'bottomright' }).addTo(map);
+
   // Google Hybrid Satellite (as specified)
   L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
-    {maxZoom:21,attribution:'© Google'}).addTo(map);
- 
+    { maxZoom:21, attribution:'© Google' }).addTo(map);
+
   markerLayer = L.layerGroup().addTo(map);
   trackLayer  = L.layerGroup().addTo(map);
- 
-  map.on('click', () => { closeMDD('rid'); closeMDD('zone'); });
+
+  // OMS — spiderweb for overlapping markers
+  oms = new OverlappingMarkerSpiderfier(map, {
+    keepSpiderfied:true, nearbyDistance:30,
+    circleSpiralSwitchover:8, circleFootSeparation:55,
+    spiralFootSeparation:35, spiralLengthStart:22, spiralLengthFactor:6,
+    legWeight:2, legColors:{ usual:'#2d6a4f', highlighted:'#e65100' },
+  });
+  oms.addListener('spiderfy', markers => {
+    justSpider = true;
+    markers.forEach(m => { try { m.closePopup(); } catch(e) {} });
+    setTimeout(() => { justSpider = false; }, 400);
+  });
+  oms.addListener('click', marker => {
+    if (justSpider) return;
+    marker._clickCount = (marker._clickCount||0) + 1;
+    if (marker._clickCount === 1) {
+      marker.setLatLng(marker._origLL);
+      marker.openPopup();
+      setTimeout(() => { marker._clickCount = 0; }, 3000);
+    } else {
+      marker._clickCount = 0;
+      map.flyTo(marker._origLL, 16, { duration:1.0 });
+      setTimeout(() => marker.openPopup(), 1100);
+    }
+  });
+
+  // Close dropdowns when clicking map
+  map.on('click', () => {
+    ['rid','cat','zone','status'].forEach(k => closeMDD(k));
+  });
 }
- 
-/* ══ DATA LOADING ════════════════════════════════════════════════ */
+
+function resetView() { map.setView(MAP_CENTER, MAP_ZOOM); }
+
+/* ════════════════════════════════════════════════════════════════
+   DATA LOADING
+════════════════════════════════════════════════════════════════ */
 function fetchCSV(url) {
-  return new Promise((res,rej) => {
+  return new Promise((res, rej) =>
     Papa.parse(url+'&_t='+Date.now(), {
       download:true, header:true, skipEmptyLines:true,
       complete: r => res(r.data), error: e => rej(e),
-    });
-  });
+    })
+  );
 }
- 
+
 async function loadAllData() {
-  const btn = document.getElementById('btn-refresh');
+  const btn = document.getElementById('btn-ref');
   btn.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
-  document.getElementById('ld-sub').textContent = 'Fetching all 4 sheets + GeoJSON…';
-  ['ls-master','ls-ats','ls-fl','ls-pali','ls-gj'].forEach(id => {
+  document.getElementById('ld-sub').textContent = 'Fetching 4 sheets + GeoJSON concurrently…';
+  ['ls-m','ls-a','ls-f','ls-p','ls-g'].forEach(id => {
     const e = document.getElementById(id); if (!e) return;
-    e.className='ld-src'; e.textContent='◌  '+e.textContent.replace(/^[◌✓✗]\s*/,'');
+    e.className='ld-s'; e.textContent='◌  '+e.textContent.replace(/^[◌✓✗]\s*/,'');
   });
- 
+
   try {
-    const [masterR, atsR, flR, paliR, gjRaw] = await Promise.all([
-      fetchCSV(URLS.master).then(d=>{setLdSrc('ls-master',true);return d;})
-        .catch(e=>{setLdSrc('ls-master',false);console.warn('Master:',e);return[];}),
-      fetchCSV(URLS.ats).then(d=>{setLdSrc('ls-ats',true);return d;})
-        .catch(e=>{setLdSrc('ls-ats',false);console.warn('ATS:',e);return[];}),
-      fetchCSV(URLS.fl).then(d=>{setLdSrc('ls-fl',true);return d;})
-        .catch(e=>{setLdSrc('ls-fl',false);console.warn('FL:',e);return[];}),
-      fetchCSV(URLS.pali).then(d=>{setLdSrc('ls-pali',true);return d;})
-        .catch(e=>{setLdSrc('ls-pali',false);console.warn('Pali:',e);return[];}),
-      fetch(URLS.geojson).then(r=>r.json()).then(d=>{setLdSrc('ls-gj',true);return d;})
-        .catch(e=>{setLdSrc('ls-gj',false);console.warn('GeoJSON:',e);return null;}),
+    const [masterR, atsR, flR, paliR, gjData, updatesR] = await Promise.all([
+      fetchCSV(URLS.master ).then(d=>{setLd('ls-m',true);return d;}).catch(e=>{setLd('ls-m',false);console.warn('Master:',e);return[];}),
+      fetchCSV(URLS.ats    ).then(d=>{setLd('ls-a',true);return d;}).catch(e=>{setLd('ls-a',false);console.warn('ATS:',e);return[];}),
+      fetchCSV(URLS.fl     ).then(d=>{setLd('ls-f',true);return d;}).catch(e=>{setLd('ls-f',false);console.warn('FL:',e);return[];}),
+      fetchCSV(URLS.pali   ).then(d=>{setLd('ls-p',true);return d;}).catch(e=>{setLd('ls-p',false);console.warn('Pali:',e);return[];}),
+      fetch(URLS.geojson   ).then(r=>r.json()).then(d=>{setLd('ls-g',true);return d;}).catch(e=>{setLd('ls-g',false);return null;}),
+      fetchCSV(URLS.updates).catch(()=>[]),
     ]);
- 
-    document.getElementById('ld-sub').textContent='Building master lookup…';
+
+    document.getElementById('ld-sub').textContent = 'Building master lookup…';
     masterMap = buildMaster(masterR);
- 
-    document.getElementById('ld-sub').textContent='Processing telemetry…';
+
+    document.getElementById('ld-sub').textContent = 'Processing telemetry streams…';
     allFixes = {};
     ingestATS(atsR);
     ingestFL(flR);
     ingestPali(paliR);
- 
-    document.getElementById('ld-sub').textContent='Merging animals…';
-    geojsonData = gjRaw;
+
+    document.getElementById('ld-sub').textContent = 'Merging dual-tagged animals…';
+    geojsonData = gjData;
     allAnimals  = mergeAnimals();
- 
+
     if (geojsonData?.features?.length) {
-      document.getElementById('ld-sub').textContent='Assigning zones (Turf.js)…';
+      document.getElementById('ld-sub').textContent = 'Assigning river zones (Turf.js)…';
       assignZones();
     }
- 
-    populateCategoryDD();
-    rebuildZoneState();
-    rebuildRIDState();
-    renderZoneList('');
-    renderRIDList('');
-    updateZoneLbl();
-    updateRIDLbl();
-    drawZonePolygons();
+
+    document.getElementById('ld-sub').textContent = 'Building filter dropdowns…';
+    rebuildCascade();
     updatePills();
- 
+    drawZonePolygons();
+    loadUpdates(updatesR);
+
+    const latestTs = allAnimals.reduce((max, a) => a.ts && a.ts > max ? a.ts : max, new Date(0));
+    document.getElementById('mf-txt').textContent =
+      `Latest fix: ${fmtDT(latestTs)} · ${Object.keys(allFixes).length} unique IDs across all sources`;
+    document.getElementById('mf-cnt').textContent = `${allAnimals.length} animals`;
     document.getElementById('sync-t').textContent =
       new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    toast(`✓ Loaded ${allAnimals.length} animals from ${Object.keys(allFixes).length} unique IDs`,true);
- 
+    toast(`✓ Loaded ${allAnimals.length} animals · ${Object.keys(allFixes).length} unique Radio IDs`, true);
+
   } catch(err) {
     console.error(err); toast('Error: '+err.message);
   } finally {
@@ -692,628 +826,777 @@ async function loadAllData() {
     document.getElementById('loading').classList.add('hide');
   }
 }
- 
-/* ══ MASTER LOOKUP ═══════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   DATA INGESTION
+════════════════════════════════════════════════════════════════ */
 function buildMaster(rows) {
   const m = {};
   rows.forEach(row => {
-    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID'));
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID','Animal ID'));
     if (id) m[id] = row;
   });
   return m;
 }
- 
-/* ══ INGEST ATS LOG ══════════════════════════════════════════════
-   Columns: RadioID, Date (ISO 8601), Latitude, Longitude         */
+
+/** ATS Log: CollarSerialNumber, RadioID, Date (ISO 8601), Latitude, Longitude */
 function ingestATS(rows) {
   rows.forEach(row => {
-    const id = nid(gc(row,'RadioID','Radio_ID','CollarSerialNumber','ID'));
+    const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
     if (!id) return;
-    const lat = parseFloat(gc(row,'Latitude','Lat','latitude'));
-    const lon = parseFloat(gc(row,'Longitude','Lon','Long','longitude'));
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     if (isNaN(lat)||isNaN(lon)) return;
-    const ts = pts(gc(row,'Date','Timestamp','DateTime','date','timestamp'));
-    if (!allFixes[id]) allFixes[id]=[];
-    allFixes[id].push({lat,lon,ts,source:'ATS',
-      remarks:gc(row,'Remarks','Notes')});
+    const ts     = pts(gc(row,'Date','Timestamp','DateTime','date'));
+    const collar = gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial');
+    if (!allFixes[id]) allFixes[id] = [];
+    allFixes[id].push({ lat, lon, ts, source:'ATS', collar,
+      remarks: gc(row,'Remarks','Notes') });
   });
 }
- 
-/* ══ INGEST FIELD LOG ════════════════════════════════════════════
-   Columns: Radio_ID, Datetime (M/D/YYYY HH:MM:SS), LatLong
-   LatLong arrives as a single "25.842, 76.563" string → split it */
+
+/** Field Log (VHF): Radio_ID, LatLong ("25.842, 76.563" — single string), Datetime */
 function ingestFL(rows) {
   rows.forEach(row => {
-    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID'));
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID','Animal ID'));
     if (!id) return;
- 
     let lat, lon;
-    // Primary: combined "LatLong" column
-    const ll = gc(row,'LatLong','Lat_Long','LatLng','GPS_Coordinates','Coordinates');
+
+    // LatLong is a single "DD.ddd, DD.ddd" string — split it
+    const ll = gc(row,'LatLong','Lat_Long','LatLng','GPS_Coordinates','Coordinates','Lat Long');
     if (ll && ll.includes(',')) {
       const parts = ll.split(',');
       lat = parseFloat(parts[0].trim());
       lon = parseFloat(parts[1].trim());
     } else {
-      // Fallback: separate columns
-      lat = parseFloat(gc(row,'Latitude','Lat','GPS_Lat'));
-      lon = parseFloat(gc(row,'Longitude','Lon','Long','GPS_Lon'));
+      lat = parseFloat(gc(row,'Latitude','Lat'));
+      lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     }
     if (isNaN(lat)||isNaN(lon)) return;
- 
-    const ts = pts(gc(row,'Datetime','DateTime','Date','Timestamp'));
-    if (!allFixes[id]) allFixes[id]=[];
-    allFixes[id].push({lat,lon,ts,source:'FieldLog',
-      activity:gc(row,'Activity','Behavior','Behaviour'),
-      signal  :gc(row,'Signal','SignalStrength'),
-      place   :gc(row,'Place','Location','Site'),
-      remarks :gc(row,'Remarks','Notes')});
+
+    const ts = pts(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
+    if (!allFixes[id]) allFixes[id] = [];
+    allFixes[id].push({ lat, lon, ts, source:'FieldLog',
+      activity: gc(row,'Activity','Behavior','Behaviour'),
+      signal  : gc(row,'Signal','SignalStrength','Signal_Strength'),
+      place   : gc(row,'Place','Location','Site'),
+      remarks : gc(row,'Remarks','Notes') });
   });
 }
- 
-/* ══ INGEST PALI FT ══════════════════════════════════════════════
-   Columns: Animal ID, Timestamp (DD-MM-YYYY HH:MM), Lat, Lng
-   CRITICAL: pts() tests DD-MM-YYYY regex BEFORE calling new Date()
-   to prevent the MM-DD misparse (December → "month 01" bug).       */
+
+/** Pali FT: Animal ID, Timestamp (DD-MM-YYYY HH:MM), Latitude, Longitude */
 function ingestPali(rows) {
   rows.forEach(row => {
     const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','RadioID','Radio_ID','ID'));
     if (!id) return;
-    const lat = parseFloat(gc(row,'Latitude','Lat','latitude'));
-    const lon = parseFloat(gc(row,'Longitude','Lon','longitude'));
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon'));
     if (isNaN(lat)||isNaN(lon)) return;
-    // pts() with DD-MM-YYYY-first ordering handles the format correctly
+    // pts() with DD-MM-YYYY-first regex handles the format correctly
     const ts = pts(gc(row,'Timestamp','Date','timestamp','date'));
-    if (!allFixes[id]) allFixes[id]=[];
-    allFixes[id].push({lat,lon,ts,source:'PaliFT',
-      activity:gc(row,'Activity','activity'),
-      signal  :gc(row,'Signal','signal'),
-      place   :gc(row,'Place','Location','place'),
-      remarks :gc(row,'Remarks','Notes','remarks')});
+    if (!allFixes[id]) allFixes[id] = [];
+    allFixes[id].push({ lat, lon, ts, source:'PaliFT',
+      activity: gc(row,'Activity','activity'),
+      signal  : gc(row,'Signal','signal'),
+      place   : gc(row,'Place','Location','place'),
+      remarks : gc(row,'Remarks','Notes','remarks') });
   });
 }
- 
-/* ══ MERGE ANIMALS ═══════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   MERGE ANIMALS — Dual-tagged (VHF + SAT) handled here
+   The masterMap key (Radio_ID) is the canonical identity.
+   If an animal has both ATS and FieldLog fixes, they merge into
+   one record. The CollarSerialNumber from ATS is stored alongside.
+════════════════════════════════════════════════════════════════ */
 function mergeAnimals() {
   const out = [];
-  Object.entries(allFixes).forEach(([id,arr]) => {
-    // Sort: most-recent first for latest fix; we'll also keep a chrono history
-    arr.sort((a,b) => {
+  Object.entries(allFixes).forEach(([id, arr]) => {
+    // Sort all fixes newest-first
+    arr.sort((a, b) => {
       if (!a.ts&&!b.ts) return 0;
       if (!a.ts) return 1; if (!b.ts) return -1;
       return b.ts - a.ts;
     });
-    const latest = arr[0];
-    const mr     = masterMap[id] || {};
- 
+
+    const latest  = arr[0];
+    const mr      = masterMap[id] || {};
+
+    // Determine if dual-tagged (has fixes from both ATS and another source)
+    const sources = [...new Set(arr.map(f => f.source))];
+    const isDual  = sources.includes('ATS') && (sources.includes('FieldLog')||sources.includes('PaliFT'));
+
+    // Collar serial from any ATS fix
+    const collar  = arr.find(f => f.collar)?.collar || gc(mr,'SAT','Collar','CollarSerial','CollarSerialNumber');
+
     // Master sheet fields
     const tagDateRaw = gc(mr,
-      'Tag Date/Release Date','TagDate','ReleaseDate','Release_Date',
-      'Tag_Date','DeploymentDate','Deployment_Date','Release');
-    const tagDate  = pts(tagDateRaw);
-    const tagPlace = gc(mr,'Tag Place','Tag_Place','TagPlace','Release_Location','Site');
-    const sex      = gc(mr,'Sex','Gender');
-    const category = gc(mr,'Category','Type','Tag_Type','TagType');
-    const tl       = gc(mr,'T.L','TL','Total_Length','TotalLength','Total Length','Length');
-    const remarks  = gc(mr,'Remarks','Notes');
-    const sat      = gc(mr,'SAT','Sat','Satellite');
- 
+      'Tag Date','Release Date','Tag Date/Release Date','TagDate','ReleaseDate',
+      'Tag_Date','Release_Date','DeploymentDate','Release');
+    const tagDate    = pts(tagDateRaw);
+    const tagPlace   = gc(mr,'Tag Place','Tag_Place','TagPlace','Release_Location','Release Location','Site');
+    const sex        = gc(mr,'Sex','Gender');
+    const category   = gc(mr,'Category','Type','Tag_Type','TagType','Species_Category');
+    const tl         = gc(mr,'T.L','TL','Total_Length','TotalLength','Total Length','Length');
+    const remarks    = gc(mr,'Remarks','Notes');
+
     const daysFix = daysSince(latest.ts);
-    // Days since release: use tagDate if available, else earliest recorded fix
-    const oldest  = arr[arr.length-1];
+    const oldest  = arr[arr.length - 1];
     const relDate = tagDate || oldest?.ts || null;
     const daysRel = relDate ? daysSince(relDate) : null;
-    const status  = getStatus(daysFix);
- 
-    // Full chronological history for tracking mode (oldest → newest)
-    const history = [...arr].reverse();
- 
+    const status  = sKey(daysFix);
+    const history = [...arr].reverse(); // oldest→newest for tracking
+
     out.push({
       id, lat:latest.lat, lon:latest.lon, ts:latest.ts,
-      source:latest.source,
-      category, sex, tl, tagPlace, tagDate, sat, remarks,
+      source:isDual ? 'ATS+VHF' : latest.source,
+      sources, isDual, collar,
+      category, sex, tl, tagPlace, tagDate, remarks,
       daysFix, daysRel, status, zone:'—',
-      activity:latest.activity||'',
-      signal  :latest.signal||'',
-      place   :latest.place||'',
-      totalFixes:arr.length,
+      activity: latest.activity||'',
+      signal  : latest.signal||'',
+      place   : latest.place||'',
+      totalFixes: arr.length,
       history,
     });
   });
-  out.sort((a,b) => a.daysFix - b.daysFix);
+  out.sort((a, b) => a.daysFix - b.daysFix);
   return out;
 }
- 
-/* ══ ZONE ASSIGNMENT (Turf.js booleanPointInPolygon) ════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   ZONE ASSIGNMENT (Turf.js booleanPointInPolygon)
+════════════════════════════════════════════════════════════════ */
 function assignZones() {
   if (!geojsonData?.features) return;
   const polys = geojsonData.features.filter(
-    f => f.geometry?.type==='Polygon'||f.geometry?.type==='MultiPolygon');
+    f => f.geometry?.type==='Polygon' || f.geometry?.type==='MultiPolygon');
   allAnimals.forEach(a => {
     const pt = turf.point([a.lon, a.lat]);
     for (const feat of polys) {
       try {
         if (turf.booleanPointInPolygon(pt, feat)) {
-          a.zone = feat.properties?.name || feat.properties?.Name ||
-                   feat.properties?.ZONE || feat.properties?.zone ||
-                   feat.properties?.STRETCH || feat.properties?.stretch || '—';
+          a.zone = getZoneName(feat) || '—';
           break;
         }
       } catch(e) {}
     }
   });
 }
- 
-/* ══ RIVER CURVE DISTANCE (Turf.js) ════════════════════════════
-   Snaps both points onto the river centreline, slices the segment
-   between them, and returns its true along-river length in metres.  */
-function calcRiverDistance(fix1, fix2) {
-  try {
-    const p1   = turf.point([fix1.lon, fix1.lat]);
-    const p2   = turf.point([fix2.lon, fix2.lat]);
-    const s1   = turf.nearestPointOnLine(RIVER_LINE, p1);
-    const s2   = turf.nearestPointOnLine(RIVER_LINE, p2);
-    const seg  = turf.lineSlice(s1, s2, RIVER_LINE);
-    return Math.round(turf.length(seg, {units:'meters'}));
-  } catch(e) { return null; }
-}
- 
-/* ══ ZONE UI ════════════════════════════════════════════════════ */
-function rebuildZoneState() {
-  // Count animals per zone
-  const counts = {};
-  allAnimals.forEach(a => {
-    if (a.zone && a.zone!=='—') counts[a.zone]=(counts[a.zone]||0)+1;
-  });
-  // All zone names from GeoJSON + those assigned to animals
-  const gzones = (geojsonData?.features||[]).map(f =>
-    f.properties?.name || f.properties?.Name ||
-    f.properties?.ZONE || f.properties?.zone ||
-    f.properties?.STRETCH || f.properties?.stretch || '').filter(Boolean);
-  const allZ = [...new Set([...Object.keys(counts),...gzones])];
-  // Sort by count desc, then alpha
-  allZ.sort((a,b) => (counts[b]||0)-(counts[a]||0) || a.localeCompare(b));
-  S.allZones   = allZ;
-  S.zoneCounts = counts;
-  S.zoneSel    = null; // all selected
-}
- 
+
 function drawZonePolygons() {
-  if (zoneLayer) map.removeLayer(zoneLayer);
+  if (zoneGeoLayer) map.removeLayer(zoneGeoLayer);
   if (!geojsonData) return;
-  zoneLayer = L.geoJSON(geojsonData, {
-    style:{color:'rgba(27,67,50,.55)',weight:1.5,dashArray:'5,10',
-           fillColor:'rgba(27,67,50,.04)',fillOpacity:1},
-    onEachFeature(feat,layer){
-      const n = feat.properties?.name||feat.properties?.Name||
-                feat.properties?.ZONE||feat.properties?.zone||'Zone';
-      layer.bindTooltip(n,{className:'zone-lbl',direction:'center',permanent:false});
+  zoneGeoLayer = L.geoJSON(geojsonData, {
+    style:{ color:'rgba(27,67,50,.5)', weight:1.5, dashArray:'5,10',
+            fillColor:'rgba(27,67,50,.04)', fillOpacity:1 },
+    onEachFeature(feat, layer) {
+      const n = getZoneName(feat) || 'Zone';
+      layer.bindTooltip(n, { className:'zone-lbl', direction:'center', permanent:false });
     }
   }).addTo(map);
 }
- 
-function renderZoneList(search) {
-  const list = document.getElementById('zone-list');
-  const zones = S.allZones.filter(z => !search||z.toLowerCase().includes(search.toLowerCase()));
-  const allChk = !S.zoneSel;
-  list.innerHTML = '';
- 
-  // "All Zones" header checkbox
-  const allDiv = document.createElement('div');
-  allDiv.className = 'mdd-opt';
-  allDiv.innerHTML =
-    `<input type="checkbox" ${allChk?'checked':''}><span class="mdd-label">All Zones</span>`;
-  allDiv.querySelector('input').addEventListener('change', e => {
-    S.zoneSel = e.target.checked ? null : new Set();
-    renderZoneList(document.getElementById('zone-search').value);
-    updateZoneLbl();
-  });
-  list.appendChild(allDiv);
- 
-  const divEl = document.createElement('div'); divEl.className='mdd-div';
-  list.appendChild(divEl);
- 
-  zones.forEach(z => {
-    const cnt  = S.zoneCounts[z]||0;
-    const chk  = !S.zoneSel || S.zoneSel.has(z);
-    const row  = document.createElement('div'); row.className='mdd-opt';
-    row.innerHTML =
-      `<input type="checkbox" ${chk?'checked':''} data-v="${z}">
-       <span class="mdd-label">${z}</span>
-       <span class="mdd-cnt">${cnt||''}</span>`;
-    row.querySelector('input').addEventListener('change', e => {
-      const v = e.target.getAttribute('data-v');
-      if (!S.zoneSel) S.zoneSel = new Set(S.allZones);
-      if (e.target.checked) S.zoneSel.add(v); else S.zoneSel.delete(v);
-      if (S.zoneSel.size === S.allZones.length) S.zoneSel = null;
-      updateZoneLbl();
+
+/* ════════════════════════════════════════════════════════════════
+   CASCADING FILTER LOGIC
+════════════════════════════════════════════════════════════════ */
+
+// Get animals matching source filter only
+function getPoolBySource() {
+  const src = document.getElementById('f-source').value;
+  if (src === 'all') return allAnimals;
+  return allAnimals.filter(a => a.sources.includes(src) || a.source === src);
+}
+
+// Get animals matching source + RID selection
+function getPoolBySourceRID() {
+  const pool = getPoolBySource();
+  if (!MDD.rid.sel) return pool;
+  return pool.filter(a => MDD.rid.sel.has(a.id));
+}
+
+// Get animals matching source + RID + Category
+function getPoolBySourceRIDCat() {
+  const pool = getPoolBySourceRID();
+  if (!MDD.cat.sel) return pool;
+  return pool.filter(a => MDD.cat.sel.has(a.category||'—'));
+}
+
+function rebuildCascade() {
+  rebuildRIDPool();
+  rebuildCatPool();
+  rebuildZonePool();
+  rebuildStatusPool();
+  renderAllDropdowns();
+}
+
+function rebuildRIDPool() {
+  const pool = getPoolBySource();
+  MDD.rid.pool = [...new Set(pool.map(a => a.id))].sort();
+  // Remove selected IDs that are no longer in pool
+  if (MDD.rid.sel) {
+    MDD.rid.sel = new Set([...MDD.rid.sel].filter(id => MDD.rid.pool.includes(id)));
+    if (MDD.rid.sel.size === MDD.rid.pool.length) MDD.rid.sel = null;
+  }
+}
+
+function rebuildCatPool() {
+  const pool = getPoolBySourceRID();
+  MDD.cat.pool = [...new Set(pool.map(a => a.category||'—'))].sort();
+  if (MDD.cat.sel) {
+    MDD.cat.sel = new Set([...MDD.cat.sel].filter(c => MDD.cat.pool.includes(c)));
+    if (MDD.cat.sel.size === MDD.cat.pool.length) MDD.cat.sel = null;
+  }
+}
+
+function rebuildZonePool() {
+  const pool = getPoolBySourceRIDCat();
+  const counts = {};
+  pool.forEach(a => { counts[a.zone] = (counts[a.zone]||0)+1; });
+  // Also include GeoJSON zones
+  if (geojsonData?.features) {
+    geojsonData.features.forEach(f => {
+      const n = getZoneName(f); if (n && !counts[n]) counts[n] = 0;
     });
-    list.appendChild(row);
-  });
+  }
+  MDD.zone.counts = counts;
+  MDD.zone.pool   = Object.keys(counts)
+    .filter(z => z && z !== '—')
+    .sort((a, b) => (counts[b]||0) - (counts[a]||0) || a.localeCompare(b));
+  if (MDD.zone.sel) {
+    MDD.zone.sel = new Set([...MDD.zone.sel].filter(z => MDD.zone.pool.includes(z)));
+    if (MDD.zone.sel.size === MDD.zone.pool.length) MDD.zone.sel = null;
+  }
 }
- 
-function updateZoneLbl() {
-  const lbl = document.getElementById('zone-lbl');
-  if (!S.zoneSel) lbl.textContent = 'All Zones';
-  else if (S.zoneSel.size===0) lbl.textContent = 'No Zone';
-  else lbl.textContent = `${S.zoneSel.size} / ${S.allZones.length} zones`;
+
+function rebuildStatusPool() {
+  MDD.status.pool = ['active','s7','s30','crit'];
 }
- 
-/* ══ CATEGORY DROPDOWN ══════════════════════════════════════════ */
-function populateCategoryDD() {
-  const cats = new Set();
-  Object.values(masterMap).forEach(r => {
-    const c = gc(r,'Category','Type','Tag_Type','TagType');
-    if (c) cats.add(c);
-  });
-  allAnimals.forEach(a => { if (a.category) cats.add(a.category); });
-  const sel = document.getElementById('f-cat');
-  while (sel.options.length>1) sel.remove(1);
-  [...cats].sort().forEach(c => {
-    const o=document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
-  });
+
+function onSourceChange() {
+  MDD.rid.sel = null; MDD.cat.sel = null; MDD.zone.sel = null; MDD.status.sel = null;
+  rebuildRIDPool(); rebuildCatPool(); rebuildZonePool();
+  renderMDDContent('rid','');
+  renderMDDContent('cat','');
+  renderMDDContent('zone','');
+  updateAllLabels();
+  updatePills();
 }
- 
-function onCategoryChange() {
-  rebuildRIDState();
-  renderRIDList('');
-  updateRIDLbl();
-}
- 
-/* ══ RADIO ID DEPENDENT MULTI-SELECT ════════════════════════════ */
-function rebuildRIDState() {
-  const cat = document.getElementById('f-cat').value;
-  S.ridPool = allAnimals
-    .filter(a => cat==='all' || a.category===cat)
-    .map(a => a.id)
-    .sort();
-  S.ridSel = null; // reset to all
-}
- 
-function renderRIDList(search) {
-  const list = document.getElementById('rid-list');
-  const ids  = S.ridPool.filter(id => !search||id.toLowerCase().includes(search.toLowerCase()));
-  const allChk = !S.ridSel;
-  list.innerHTML = '';
- 
-  // "All IDs" header
-  const allDiv = document.createElement('div'); allDiv.className='mdd-opt';
-  allDiv.innerHTML =
-    `<input type="checkbox" ${allChk?'checked':''}><span class="mdd-label">All IDs (${S.ridPool.length})</span>`;
-  allDiv.querySelector('input').addEventListener('change', e => {
-    S.ridSel = e.target.checked ? null : new Set();
-    renderRIDList(document.getElementById('rid-search').value);
-    updateRIDLbl();
-  });
-  list.appendChild(allDiv);
-  const divEl=document.createElement('div'); divEl.className='mdd-div'; list.appendChild(divEl);
- 
-  ids.forEach(id => {
-    const a   = allAnimals.find(x=>x.id===id);
-    const col = markerColor(a?.status||'crit');
-    const chk = !S.ridSel || S.ridSel.has(id);
-    const row = document.createElement('div'); row.className='mdd-opt';
-    row.innerHTML =
-      `<input type="checkbox" ${chk?'checked':''} data-v="${id}">
-       <span class="mdd-label">
-         <span style="color:${col};font-weight:700">${id}</span>
-         ${a?.category?`<span style="color:var(--text4);font-size:.55rem"> · ${a.category}</span>`:''}
-       </span>`;
-    row.querySelector('input').addEventListener('change', e => {
-      const v = e.target.getAttribute('data-v');
-      if (!S.ridSel) S.ridSel = new Set(S.ridPool);
-      if (e.target.checked) S.ridSel.add(v); else S.ridSel.delete(v);
-      if (S.ridSel.size===S.ridPool.length) S.ridSel=null;
-      updateRIDLbl();
-    });
-    list.appendChild(row);
-  });
-}
- 
-function updateRIDLbl() {
-  const lbl = document.getElementById('rid-lbl');
-  if (!S.ridSel) lbl.textContent = S.ridPool.length ? `All IDs (${S.ridPool.length})` : 'All IDs';
-  else if (S.ridSel.size===0) lbl.textContent='No IDs';
-  else lbl.textContent=`${S.ridSel.size} selected`;
-}
- 
-/* ══ MULTI-SELECT DROPDOWN TOGGLE ═══════════════════════════════ */
-function toggleMDD(which) {
-  const panel = document.getElementById(which+'-panel');
-  const btn   = document.getElementById(which+'-btn');
+
+/* ════════════════════════════════════════════════════════════════
+   MULTI-SELECT DROPDOWN HELPERS
+════════════════════════════════════════════════════════════════ */
+function toggleMDD(key) {
+  const panel = document.getElementById(key+'-panel');
+  const btn   = document.getElementById(key+'-btn');
   const isOpen = panel.classList.contains('open');
- 
-  // Close all panels first
-  document.querySelectorAll('.mdd-panel').forEach(p => p.classList.remove('open'));
-  document.querySelectorAll('.mdd-btn').forEach(b => b.classList.remove('open'));
- 
+  // Close all
+  ['rid','cat','zone','status'].forEach(k => {
+    document.getElementById(k+'-panel')?.classList.remove('open');
+    document.getElementById(k+'-btn')?.classList.remove('open');
+  });
   if (!isOpen) {
-    // Use fixed positioning to escape overflow-x:auto clipping on #fbar
     const rect = btn.getBoundingClientRect();
     panel.style.top  = (rect.bottom+4)+'px';
     panel.style.left = Math.min(rect.left, window.innerWidth-220)+'px';
-    panel.classList.add('open');
-    btn.classList.add('open');
-    const si = document.getElementById(which+'-search');
-    if (si) { si.value=''; si.focus(); onMDDSearch(which,''); }
+    panel.classList.add('open'); btn.classList.add('open');
+    // Reset search and render
+    const si = document.getElementById(key+'-search');
+    if (si) { si.value=''; MDD[key].search=''; }
+    renderMDDContent(key, '');
   }
 }
- 
-function closeMDD(which) {
-  document.getElementById(which+'-panel')?.classList.remove('open');
-  document.getElementById(which+'-btn')?.classList.remove('open');
+function closeMDD(key) {
+  document.getElementById(key+'-panel')?.classList.remove('open');
+  document.getElementById(key+'-btn')?.classList.remove('open');
 }
- 
-function onMDDSearch(which, val) {
-  if (which==='zone') renderZoneList(val);
-  else if (which==='rid') renderRIDList(val);
+
+function onMDDSearch(key, val) {
+  MDD[key].search = val.toLowerCase();
+  renderMDDContent(key, MDD[key].search);
 }
- 
-// Close dropdowns when clicking outside them
+
+function mddSelectAll(key) {
+  MDD[key].sel = null;
+  renderMDDContent(key, MDD[key].search);
+  updateAllLabels();
+  if (key === 'rid') { rebuildCatPool(); rebuildZonePool(); renderAllDropdowns(); }
+  if (key === 'cat') { rebuildZonePool(); renderMDDContent('zone', MDD.zone.search); }
+}
+function mddClearAll(key) {
+  MDD[key].sel = new Set();
+  renderMDDContent(key, MDD[key].search);
+  updateAllLabels();
+}
+
+function renderMDDContent(key, search) {
+  const list = document.getElementById(key+'-list'); if (!list) return;
+  const pool = MDD[key].pool;
+  const filtered = pool.filter(v => !search || String(v).toLowerCase().includes(search));
+  list.innerHTML = '';
+  filtered.forEach(v => {
+    const chk = !MDD[key].sel || MDD[key].sel.has(v);
+    const lbl = key==='status' ? STATUS_META[v]?.label : v;
+    const cnt = key==='zone' ? MDD.zone.counts[v]||0 : 0;
+    const color = key==='status' ? `color:${STATUS_META[v]?.color};` : '';
+    const row = document.createElement('div'); row.className='mdd-opt';
+    row.innerHTML = `<input type="checkbox" ${chk?'checked':''} data-v="${v}">
+      <span class="mdd-label" style="${color}">${lbl}</span>
+      ${cnt?`<span class="mdd-cnt">${cnt}</span>`:''}`;
+    const cb = row.querySelector('input');
+    cb.addEventListener('change', e => {
+      const val = e.target.getAttribute('data-v');
+      if (!MDD[key].sel) MDD[key].sel = new Set(pool);
+      if (e.target.checked) MDD[key].sel.add(val); else MDD[key].sel.delete(val);
+      if (MDD[key].sel.size === pool.length) MDD[key].sel = null;
+      updateAllLabels();
+      // Cascade downstream
+      if (key==='rid') { rebuildCatPool(); rebuildZonePool(); renderMDDContent('cat',''); renderMDDContent('zone',''); }
+      if (key==='cat') { rebuildZonePool(); renderMDDContent('zone',''); }
+      // Zone: fly to selected zone
+      if (key==='zone' && e.target.checked) {
+        flyToZone(val);
+      }
+    });
+    list.appendChild(row);
+  });
+}
+
+function renderAllDropdowns() {
+  ['rid','cat','zone','status'].forEach(k => renderMDDContent(k, MDD[k].search||''));
+  updateAllLabels();
+}
+
+function updateAllLabels() {
+  updateMDDLabel('rid');
+  updateMDDLabel('cat');
+  updateMDDLabel('zone');
+  updateMDDLabel('status');
+}
+
+function updateMDDLabel(key) {
+  const lbl = document.getElementById(key+'-lbl'); if (!lbl) return;
+  const mdd = MDD[key];
+  if (!mdd.sel) { lbl.textContent = {rid:'All IDs',cat:'All Categories',zone:'All Zones',status:'All Statuses'}[key]; return; }
+  if (mdd.sel.size === 0) { lbl.textContent = 'None selected'; return; }
+  if (mdd.sel.size === 1) { const v = [...mdd.sel][0]; lbl.textContent = key==='status' ? STATUS_META[v]?.label : v; return; }
+  lbl.textContent = `${mdd.sel.size} selected`;
+}
+
+// Close dropdowns when clicking outside
 document.addEventListener('click', e => {
-  if (!document.getElementById('zone-wrap')?.contains(e.target)) closeMDD('zone');
-  if (!document.getElementById('rid-wrap')?.contains(e.target))  closeMDD('rid');
+  ['rid','cat','zone','status'].forEach(k => {
+    const wrap = document.getElementById(k+'-wrap');
+    if (wrap && !wrap.contains(e.target)) closeMDD(k);
+  });
 });
- 
-/* ══ FILTER & APPLY ══════════════════════════════════════════════ */
+
+/** Fly to a zone's GeoJSON polygon bounds */
+function flyToZone(zoneName) {
+  if (!geojsonData?.features) return;
+  const feat = geojsonData.features.find(f => getZoneName(f) === zoneName);
+  if (!feat) return;
+  try {
+    const bounds = L.geoJSON(feat).getBounds();
+    if (bounds.isValid()) map.flyToBounds(bounds, { padding:[50,50] });
+  } catch(e) {}
+}
+
+/* ════════════════════════════════════════════════════════════════
+   APPLY FILTERS
+════════════════════════════════════════════════════════════════ */
 function applyFilters() {
-  closeMDD('zone'); closeMDD('rid');
- 
-  const catF    = document.getElementById('f-cat').value;
-  const statusF = document.getElementById('f-status').value;
-  const sourceF = document.getElementById('f-source').value;
- 
+  ['rid','cat','zone','status'].forEach(k => closeMDD(k));
+
+  const src = document.getElementById('f-source').value;
   displayed = allAnimals.filter(a => {
-    if (catF    !=='all' && a.category!==catF)   return false;
-    if (statusF !=='all' && a.status  !==statusF) return false;
-    if (sourceF !=='all' && a.source  !==sourceF) return false;
-    if (S.ridSel  && !S.ridSel.has(a.id))         return false;
-    if (S.zoneSel && a.zone!=='—' && !S.zoneSel.has(a.zone)) return false;
+    if (src !== 'all' && !a.sources.includes(src) && a.source !== src) return false;
+    if (MDD.rid.sel    && !MDD.rid.sel.has(a.id))               return false;
+    if (MDD.cat.sel    && !MDD.cat.sel.has(a.category||'—'))    return false;
+    if (MDD.zone.sel   && a.zone!=='—' && !MDD.zone.sel.has(a.zone)) return false;
+    if (MDD.status.sel && !MDD.status.sel.has(a.status))        return false;
     return true;
   });
- 
-  // Tracking mode: when specific Radio IDs are selected (not all/none)
-  const trackIDs = (S.ridSel && S.ridSel.size>0) ? S.ridSel : null;
- 
+
+  // Tracking mode: draw tracks when specific RIDs are selected (not all)
+  const trackIDs = (MDD.rid.sel && MDD.rid.sel.size > 0) ? MDD.rid.sel : null;
   renderMarkers(trackIDs);
   renderTable();
-  document.getElementById('map-blank').classList.add('gone');
-  document.getElementById('track-badge').style.display = trackIDs ? 'block' : 'none';
+
+  if (trackIDs) {
+    document.getElementById('track-badge').style.display = 'block';
+    document.getElementById('track-lbl').textContent = `${[...trackIDs].slice(0,3).join(', ')}${trackIDs.size>3?' +more':''}`;
+  } else {
+    document.getElementById('track-badge').style.display = 'none';
+  }
+
+  // Fit bounds if zone filter active
+  if (MDD.zone.sel && MDD.zone.sel.size > 0) {
+    // Already flew to zone during selection; if multiple, fit displayed animals
+    if (MDD.zone.sel.size > 1) {
+      const lls = displayed.filter(a=>!isNaN(a.lat)).map(a=>[a.lat,a.lon]);
+      if (lls.length) { try { map.fitBounds(L.latLngBounds(lls),{padding:[50,50],maxZoom:16}); } catch(e) {} }
+    }
+  }
 }
- 
+
 function clearFilters() {
-  document.getElementById('f-cat').value    = 'all';
-  document.getElementById('f-status').value = 'all';
   document.getElementById('f-source').value = 'all';
-  S.zoneSel = null; S.ridSel = null;
-  rebuildRIDState();
-  renderZoneList(''); renderRIDList('');
-  updateZoneLbl(); updateRIDLbl();
+  Object.values(MDD).forEach(m => { m.sel = null; m.search = ''; });
+  activePill = null;
+  document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
+  rebuildCascade();
 }
- 
-/* ══ MARKERS ═════════════════════════════════════════════════════ */
-function buildLatestIcon(a) {
+
+/* ════════════════════════════════════════════════════════════════
+   MARKERS
+════════════════════════════════════════════════════════════════ */
+function buildIcon(a) {
   const c  = markerColor(a.status);
-  const sz = a.status==='active' ? 16 : 13;
-  const pulse = a.status==='active'
-    ? `<div style="position:absolute;top:50%;left:50%;width:${sz}px;height:${sz}px;
-        border-radius:50%;background:${c};opacity:.28;
-        animation:pulse-ring 2.3s ease-out infinite;"></div>` : '';
+  // Show Radio ID text inside the circle
+  const lbl = a.id.length > 6 ? a.id.slice(0,5)+'…' : a.id;
+  const sz  = a.id.length > 5 ? 38 : 32;
+  const fs  = a.id.length > 5 ? '7.5px' : '8.5px';
+  const pulse = a.status === 'active'
+    ? `<div style="position:absolute;top:50%;left:50%;width:${sz}px;height:${sz}px;margin-left:-${sz/2}px;margin-top:-${sz/2}px;border-radius:50%;background:${c};opacity:.3;animation:mPulse 2.3s ease-out infinite;pointer-events:none;"></div>`
+    : '';
+  const dualTag = a.isDual
+    ? `<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#f59e0b;border:1.5px solid white;"></div>`
+    : '';
   return L.divIcon({
-    html:`<div style="position:relative;width:${sz}px;height:${sz}px;">${pulse}
-      <svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1.5}"
-        fill="${c}" stroke="rgba(255,255,255,.85)" stroke-width="2"/></svg></div>`,
-    className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-(sz/2+8)],
+    html:`<div style="position:relative;width:${sz}px;height:${sz}px;">
+      ${pulse}
+      <div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};
+        border:2.5px solid rgba(255,255,255,.9);
+        box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1.5px ${c}66;
+        display:flex;align-items:center;justify-content:center;
+        font-family:'IBM Plex Mono',monospace;font-size:${fs};font-weight:800;
+        color:white;line-height:1.15;text-align:center;
+        text-shadow:0 1px 3px rgba(0,0,0,.5);cursor:pointer;">${lbl}</div>
+      ${dualTag}
+    </div>`,
+    className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-(sz/2+10)],
   });
 }
- 
-function buildHistIcon(color, sz) {
-  return L.divIcon({
-    html:`<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}"
-      fill="${color}" fill-opacity=".7" stroke="white" stroke-width="1.2"/></svg>`,
-    className:'', iconSize:[sz,sz], iconAnchor:[sz/2,sz/2], popupAnchor:[0,-(sz/2+5)],
-  });
-}
- 
+
 function buildPopup(a) {
-  const c   = markerColor(a.status);
-  const sc  = {active:'sb-a',s7:'sb-s7',s30:'sb-s30',crit:'sb-crit'}[a.status]||'';
-  const sl  = {active:'Active ≤7d',s7:'Silent >7d',s30:'Silent >30d',crit:'Crit ≥45d'}[a.status]||'';
-  const src = {ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali';
+  const st  = STATUS_META[a.status];
+  const src = a.isDual ? 'sr-merged' : {ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali';
+  const srcLabel = a.isDual ? '📡 VHF + SAT' : a.source;
   const rows = [
-    a.category  ? ['Category',       a.category]                          : null,
-    a.sex       ? ['Sex',            a.sex]                               : null,
-    a.tl        ? ['Total Length',   a.tl+' cm']                          : null,
-    a.tagPlace  ? ['Tag Place',      a.tagPlace]                          : null,
-    a.tagDate   ? ['Tag / Release',  fmtDT(a.tagDate)]                    : null,
+    a.category  ? ['Category',       a.category]              : null,
+    a.sex       ? ['Sex',            a.sex]                   : null,
+    a.tl        ? ['Total Length',   a.tl+' cm']              : null,
+    a.tagPlace  ? ['Tag / Rel. Site',a.tagPlace]              : null,
+    a.tagDate   ? ['Release Date',   fmtDT(a.tagDate)]        : null,
     ['Last Fix',    fmtDT(a.ts)],
     ['Coordinates', `${a.lat.toFixed(5)}°, ${a.lon.toFixed(5)}°`],
-    a.zone!=='—' ? ['Zone',          a.zone]                              : null,
-    a.daysRel!==null ? ['Days Since Release', a.daysRel+'d']              : null,
-    ['Total Fixes', a.totalFixes],
+    a.zone!=='—' ? ['Zone',          a.zone]                  : null,
+    a.daysRel!==null ? ['Days Since Release', a.daysRel+'d']  : null,
+    a.collar    ? ['Collar Serial',  a.collar]                 : null,
+    ['Total Fixes',  a.totalFixes],
+    a.activity  ? ['Activity',       a.activity]              : null,
+    a.signal    ? ['Signal',         a.signal]                 : null,
   ].filter(Boolean);
-  return `<div class="pop-inner">
-    <div class="pop-id"><span>📡 ${a.id}</span><span class="sbadge ${sc}">${sl}</span></div>
-    ${rows.map(([l,v])=>`<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
-    <div style="margin-top:5px;display:flex;align-items:center;gap:6px;">
-      <span class="pop-days" style="background:${c}18;color:${c};border:1px solid ${c}44;">
-        ${a.daysFix===0?'Today':a.daysFix+'d ago'}</span>
-      <span class="src-tag ${src}">${a.source}</span>
+
+  return `<div>
+    <div class="pop-top">
+      <div class="pop-badge" style="background:${st.color};">${a.id.length>6?a.id.slice(0,5)+'…':a.id}</div>
+      <div class="pop-title">
+        <div class="pop-id">📡 ${a.id}</div>
+        <div class="pop-sub">
+          <span class="sbadge ${st.cls}">${st.label}</span>
+          <span class="pop-src ${src}">${srcLabel}</span>
+          ${a.isDual?'<span style="font-size:.55rem;color:#fde68a;margin-left:4px;">⚡ Dual Tag</span>':''}
+        </div>
+      </div>
     </div>
-    ${a.remarks?`<div style="margin-top:5px;font-size:.6rem;color:var(--text3);font-style:italic;">${a.remarks}</div>`:''}
-  </div>
-  <div class="pop-acts">
-    <button class="pab" onclick="flyTo('${a.id}')">🗺 Focus</button>
-    <button class="pab" onclick="hiliteRow('${a.id}')">📋 Table</button>
+    <div class="pop-body">
+      ${rows.map(([l,v])=>`<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
+      <div class="pop-days" style="background:${st.lt};color:${st.color};border:1px solid ${st.br};">
+        ${a.daysFix===0?'Today':a.daysFix+'d ago'}
+      </div>
+      ${a.remarks?`<div style="margin-top:5px;font-size:.59rem;color:var(--text3);font-style:italic;border-top:1px solid var(--border);padding-top:4px;">${a.remarks}</div>`:''}
+    </div>
+    <div class="pop-acts">
+      <button class="pab" onclick="flyTo('${a.id}')">🗺 Focus</button>
+      <button class="pab" onclick="selectRID('${a.id}')">🗺 Track</button>
+      <button class="pab" onclick="hiliteRow('${a.id}')">📋 Table</button>
+    </div>
   </div>`;
 }
- 
+
 function renderMarkers(trackIDs) {
-  markerLayer.clearLayers();
-  trackLayer.clearLayers();
+  markerLayer.clearLayers(); trackLayer.clearLayers();
   mapMarkers = [];
- 
-  // ── TRACKING MODE: draw polylines + historical fix dots ─────────
-  if (trackIDs && trackIDs.size>0) {
+  // Clear OMS
+  try { oms.clearMarkers?.(); } catch(e) {}
+
+  // Track lines + historical dots for selected RIDs
+  if (trackIDs && trackIDs.size > 0) {
     trackIDs.forEach(id => {
-      const a = allAnimals.find(x=>x.id===id);
-      if (!a || !a.history?.length) return;
+      const a = allAnimals.find(x => x.id===id); if (!a?.history?.length) return;
       const color = markerColor(a.status);
- 
-      // Build valid latlngs from history (oldest→newest)
-      const pts2 = a.history.filter(f=>!isNaN(f.lat)&&!isNaN(f.lon)&&f.ts);
- 
-      if (pts2.length>1) {
+      const pts2  = a.history.filter(f => !isNaN(f.lat)&&!isNaN(f.lon));
+      if (pts2.length > 1) {
         L.polyline(pts2.map(f=>[f.lat,f.lon]),
-          {color,weight:2.5,opacity:.75,dashArray:'8,14'}).addTo(trackLayer);
+          {color,weight:2.5,opacity:.8,dashArray:'8,14'}).addTo(trackLayer);
       }
- 
-      // Historical dots
-      pts2.forEach((fix,idx) => {
+      pts2.forEach((fix, idx) => {
         const isLast = idx===pts2.length-1;
-        const sz = isLast ? 14 : 7;
-        const m  = L.marker([fix.lat,fix.lon],{
-          icon:buildHistIcon(color,sz), zIndexOffset:isLast?200:0
+        const sz = isLast?14:7;
+        const icon = L.divIcon({
+          html:`<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}" fill="${color}" fill-opacity=".75" stroke="white" stroke-width="1.2"/></svg>`,
+          className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-(sz/2+5)],
         });
- 
+        const m = L.marker([fix.lat,fix.lon],{icon,zIndexOffset:isLast?200:0});
         // River distance from previous fix
         let rivRow = '';
         if (idx>0) {
-          const prev = pts2[idx-1];
-          const rd   = calcRiverDistance(prev,fix);
+          const rd = calcRiverDist(pts2[idx-1], fix);
           if (rd!==null) rivRow=`<div class="pop-row"><span class="pop-lbl">River Dist (prev)</span><span class="pop-val">${rd} m</span></div>`;
         }
- 
-        m.bindPopup(`<div class="pop-inner">
-          <div class="pop-id"><span>📍 ${id}</span>
-            <span style="font-size:.58rem;color:var(--text3)">Fix ${idx+1}/${pts2.length}</span></div>
+        m.bindPopup(`<div class="pop-body">
+          <div style="font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--forest);margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--green-lt);">
+            📍 ${id} <span style="font-size:.6rem;color:var(--text3);">Fix ${idx+1}/${pts2.length}</span>
+          </div>
           <div class="pop-row"><span class="pop-lbl">Time</span><span class="pop-val">${fmtDT(fix.ts)}</span></div>
           <div class="pop-row"><span class="pop-lbl">Coords</span><span class="pop-val">${fix.lat.toFixed(5)}, ${fix.lon.toFixed(5)}</span></div>
           <div class="pop-row"><span class="pop-lbl">Source</span><span class="pop-val">${fix.source}</span></div>
           ${rivRow}
           ${fix.place?`<div class="pop-row"><span class="pop-lbl">Place</span><span class="pop-val">${fix.place}</span></div>`:''}
           ${fix.activity?`<div class="pop-row"><span class="pop-lbl">Activity</span><span class="pop-val">${fix.activity}</span></div>`:''}
-        </div>`,{maxWidth:260});
+        </div>`,{maxWidth:270});
         trackLayer.addLayer(m);
       });
     });
   }
- 
-  // ── LATEST LOCATION markers for all displayed animals ────────────
+
+  // Latest-location markers for all displayed animals
   displayed.forEach(a => {
     if (isNaN(a.lat)||isNaN(a.lon)) return;
-    const m = L.marker([a.lat,a.lon],{icon:buildLatestIcon(a)})
-      .bindPopup(buildPopup(a),{maxWidth:290});
-    m._aid = a.id;
-    markerLayer.addLayer(m);
-    mapMarkers.push(m);
+    const origLL = L.latLng(a.lat, a.lon);
+    const marker = L.marker(origLL, { icon:buildIcon(a) });
+    marker._origLL = origLL; marker._clickCount = 0; marker._aid = a.id;
+    marker.bindPopup(buildPopup(a), { maxWidth:310, className:'' });
+    marker.on('popupclose', function() { this.setLatLng(this._origLL); });
+    markerLayer.addLayer(marker);
+    oms.addMarker(marker);
+    mapMarkers.push(marker);
   });
- 
-  if (mapMarkers.length>0) {
-    try { map.fitBounds(L.latLngBounds(mapMarkers.map(m=>m.getLatLng())),{padding:[50,50],maxZoom:16}); }
-    catch(e) {}
+
+  if (mapMarkers.length > 0) {
+    try {
+      map.fitBounds(L.latLngBounds(mapMarkers.map(m=>m.getLatLng())),
+        {padding:[55,55],maxZoom:16});
+    } catch(e) {}
   }
 }
- 
-/* ══ TABLE ═══════════════════════════════════════════════════════ */
+
+function flyTo(id) {
+  const a = allAnimals.find(x=>x.id===id); if (!a) return;
+  map.flyTo([a.lat,a.lon],16,{duration:1.1});
+  setTimeout(() => {
+    const m = mapMarkers.find(m=>m._aid===id);
+    if (m) m.openPopup();
+  },1200);
+}
+
+function selectRID(id) {
+  MDD.rid.sel = new Set([id]);
+  updateAllLabels();
+  applyFilters();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TABLE
+════════════════════════════════════════════════════════════════ */
 function renderTable() {
-  document.getElementById('tbl-badge').textContent = displayed.length+' animals';
+  document.getElementById('tbl-badge').textContent = `${displayed.length} animals`;
   const body = document.getElementById('tbl-body');
   body.innerHTML = '';
   if (!displayed.length) {
-    body.innerHTML='<tr><td class="no-data" colspan="14">No animals match selected filters</td></tr>';
+    body.innerHTML = '<tr class="no-data-row"><td colspan="15">No animals match current filters</td></tr>';
     return;
   }
-  const sc={ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'};
-  const sb={active:'sb-a',s7:'sb-s7',s30:'sb-s30',crit:'sb-crit'};
-  const sl={active:'Active',s7:'>7d',s30:'>30d',crit:'≥45d'};
   displayed.forEach(a => {
-    const tr = document.createElement('tr'); tr.dataset.id=a.id;
-    tr.innerHTML=`
-      <td><b>${a.id}</b></td>
-      <td style="font-size:.62rem">${fmtDT(a.ts)}</td>
-      <td><b style="color:${markerColor(a.status)}">${a.daysFix}</b></td>
-      <td><span class="sbadge ${sb[a.status]}">${sl[a.status]}</span></td>
+    const st = STATUS_META[a.status];
+    const src = a.isDual ? 'sr-merged' : {ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali';
+    const tr = document.createElement('tr'); tr.dataset.id = a.id;
+    tr.innerHTML = `
+      <td><b style="font-family:var(--mono);color:${st.color};">${a.id}</b></td>
+      <td style="font-size:.6rem;">${fmtDT(a.ts)}</td>
+      <td><b style="color:${st.color};">${a.daysFix}</b></td>
+      <td><span class="sbadge ${st.cls}">${st.label}</span></td>
       <td>${a.category||'—'}</td>
       <td>${a.sex||'—'}</td>
-      <td><span class="src-tag ${sc[a.source]||'sr-pali'}">${a.source}</span></td>
+      <td><span class="pop-src ${src}">${a.isDual?'VHF+SAT':a.source}</span></td>
       <td>${a.zone}</td>
       <td>${a.daysRel!==null?a.daysRel+'d':'—'}</td>
-      <td style="font-size:.6rem">${a.lat.toFixed(5)}</td>
-      <td style="font-size:.6rem">${a.lon.toFixed(5)}</td>
+      <td style="font-family:var(--mono);font-size:.6rem;">${a.collar||'—'}</td>
+      <td style="font-size:.6rem;">${isNaN(a.lat)?'—':a.lat.toFixed(5)}</td>
+      <td style="font-size:.6rem;">${isNaN(a.lon)?'—':a.lon.toFixed(5)}</td>
       <td>${a.tagPlace||'—'}</td>
       <td>${a.tl||'—'}</td>
-      <td style="font-size:.6rem;color:var(--text3)">${a.remarks||'—'}</td>`;
-    tr.onclick = () => flyTo(a.id,tr);
+      <td style="font-size:.59rem;color:var(--text3);">${a.remarks||'—'}</td>`;
+    tr.onclick = () => flyTo(a.id);
     body.appendChild(tr);
   });
 }
- 
+
 function sortTbl(col) {
   if (sortCol===col) sortDir*=-1; else {sortCol=col;sortDir=1;}
-  const keys=['id','ts','daysFix','status','category','sex','source','zone','daysRel'];
-  const k=keys[col]; if (!k) return;
+  const keys = ['id','ts','daysFix','status','category','sex','source','zone','daysRel'];
+  const k = keys[col]; if (!k) return;
   displayed.sort((a,b) => {
     let va=a[k], vb=b[k];
-    if (va==null) va=sortDir>0?Infinity:-Infinity;
-    if (vb==null) vb=sortDir>0?Infinity:-Infinity;
+    if (va==null) va=sortDir>0?Infinity:'zzz';
+    if (vb==null) vb=sortDir>0?Infinity:'zzz';
     if (va instanceof Date) va=va.getTime();
     if (vb instanceof Date) vb=vb.getTime();
     return (typeof va==='string'?va.localeCompare(String(vb)):va-vb)*sortDir;
   });
   renderTable();
 }
- 
-/* ══ FLY TO ══════════════════════════════════════════════════════ */
-function flyTo(id, tr) {
-  const a = allAnimals.find(x=>x.id===id); if (!a) return;
-  map.flyTo([a.lat,a.lon],16,{duration:1.1});
-  setTimeout(() => {
-    const m = mapMarkers.find(m=>m._aid===id);
-    if (m) m.openPopup();
-  }, 1200);
-  if (tr) {
-    document.querySelectorAll('#tbl-body tr').forEach(r=>r.classList.remove('sel'));
-    tr.classList.add('sel');
-  }
-}
+
 function hiliteRow(id) {
   document.querySelectorAll('#tbl-body tr').forEach(r => {
     if (r.dataset.id===id) { r.classList.add('sel'); r.scrollIntoView({block:'center',behavior:'smooth'}); }
     else r.classList.remove('sel');
   });
 }
- 
-/* ══ PILLS ═══════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   STATUS PILLS
+════════════════════════════════════════════════════════════════ */
 function updatePills() {
-  const c={active:0,s7:0,s30:0,crit:0};
-  allAnimals.forEach(a=>c[a.status]++);
-  document.getElementById('c-a').textContent    = c.active;
-  document.getElementById('c-s7').textContent   = c.s7;
-  document.getElementById('c-s30').textContent  = c.s30;
-  document.getElementById('c-crit').textContent = c.crit;
+  // Count based on current source filter
+  const pool = getPoolBySource();
+  const counts = {active:0,s7:0,s30:0,crit:0};
+  pool.forEach(a => counts[a.status]++);
+  document.getElementById('c-a').textContent    = counts.active;
+  document.getElementById('c-s7').textContent   = counts.s7;
+  document.getElementById('c-s30').textContent  = counts.s30;
+  document.getElementById('c-crit').textContent = counts.crit;
 }
- 
-/* ══ BOTTOM PANEL RESIZE & TOGGLE ═══════════════════════════════ */
-function toggleBtm() {
-  btmCollapsed=!btmCollapsed;
-  const btm=document.getElementById('btm');
-  const mw=document.getElementById('map-wrap');
-  const btn=document.getElementById('btm-tog');
-  if (btmCollapsed) {
-    btm.style.height='32px'; mw.style.bottom='32px'; btn.textContent='▲ Show';
+
+function setPill(st) {
+  if (activePill === st) {
+    // Toggle off
+    activePill = null;
+    document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
+    MDD.status.sel = null;
   } else {
-    btm.style.height=btmH+'px'; mw.style.bottom=btmH+'px'; btn.textContent='▼ Hide';
+    activePill = st;
+    document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
+    document.getElementById('pill-'+st.replace('s7','s7').replace('s30','s30'))?.classList.add('on');
+    const ids = {'active':'pill-a','s7':'pill-s7','s30':'pill-s30','crit':'pill-crit'};
+    document.getElementById(ids[st])?.classList.add('on');
+    MDD.status.sel = new Set([st]);
   }
-  setTimeout(()=>map.invalidateSize(),280);
+  updateMDDLabel('status');
+  applyFilters();
 }
+
+/* ════════════════════════════════════════════════════════════════
+   HEATMAP & KDE
+════════════════════════════════════════════════════════════════ */
+function toggleHeatmap() {
+  const btn = document.getElementById('btnHeat');
+  const on  = !btn.classList.contains('on');
+  btn.classList.toggle('on', on);
+  if (!heatLayer) {
+    const pts2 = Object.values(allFixes).flat()
+      .filter(f=>!isNaN(f.lat)&&!isNaN(f.lon))
+      .map(f=>[f.lat,f.lon,.6]);
+    heatLayer = L.heatLayer(pts2,{radius:22,blur:16,maxZoom:17,
+      gradient:{0.2:'#ffffb2',0.4:'#fecc5c',0.6:'#fd8d3c',0.8:'#f03b20',1:'#bd0026'}});
+  }
+  if (on) map.addLayer(heatLayer); else map.removeLayer(heatLayer);
+}
+
+function toggleKDE() {
+  const btn = document.getElementById('btnKDE');
+  const on  = !btn.classList.contains('on');
+  btn.classList.toggle('on', on);
+  if (kdeLayer) { map.removeLayer(kdeLayer); kdeLayer = null; }
+  if (!on) return;
+  const pts2 = Object.values(allFixes).flat()
+    .filter(f=>!isNaN(f.lat)&&!isNaN(f.lon))
+    .map(f=>[f.lat,f.lon]);
+  if (pts2.length < 4) return;
+
+  function std2(a){const m=a.reduce((x,y)=>x+y,0)/a.length;return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length);}
+  const KDE = L.Layer.extend({
+    initialize(){this._pts=pts2;},
+    onAdd(m){this._map=m;const c=document.createElement('canvas');c.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:0.52;z-index:200;';m.getPanes().overlayPane.appendChild(c);this._c=c;m.on('viewreset moveend zoomend resize',this._draw,this);this._draw();},
+    onRemove(m){if(this._c?.parentNode)this._c.parentNode.removeChild(this._c);m.off('viewreset moveend zoomend resize',this._draw,this);},
+    _draw(){
+      const sz=this._map.getSize();this._c.width=sz.x;this._c.height=sz.y;
+      const ctx=this._c.getContext('2d');ctx.clearRect(0,0,sz.x,sz.y);
+      L.DomUtil.setPosition(this._c,this._map.containerPointToLayerPoint([0,0]));
+      const px=this._pts.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
+      const xs=px.map(p=>p.x),ys=px.map(p=>p.y),n=xs.length;
+      const bw=Math.max(0.9*Math.min(std2(xs),std2(ys))*Math.pow(n,-0.2),16),bw2=bw*bw;
+      const cs=Math.max(3,Math.round(bw/7)),nc=Math.ceil(sz.x/cs),nr=Math.ceil(sz.y/cs);
+      const den=new Float32Array(nr*nc);let mx=0;
+      for(let r=0;r<nr;r++)for(let c2=0;c2<nc;c2++){const x=(c2+.5)*cs,y=(r+.5)*cs;let d=0;for(let k=0;k<n;k++){const dx=x-xs[k],dy=y-ys[k];d+=Math.exp(-.5*(dx*dx+dy*dy)/bw2);}den[r*nc+c2]=d;if(d>mx)mx=d;}
+      if(!mx)return;
+      const img=ctx.createImageData(sz.x,sz.y);
+      for(let r=0;r<nr;r++)for(let c2=0;c2<nc;c2++){
+        const norm=den[r*nc+c2]/mx;if(norm<.04)continue;
+        let R2,G2,B2;
+        if(norm<.33){R2=0;G2=Math.round(100+norm*3*100);B2=60;}
+        else if(norm<.66){R2=Math.round((norm-.33)*3*220);G2=200;B2=0;}
+        else{R2=255;G2=Math.round(200-(norm-.66)*3*200);B2=0;}
+        const A=Math.round(norm*175);
+        for(let dr=0;dr<cs&&r*cs+dr<sz.y;dr++)for(let dc=0;dc<cs&&c2*cs+dc<sz.x;dc++){const idx=((r*cs+dr)*sz.x+(c2*cs+dc))*4;img.data[idx]=R2;img.data[idx+1]=G2;img.data[idx+2]=B2;img.data[idx+3]=A;}
+      }
+      ctx.putImageData(img,0,0);
+    }
+  });
+  kdeLayer = new KDE(); map.addLayer(kdeLayer);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   FIELD UPDATES PANEL
+════════════════════════════════════════════════════════════════ */
+function loadUpdates(rows) {
+  if (!rows?.length) return;
+  const sorted = rows
+    .filter(r => gc(r,'Date','date'))
+    .sort((a,b) => {
+      const da=pts(gc(a,'Date','date')), db=pts(gc(b,'Date','date'));
+      if(!da&&!db)return 0; if(!da)return 1; if(!db)return -1;
+      return db-da;
+    });
+  if (!sorted.length) return;
+  const latestDate = pts(gc(sorted[0],'Date','date'));
+  document.getElementById('fuDate').textContent = fmtDateOnly(latestDate);
+  document.getElementById('fuText').textContent = gc(sorted[0],'Update','Notes','Text','update')||'';
+  const list = document.getElementById('fuList');
+  if (sorted.length <= 1) { list.innerHTML='<p style="color:var(--text4);font-size:.74rem;">No previous updates.</p>'; return; }
+  sorted.slice(1).forEach(r => {
+    const d = document.createElement('div'); d.className='fu';
+    const dt = pts(gc(r,'Date','date'));
+    d.innerHTML = `<div class="fd">${fmtDateOnly(dt)}</div><div class="ft">${gc(r,'Update','Notes','Text','update')||''}</div>`;
+    list.appendChild(d);
+  });
+}
+
+function toggleFP() { document.getElementById('fp').classList.toggle('open'); document.getElementById('fp-bg').classList.toggle('open'); }
+function closeFP()  { document.getElementById('fp').classList.remove('open'); document.getElementById('fp-bg').classList.remove('open'); }
+
+/* ════════════════════════════════════════════════════════════════
+   BOTTOM TABLE RESIZE
+════════════════════════════════════════════════════════════════ */
 function initResize() {
-  const rbar=document.getElementById('rbar');
-  const btm=document.getElementById('btm');
-  const mw=document.getElementById('map-wrap');
+  const rbar = document.getElementById('rbar');
+  const btm  = document.getElementById('btm');
+  const mapW = document.getElementById('map-wrap');
   let drag=false,sy=0,sh=0;
   const start=y=>{if(btmCollapsed)return;drag=true;sy=y;sh=btm.offsetHeight;document.body.style.cursor='ns-resize';};
-  const move=y=>{if(!drag)return;const h=Math.min(Math.max(40,sh+(sy-y)),window.innerHeight*.65);btmH=h;btm.style.height=h+'px';mw.style.bottom=h+'px';};
+  const move=y=>{if(!drag)return;const h=Math.min(Math.max(40,sh+(sy-y)),window.innerHeight*.65);btmH=h;btm.style.height=h+'px';mapW.style.bottom=h+'px';};
   const end=()=>{drag=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),80);};
   rbar.addEventListener('mousedown',e=>{start(e.clientY);e.preventDefault();});
   document.addEventListener('mousemove',e=>move(e.clientY));
@@ -1322,16 +1605,40 @@ function initResize() {
   document.addEventListener('touchmove',e=>{if(drag)move(e.touches[0].clientY);},{passive:true});
   document.addEventListener('touchend',end);
 }
- 
-/* ══ EXPORT ══════════════════════════════════════════════════════ */
+
+function toggleBtm() {
+  btmCollapsed = !btmCollapsed;
+  const btm  = document.getElementById('btm');
+  const mapW = document.getElementById('map-wrap');
+  const btn  = document.getElementById('btm-tog');
+  if (btmCollapsed) { btm.style.height='32px'; mapW.style.bottom='32px'; btn.textContent='▲ Show'; }
+  else              { btm.style.height=btmH+'px'; mapW.style.bottom=btmH+'px'; btn.textContent='▼ Hide'; }
+  setTimeout(()=>map.invalidateSize(),280);
+}
+
+function toggleFBar() {
+  fbarHidden = !fbarHidden;
+  document.getElementById('fbar').classList.toggle('hidden', fbarHidden);
+  const fbtn = document.getElementById('fbtn');
+  if (fbtn) fbtn.classList.toggle('on', !fbarHidden);
+  // Adjust map-wrap top
+  const mapW = document.getElementById('map-wrap');
+  mapW.style.top = fbarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
+  setTimeout(()=>map.invalidateSize(),250);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   EXPORT
+════════════════════════════════════════════════════════════════ */
 function exportCSV() {
-  if (!displayed.length) { toast('Apply filters first'); return; }
-  const rows=[['Radio_ID','Last_Fix','Days_Since_Fix','Status','Category','Sex','Source',
-    'Zone','Latitude','Longitude','Tag_Place','T.L','Tag_Date','Days_Since_Release','Remarks']];
+  if (!displayed.length) { toast('Apply filters first to export'); return; }
+  const rows=[['Radio_ID','Last_Fix','Days_Since_Fix','Status','Category','Sex','Source','Zone',
+    'Latitude','Longitude','Collar_Serial','Tag_Place','TL_cm','Tag_Date','Days_Since_Release','Remarks']];
   displayed.forEach(a=>rows.push([
-    a.id,fmtDT(a.ts),a.daysFix,a.status,a.category||'',a.sex||'',a.source,a.zone,
-    a.lat,a.lon,a.tagPlace||'',a.tl||'',
-    a.tagDate?fmtDT(a.tagDate):'—',a.daysRel!==null?a.daysRel:'—',a.remarks||'',
+    a.id, fmtDT(a.ts), a.daysFix, a.status, a.category||'', a.sex||'',
+    a.source, a.zone, a.lat, a.lon, a.collar||'',
+    a.tagPlace||'', a.tl||'',
+    a.tagDate?fmtDT(a.tagDate):'—', a.daysRel!==null?a.daysRel:'—', a.remarks||'',
   ]));
   const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const el=document.createElement('a');
@@ -1339,14 +1646,17 @@ function exportCSV() {
   el.download=`gep_telemetry_${new Date().toISOString().slice(0,10)}.csv`;
   el.click(); URL.revokeObjectURL(el.href);
 }
- 
-/* ══ BOOT ════════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════════════════ */
 (async function boot() {
   initMap();
   initResize();
-  // Initialise multi-select state to "all selected"
-  S.ridPool=[]; S.ridSel=null; S.zoneSel=null; S.allZones=[]; S.zoneCounts={};
+  // Initialise all MDD state
+  Object.values(MDD).forEach(m => { m.sel=null; m.pool=[]; m.search=''; });
   await loadAllData();
+  window.addEventListener('resize', () => setTimeout(()=>map.invalidateSize(),150));
 })();
 </script>
 </body>
