@@ -24,7 +24,7 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:70px;
+  --hdr:118px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -59,32 +59,33 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:1100;display:grid;grid-template-columns:auto auto minmax(260px,1fr) auto auto;align-items:center;gap:12px;padding:0 16px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:2200;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
 .hdr-logos img{height:46px;max-width:110px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
 .hdr-divider{width:1px;height:36px;background:rgba(255,255,255,.18)}
 .hdr-brand{min-width:0}
+.hdr-logos,.hdr-divider,.hdr-brand,.syncbox,.hdr-actions{grid-row:1}
 .hdr-title{font:700 .94rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
-#statusBlocks{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:8px;min-width:520px}
+#statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0;width:100%}
 .sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease}
 .sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
 .sblock.muted{color:rgba(255,255,255,.42)}
 .sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
 
-.hdr-actions{display:flex;align-items:center;gap:8px}
-.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px}
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;position:relative;z-index:2210}
+.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
 .syncbox span{font:600 .64rem var(--mono);color:#fff}
 .hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:1050;display:flex;align-items:center;gap:8px;padding:0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow-x:auto;overflow-y:visible}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:2150;display:flex;align-items:center;gap:8px;padding:0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow-x:auto;overflow-y:visible}
 #fbar.hidden{height:0;padding:0 16px;border-bottom:none;opacity:0;pointer-events:none}
 .fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
@@ -96,12 +97,12 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-.ms-wrap{position:relative;flex-shrink:0}
+.ms-wrap{position:relative;flex-shrink:0;z-index:1}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:3200;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:3300;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -184,7 +185,6 @@ button{cursor:pointer}
 .no-data td{padding:20px 12px;text-align:center;color:var(--muted-2);font:600 .7rem var(--mono)}
 
 @media (max-width:1360px){
-  #statusBlocks{min-width:440px}
   .hdr-title{font-size:.84rem}
 }
 </style>
@@ -219,7 +219,7 @@ button{cursor:pointer}
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
       <img src="mcbt.png" alt="MCBT" onerror="this.style.display='none'">
     </a>
-    <a href="https://www.instagram.com/gharial_ecology_project/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
+    <a href="https://www.instagram.com/gharialecologyproject/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
       <img src="gep.png" alt="GEP" onerror="this.style.display='none'">
     </a>
   </div>
@@ -910,11 +910,24 @@ function getViewEntities(source){
     if(source === 'FieldLog'){
       if(entity.isHatchling || !entity.latestVHF) return null;
       const relevantFix = entity.latestVHF;
-      const locationFix = entity.latestOverall || entity.latestVHF;
-      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.allHistory.slice(),status:'vhf',zone:locationFix?.zone || '-'};
+      const locationFix = entity.latestVHF;
+      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-'};
     }
     return null;
   }).filter(Boolean);
+}
+
+function snapFixToRiver(fix){
+  if(!Number.isFinite(fix?.lat) || !Number.isFinite(fix?.lon)){
+    return {lat:fix?.lat ?? null, lon:fix?.lon ?? null};
+  }
+  try{
+    const snapped = turf.nearestPointOnLine(activeRiverLine(), turf.point([fix.lon,fix.lat]));
+    const [lon, lat] = snapped.geometry.coordinates;
+    return {lat, lon};
+  }catch(error){
+    return {lat:fix.lat, lon:fix.lon};
+  }
 }
 
 function statusLabel(status, source){
@@ -1001,10 +1014,10 @@ function resetMultiSelect(key, message, disabled){
   counter.textContent = disabled ? '' : '0/0';
 }
 
-function buildMSOptions(key, options, formatter){
+function buildMSOptions(key, options, formatter, preserveSelection = false){
   const button = document.getElementById('msb-' + key);
   const list = document.getElementById('msi-' + key);
-  const previous = new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value));
+  const previous = preserveSelection ? new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value)) : new Set();
   button.classList.remove('disabled');
   list.innerHTML = '';
   if(!options.length){
@@ -1293,28 +1306,30 @@ function renderMarkers(){
   const trackEntity = trackEntityKey ? displayedEntities.find(item=>item.compKey === trackEntityKey) : null;
   if(trackEntity){
     const history = trackEntity.trackHistory.filter(item=>Number.isFinite(item.lat) && Number.isFinite(item.lon));
+    const snappedHistory = history.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
     if(history.length > 1){
       const line = activeRiverLine();
       const riverCoords = [];
-      for(let i = 0; i < history.length - 1; i += 1){
+      for(let i = 0; i < snappedHistory.length - 1; i += 1){
         try{
-          const start = turf.nearestPointOnLine(line, turf.point([history[i].lon,history[i].lat]));
-          const end = turf.nearestPointOnLine(line, turf.point([history[i+1].lon,history[i+1].lat]));
+          const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon,snappedHistory[i].snapped.lat]));
+          const end = turf.nearestPointOnLine(line, turf.point([snappedHistory[i+1].snapped.lon,snappedHistory[i+1].snapped.lat]));
           const segment = turf.lineSlice(start, end, line);
           const coords = segment.geometry.coordinates.map(coord=>[coord[1],coord[0]]);
           if(i === 0) riverCoords.push(...coords);
           else riverCoords.push(...coords.slice(1));
         }catch(error){
-          riverCoords.push([history[i].lat,history[i].lon]);
-          if(i === history.length - 2) riverCoords.push([history[i+1].lat,history[i+1].lon]);
+          riverCoords.push([snappedHistory[i].snapped.lat,snappedHistory[i].snapped.lon]);
+          if(i === snappedHistory.length - 2) riverCoords.push([snappedHistory[i+1].snapped.lat,snappedHistory[i+1].snapped.lon]);
         }
       }
       if(riverCoords.length > 1){
         L.polyline(riverCoords,{color:markerColor(trackEntity),weight:3,opacity:.9,dashArray:'8 12'}).addTo(trackLayer);
       }
     }
-    history.forEach((fix, index)=>{
-      const latest = index === history.length - 1;
+    snappedHistory.forEach((item, index)=>{
+      const {fix, snapped} = item;
+      const latest = index === snappedHistory.length - 1;
       const size = latest ? 12 : 8;
       const color = markerColor(trackEntity);
       const fixMarker = L.marker([fix.lat,fix.lon],{
@@ -1324,9 +1339,11 @@ function renderMarkers(){
           iconSize:[size,size],
           iconAnchor:[size / 2,size / 2]
         }),
-        zIndexOffset:latest ? 250 : 0
+        zIndexOffset:latest ? 250 : 0,
+        keyboard:false
       });
-      const previous = index > 0 ? history[index - 1] : null;
+      fixMarker.setLatLng([snapped.lat,snapped.lon]);
+      const previous = index > 0 ? snappedHistory[index - 1].fix : null;
       const riverDistance = previous ? calcRiverDistance(previous, fix) : null;
       fixMarker.bindPopup(
         '<div class="pop-body">' +
@@ -1346,6 +1363,29 @@ function renderMarkers(){
     document.getElementById('trackLabel').textContent = trackEntity.id;
   }else{
     document.getElementById('trackBadge').style.display = 'none';
+  }
+
+  if(trackEntity){
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    heatmapOn = false;
+    kdeOn = false;
+    document.getElementById('heatBtn').classList.remove('on');
+    document.getElementById('kdeBtn').classList.remove('on');
+  }
+
+  if(trackEntity){
+    const points = trackEntity.trackHistory.map(fix=>snapFixToRiver(fix)).filter(point=>Number.isFinite(point.lat) && Number.isFinite(point.lon)).map(point=>[point.lat,point.lon]);
+    if(points.length){
+      map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
+    }
+    if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
+      const marker = historyMarkerMap[pendingFocusFixKey];
+      pendingFocusFixKey = null;
+      map.flyTo(marker.getLatLng(),16,{duration:1});
+      setTimeout(()=>marker.openPopup(),700);
+    }
+    return;
   }
 
   displayedEntities.forEach(entity=>{
