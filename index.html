@@ -59,7 +59,7 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:2200;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
@@ -77,7 +77,7 @@ button{cursor:pointer}
 .sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
 
-.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;position:relative;z-index:2210}
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;position:relative;z-index:10021}
 .syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
 .syncbox span{font:600 .64rem var(--mono);color:#fff}
@@ -85,7 +85,7 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:2150;display:flex;align-items:center;gap:8px;padding:0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow-x:auto;overflow-y:visible}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;gap:8px;padding:0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow-x:auto;overflow-y:visible}
 #fbar.hidden{height:0;padding:0 16px;border-bottom:none;opacity:0;pointer-events:none}
 .fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
@@ -97,12 +97,12 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-.ms-wrap{position:relative;flex-shrink:0;z-index:1}
+.ms-wrap{position:relative;flex-shrink:0;z-index:10011}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:3300;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:10012;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -120,6 +120,7 @@ button{cursor:pointer}
 .leaflet-popup-content{margin:0}
 .leaflet-popup-tip{background:#fff}
 .leaflet-popup-close-button{top:10px!important;right:10px!important}
+.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
@@ -226,7 +227,7 @@ button{cursor:pointer}
   <div class="hdr-divider"></div>
   <div class="hdr-brand">
     <div class="hdr-title">Gharial Ecology Project - Unified Telemetry Dashboard</div>
-    <div class="hdr-sub">Desktop telemetry monitor · ATS + VHF + hatchling routing</div>
+    <div class="hdr-sub">Desktop telemetry monitor | ATS + VHF + hatchling routing</div>
   </div>
   <div id="statusBlocks">
     <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
@@ -239,7 +240,7 @@ button{cursor:pointer}
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
-    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">⟳</span> Refresh</button>
+    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">R</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
     <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()" style="display:none">Field Updates</button>
   </div>
@@ -259,7 +260,7 @@ button{cursor:pointer}
   <div class="fg">
     <label>Radio ID</label>
     <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">▾</span></button>
+      <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
       <div class="ms-drop" id="msd-rid">
         <div class="ms-head">
           <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
@@ -274,7 +275,7 @@ button{cursor:pointer}
   <div class="fg">
     <label>Category</label>
     <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">▾</span></button>
+      <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
       <div class="ms-drop" id="msd-cat">
         <div class="ms-head">
           <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
@@ -289,7 +290,7 @@ button{cursor:pointer}
   <div class="fg">
     <label>Zone</label>
     <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">▾</span></button>
+      <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
       <div class="ms-drop" id="msd-zone">
         <div class="ms-head">
           <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
@@ -304,7 +305,7 @@ button{cursor:pointer}
   <div class="fg">
     <label>Status</label>
     <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">▾</span></button>
+      <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
       <div class="ms-drop" id="msd-status">
         <div class="ms-head">
           <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
@@ -328,7 +329,7 @@ button{cursor:pointer}
 <div id="map-wrap">
   <div id="map"></div>
   <div class="map-fab">
-    <button class="fab" type="button" title="Reset View" onclick="resetView()">⌂</button>
+    <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
   </div>
   <div id="trackBadge">Track Mode - <span id="trackLabel"></span></div>
   <div id="legend"></div>
@@ -343,7 +344,7 @@ button{cursor:pointer}
 <aside id="fp">
   <div class="fp-hdr">
     <h3>Pali FT Field Updates</h3>
-    <button class="fp-cl" type="button" onclick="closeFieldPanel()">×</button>
+    <button class="fp-cl" type="button" onclick="closeFieldPanel()">X</button>
   </div>
   <div class="fp-latest">
     <div class="fp-kicker">Latest update</div>
@@ -446,16 +447,16 @@ const VIEW_META = {
   },
   ATS:{
     blocks:[
-      {key:'active',label:'Active ≤ 7d'},
+      {key:'active',label:'Active <= 7d'},
       {key:'s7',label:'Silent > 7d'},
       {key:'s30',label:'Silent > 30d'},
-      {key:'crit',label:'Critical ≥ 45d'}
+      {key:'crit',label:'Critical >= 45d'}
     ],
     legend:[
-      {label:'Active ≤ 7d',color:'#1565c0'},
+      {label:'Active <= 7d',color:'#1565c0'},
       {label:'Silent 8-30d',color:'#b45309'},
       {label:'Silent 31-44d',color:'#b91c1c'},
-      {label:'Critical ≥ 45d',color:'#7f1d1d'}
+      {label:'Critical >= 45d',color:'#7f1d1d'}
     ],
     statusKeys:['active','s7','s30','crit'],
     showFieldUpdates:false,
@@ -479,13 +480,13 @@ const VIEW_META = {
   },
   PaliFT:{
     blocks:[
-      {key:'active',label:'Active ≤ 10d'},
+      {key:'active',label:'Active <= 10d'},
       {key:'tmiss',label:'Temp Missing'},
       {key:'gone',label:'Gone > 30d'},
       {key:'dead',label:'Dead'}
     ],
     legend:[
-      {label:'Active ≤ 10d',color:'#16a34a'},
+      {label:'Active <= 10d',color:'#16a34a'},
       {label:'Temp Missing',color:'#d97706'},
       {label:'Gone > 30d',color:'#374151'},
       {label:'Dead',color:'#991b1b'}
@@ -903,9 +904,9 @@ function getViewEntities(source){
     if(source === 'ATS'){
       if(entity.isHatchling || !entity.latestATS) return null;
       const relevantFix = entity.latestATS;
-      const locationFix = entity.latestOverall || entity.latestATS;
+      const locationFix = entity.latestATS;
       const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
-      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.allHistory.slice(),status,zone:locationFix?.zone || '-'};
+      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
     }
     if(source === 'FieldLog'){
       if(entity.isHatchling || !entity.latestVHF) return null;
@@ -931,11 +932,11 @@ function snapFixToRiver(fix){
 }
 
 function statusLabel(status, source){
-  if(status === 'active' && source === 'PaliFT') return 'Active ≤ 10d';
-  if(status === 'active' && source === 'ATS') return 'Active ≤ 7d';
+  if(status === 'active' && source === 'PaliFT') return 'Active <= 10d';
+  if(status === 'active' && source === 'ATS') return 'Active <= 7d';
   if(status === 's7') return 'Silent > 7d';
   if(status === 's30') return 'Silent > 30d';
-  if(status === 'crit') return 'Critical ≥ 45d';
+  if(status === 'crit') return 'Critical >= 45d';
   if(status === 'tmiss') return 'Temp Missing';
   if(status === 'gone') return 'Gone > 30d';
   if(status === 'dead') return 'Dead';
@@ -1261,7 +1262,7 @@ function popupHtml(entity){
         '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
         '<div>' +
           '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
-          '<div class="pop-sub">' + status + ' · ' + escapeHtml(sourceLabel) + '</div>' +
+          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="pop-body">' +
@@ -1391,7 +1392,7 @@ function renderMarkers(){
   displayedEntities.forEach(entity=>{
     const fix = entity.displayFix;
     if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
-    const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id)});
+    const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),keyboard:false});
     marker.bindPopup(popupHtml(entity),{maxWidth:330});
     marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
     markerLayer.addLayer(marker);
@@ -1429,6 +1430,9 @@ function renderMarkers(){
 function focusEntity(compKey){
   const marker = entityMarkerMap[compKey];
   if(!marker) return;
+  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
+  marker.setZIndexOffset(5000);
+  map.closePopup();
   map.flyTo(marker.getLatLng(),16,{duration:1});
   setTimeout(()=>marker.openPopup(),700);
 }
@@ -1436,6 +1440,7 @@ function focusEntity(compKey){
 function trackSingle(compKey, focusFix = null){
   trackEntityKey = compKey;
   pendingFocusFixKey = focusFix;
+  map.closePopup();
   renderMarkers();
   renderTable();
 }
@@ -1506,7 +1511,7 @@ function renderTable(){
   const target = trackEntityKey ? displayedEntities.find(entity=>entity.compKey === trackEntityKey) : (displayedEntities.length === 1 ? displayedEntities[0] : null);
   if(target) displayRows = buildHistoryRows(target);
   else displayRows = displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent = target ? (displayRows.length + ' fixes · ' + target.id) : (displayRows.length + ' records');
+  document.getElementById('tableBadge').textContent = target ? (displayRows.length + ' fixes | ' + target.id) : (displayRows.length + ' records');
   updateCollarColumn();
   if(!source){
     body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source to display telemetry records.</td></tr>';
@@ -1546,6 +1551,8 @@ function renderTable(){
         }else{
           const marker = historyMarkerMap[row.rowKey];
           if(marker){
+            Object.values(historyMarkerMap).forEach(item=>item.setZIndexOffset(0));
+            marker.setZIndexOffset(5000);
             map.flyTo(marker.getLatLng(),16,{duration:1});
             setTimeout(()=>marker.openPopup(),700);
           }
