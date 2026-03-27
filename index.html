@@ -1,3 +1,6 @@
+Index · HTML
+Copy
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,20 +10,16 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ══ TOKENS ═════════════════════════════════════════════════════ */
 :root{
   --forest:#1b4332;--forest2:#2d6a4f;--forest3:#40916c;--green:#52b788;
   --green-lt:#d8f3dc;--green-pale:#f0f9f5;
-  /* Adult statuses */
   --s-active:#1565c0;--s-active-lt:#dbeafe;--s-active-br:#bfdbfe;
   --s-s7:#b45309;--s-s7-lt:#fef3c7;--s-s7-br:#fde68a;
   --s-s30:#b91c1c;--s-s30-lt:#fee2e2;--s-s30-br:#fecaca;
   --s-crit:#7f1d1d;--s-crit-lt:#fee2e2;--s-crit-br:#fca5a5;
-  /* Hatchling statuses */
   --s-tmiss:#d97706;--s-tmiss-lt:#fef9c3;--s-tmiss-br:#fde68a;
   --s-gone:#374151;--s-gone-lt:#f3f4f6;--s-gone-br:#d1d5db;
   --s-dead:#b91c1c;
-  /* Special */
   --s-ndep:#7c3aed;--s-ndep-lt:#f3e8ff;--s-ndep-br:#ddd6fe;
   --text:#111827;--text2:#374151;--text3:#6b7280;--text4:#9ca3af;
   --border:#e5e7eb;--border2:#d1d5db;
@@ -38,12 +37,42 @@ html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--b
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 button{cursor:pointer;font-family:var(--font);}
-
 @keyframes spin{to{transform:rotate(360deg);}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(82,183,136,.5);}50%{box-shadow:0 0 0 5px transparent;}}
 @keyframes mPulse{0%{transform:scale(1);opacity:.5;}70%{transform:scale(2.6);opacity:0;}100%{opacity:0;}}
-
+ 
+/* ══ SPLASH ══════════════════════════════════════════════════════ */
+#splash{
+  position:fixed;inset:0;z-index:10000;
+  background:url('background.gif') center/cover no-repeat,
+             linear-gradient(108deg,#1b4332 0%,#2d6a4f 55%,#1b5e43 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  transition:opacity .65s,visibility .65s;
+}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-overlay{position:absolute;inset:0;background:rgba(10,30,20,.65);}
+.splash-content{
+  position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:20px;
+  background:rgba(10,25,15,.58);border:1.5px solid rgba(82,183,136,.35);border-radius:18px;
+  padding:40px 52px;backdrop-filter:blur(12px);
+  box-shadow:0 8px 48px rgba(0,0,0,.55),0 0 0 1px rgba(82,183,136,.12);
+  max-width:430px;width:90%;
+}
+.splash-logos{display:flex;align-items:center;justify-content:center;gap:22px;}
+.splash-logos img{height:72px;object-fit:contain;filter:drop-shadow(0 2px 10px rgba(0,0,0,.65)) brightness(1.12);}
+.splash-logos .ldiv{width:1.5px;height:54px;background:rgba(255,255,255,.25);}
+.splash-title{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:#fff;text-align:center;letter-spacing:.04em;line-height:1.45;}
+.splash-sub{font-family:var(--mono);font-size:.61rem;color:rgba(255,255,255,.52);text-align:center;letter-spacing:.08em;text-transform:uppercase;}
+.splash-ring{width:36px;height:36px;border:3px solid rgba(255,255,255,.18);border-top-color:#52b788;border-radius:50%;animation:spin .8s linear infinite;}
+.splash-status{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.6);text-align:center;min-height:1.4em;}
+.splash-srcs{display:flex;flex-direction:column;gap:3px;width:100%;}
+.splash-src{font-family:var(--mono);font-size:.57rem;padding:2px 10px;border-radius:3px;color:rgba(255,255,255,.4);transition:all .35s;display:flex;align-items:center;gap:6px;}
+.splash-src::before{content:'◌';flex-shrink:0;}
+.splash-src.ok{color:#86efac;background:rgba(134,239,172,.08);}
+.splash-src.ok::before{content:'✓';}
+.splash-src.err{color:#fca5a5;}
+.splash-src.err::before{content:'✗';}
+ 
 /* ══ HEADER ══════════════════════════════════════════════════════ */
 #hdr{
   position:fixed;top:0;left:0;right:0;z-index:1200;height:var(--hdr);
@@ -67,15 +96,16 @@ button{cursor:pointer;font-family:var(--font);}
 .hbtn{display:flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--r);border:1.5px solid rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff;font-family:var(--mono);font-size:.63rem;font-weight:600;transition:all .18s;white-space:nowrap;}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.6);}
 .hbtn.loading .spin-ic{animation:spin .75s linear infinite;display:inline-block;}
-
+ 
 /* ══ FILTER BAR ══════════════════════════════════════════════════ */
 #fbar{
   position:fixed;top:var(--hdr);left:0;right:0;z-index:1100;height:var(--fbar);
   background:var(--surface);border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:6px;padding:0 14px;overflow-x:auto;overflow-y:visible;scrollbar-width:none;
+  transition:height .2s,opacity .2s,padding .2s;
 }
 #fbar::-webkit-scrollbar{display:none;}
-#fbar.hidden{height:0;padding:0;overflow:hidden;opacity:0;pointer-events:none;transition:height .2s,opacity .2s;}
+#fbar.hidden{height:0;padding-top:0;padding-bottom:0;overflow:hidden;opacity:0;pointer-events:none;}
 .fg{display:flex;align-items:center;gap:5px;flex-shrink:0;}
 .fg label{font-family:var(--mono);font-size:.54rem;font-weight:700;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;}
 .fsel{padding:4px 22px 4px 8px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:.64rem;cursor:pointer;min-width:118px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;background-size:8px;}
@@ -87,9 +117,9 @@ button{cursor:pointer;font-family:var(--font);}
 .fbtn-apply{background:var(--forest2);color:#fff;border-color:var(--forest2);}
 .fbtn-apply:hover{background:var(--forest3);border-color:var(--forest3);color:#fff;}
 .fbtn-clr{color:var(--text3);}
-
+ 
 /* ══ MAP ══════════════════════════════════════════════════════════ */
-#map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1;}
+#map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1;transition:top .2s;}
 #map{width:100%;height:100%;}
 .leaflet-popup-content-wrapper{background:#fff!important;border:1px solid var(--border2)!important;border-radius:var(--r-lg)!important;box-shadow:var(--shadow-lg)!important;color:var(--text)!important;padding:0!important;min-width:265px;}
 .leaflet-popup-content{margin:0!important;}
@@ -98,8 +128,8 @@ button{cursor:pointer;font-family:var(--font);}
 .leaflet-popup-close-button:hover{color:var(--text)!important;}
 .leaflet-container a.leaflet-popup-close-button:hover{background:none!important;}
 .map-fab{position:absolute;top:10px;left:10px;z-index:500;display:flex;flex-direction:column;gap:4px;}
-.fab{width:30px;height:30px;background:white;border:1px solid var(--border);border-radius:var(--r);font-size:.8rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .15s;}
-.fab:hover,.fab.on{background:var(--green-lt);border-color:var(--forest3);color:var(--forest);}
+.fab{width:30px;height:30px;background:white;border:1px solid var(--border);border-radius:var(--r);font-size:.8rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);transition:all .15s;cursor:pointer;}
+.fab:hover{background:var(--green-lt);border-color:var(--forest3);}
 .zone-lbl{background:rgba(255,255,255,.92)!important;border:1px solid var(--border)!important;color:var(--forest)!important;font-family:var(--mono)!important;font-size:.59rem!important;font-weight:700!important;border-radius:3px!important;padding:2px 6px!important;}
 #track-badge{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:500;background:var(--forest2);color:#fff;border-radius:var(--r);padding:4px 12px;font-family:var(--mono);font-size:.63rem;font-weight:700;box-shadow:var(--shadow);display:none;}
 #legend{position:absolute;bottom:10px;left:10px;z-index:500;background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;box-shadow:var(--shadow);}
@@ -109,10 +139,14 @@ button{cursor:pointer;font-family:var(--font);}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:2px solid rgba(255,255,255,.55);}
 #mfoot{position:absolute;bottom:0;left:0;right:0;z-index:400;background:rgba(255,255,255,.93);backdrop-filter:blur(8px);padding:3px 12px;font-family:var(--mono);font-size:.61rem;color:var(--text3);border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;}
 .mf-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite;}
-
+#blank-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:450;background:rgba(255,255,255,.96);border:1.5px solid var(--border2);border-radius:var(--r-lg);padding:28px 40px;text-align:center;box-shadow:var(--shadow-md);pointer-events:none;}
+#blank-hint .bh-ico{font-size:2.5rem;margin-bottom:10px;}
+#blank-hint .bh-t{font-family:var(--mono);font-size:.8rem;font-weight:700;color:var(--forest);margin-bottom:6px;}
+#blank-hint .bh-s{font-size:.67rem;color:var(--text3);line-height:1.6;}
+ 
 /* ══ POPUP ════════════════════════════════════════════════════════ */
 .pop-top{background:linear-gradient(108deg,var(--forest),var(--forest2));padding:11px 36px 10px 13px;border-bottom:2px solid var(--green);display:flex;align-items:center;gap:11px;}
-.pop-badge{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:800;color:#fff;line-height:1.2;text-align:center;letter-spacing:-.3px;border:2.5px solid rgba(255,255,255,.65);box-shadow:0 3px 10px rgba(0,0,0,.4);}
+.pop-badge{width:44px;height:44px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:800;color:#fff;line-height:1.2;text-align:center;border:2.5px solid rgba(255,255,255,.65);box-shadow:0 3px 10px rgba(0,0,0,.4);}
 .pop-id{font-family:var(--mono);font-size:.88rem;font-weight:800;color:#fff;line-height:1.2;}
 .pop-sub{font-size:.6rem;color:rgba(255,255,255,.65);margin-top:2px;font-family:var(--mono);}
 .pop-body{padding:9px 13px;}
@@ -125,7 +159,6 @@ button{cursor:pointer;font-family:var(--font);}
 .sr-fl{background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;}
 .sr-pali{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0;}
 .sr-merged{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
-.sr-ndep{background:#f3e8ff;color:#7c3aed;border:1px solid #ddd6fe;}
 .pop-acts{display:flex;gap:4px;padding:7px 13px;border-top:1px solid var(--border);background:var(--surface2);border-radius:0 0 var(--r-lg) var(--r-lg);}
 .pab{flex:1;padding:5px;text-align:center;background:var(--green-lt);border:1px solid var(--border);color:var(--forest);border-radius:4px;font-family:var(--mono);font-size:.6rem;font-weight:700;cursor:pointer;transition:all .14s;}
 .pab:hover{background:var(--green);color:#fff;border-color:var(--green);}
@@ -138,7 +171,7 @@ button{cursor:pointer;font-family:var(--font);}
 .sb-gone{background:var(--s-gone-lt);color:var(--s-gone);border:1px solid var(--s-gone-br);}
 .sb-dead{background:var(--s-s30-lt);color:var(--s-dead);border:1px solid var(--s-s30-br);}
 .sb-ndep{background:var(--s-ndep-lt);color:var(--s-ndep);border:1px solid var(--s-ndep-br);}
-
+ 
 /* ══ BOTTOM TABLE ════════════════════════════════════════════════ */
 #btm{position:fixed;bottom:0;left:0;right:0;z-index:800;background:var(--surface);border-top:2px solid var(--border2);height:var(--btm);display:flex;flex-direction:column;}
 #rbar{height:6px;flex-shrink:0;cursor:ns-resize;background:linear-gradient(180deg,#eaede8,#dde2da);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;}
@@ -158,7 +191,8 @@ button{cursor:pointer;font-family:var(--font);}
 .dtbl tbody tr:hover{background:var(--green-pale);}
 .dtbl tbody tr.sel{background:var(--green-lt)!important;}
 .no-data-row td{text-align:center;color:var(--text3);padding:20px!important;font-size:.67rem!important;}
-
+.col-hidden{display:none!important;}
+ 
 /* ══ FIELD PANEL ════════════════════════════════════════════════ */
 #fp-bg{display:none;position:fixed;inset:0;background:rgba(15,30,20,.4);z-index:1099;}
 #fp-bg.open{display:block;}
@@ -177,79 +211,44 @@ button{cursor:pointer;font-family:var(--font);}
 .fu{padding:7px 0;border-bottom:1px solid var(--border);}
 .fu .fd{font-weight:700;color:var(--text2);font-size:.67rem;font-family:var(--mono);}
 .fu .ft{margin-top:2px;font-size:.74rem;line-height:1.4;color:var(--text);}
-
-/* ══ STATS MODAL ═══════════════════════════════════════════════ */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,30,20,.5);z-index:2000;padding:16px;overflow-y:auto;backdrop-filter:blur(4px);}
-.modal-bg.open{display:flex;align-items:flex-start;justify-content:center;}
-.modal{background:white;border:1px solid var(--border2);border-radius:var(--r-lg);width:100%;max-width:1060px;margin:auto;overflow:hidden;box-shadow:var(--shadow-lg);}
-.modal-hdr{background:linear-gradient(108deg,var(--forest),var(--forest2));color:white;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;}
-.modal-hdr h2{font-size:.88rem;font-weight:700;font-family:var(--mono);}
-.mcl{background:none;border:none;color:rgba(255,255,255,.65);font-size:1.25rem;cursor:pointer;border-radius:4px;padding:2px 5px;}
-.mcl:hover{color:white;}
-.modal-body{padding:16px;overflow-y:auto;max-height:82vh;background:var(--bg);}
-.mtabs{display:flex;gap:2px;border-bottom:2px solid var(--border);background:white;padding:0 5px;margin-bottom:15px;overflow-x:auto;scrollbar-width:none;}
-.mtabs::-webkit-scrollbar{display:none;}
-.mtab{padding:8px 14px;border:none;background:none;cursor:pointer;font-size:.75rem;font-weight:700;color:var(--text3);border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .16s;font-family:var(--font);white-space:nowrap;}
-.mtab.on{color:var(--forest);border-bottom-color:var(--forest3);}
-.mtc{display:none;}.mtc.on{display:block;}
-.scards{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px;}
-.sc{background:white;border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;border-top:3px solid var(--s-active);}
-.sc.g{border-top-color:var(--forest3);}.sc.r{border-top-color:var(--s-dead);}.sc.y{border-top-color:var(--s-tmiss);}.sc.gr{border-top-color:var(--s-gone);}.sc.p{border-top-color:#7c3aed;}.sc.t{border-top-color:#0891b2;}
-.sc .sv{font-size:1.45rem;font-weight:800;font-family:var(--mono);color:var(--text);}
-.sc .sl{font-size:.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.cgrid.full{grid-template-columns:1fr;}
-.cc{background:white;border:1px solid var(--border);border-radius:var(--r);padding:12px;}
-.cc h4{font-size:.64rem;font-weight:700;color:var(--forest3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono);}
-.cw{position:relative;height:195px;}
-.mort-tbl,.eco-tbl,.fix-tbl{width:100%;border-collapse:collapse;font-size:.68rem;}
-.mort-tbl th,.eco-tbl th,.fix-tbl th{background:var(--forest);color:white;padding:5px 8px;text-align:left;position:sticky;top:0;z-index:1;font-family:var(--mono);font-size:.58rem;}
-.mort-tbl td,.eco-tbl td,.fix-tbl td{padding:4px 8px;border-bottom:1px solid var(--border);}
-.mort-tbl tr:hover td,.eco-tbl tr:hover td,.fix-tbl tr:hover td{background:var(--green-pale);}
-.eco-scroll,.fix-scroll{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;}
-.si-bar{height:6px;border-radius:3px;background:var(--forest3);display:inline-block;vertical-align:middle;margin-left:4px;}
-.movs{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:7px;margin-bottom:13px;}
-.ms{background:white;border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;border-left:3px solid var(--forest3);}
-.ms .v{font-size:1.15rem;font-weight:800;font-family:var(--mono);color:var(--text);}
-.ms .l{font-size:.58rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-top:1px;}
-
-/* ══ LOADING ══════════════════════════════════════════════════ */
-#loading{position:fixed;inset:0;z-index:9000;background:linear-gradient(108deg,#1b4332 0%,#2d6a4f 55%,#1b5e43 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:opacity .5s,visibility .5s;}
-#loading.hide{opacity:0;visibility:hidden;pointer-events:none;}
-.ld-ring{width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
-.ld-title{font-family:var(--mono);font-size:.88rem;font-weight:700;color:#fff;}
-.ld-sub{font-family:var(--mono);font-size:.62rem;color:rgba(255,255,255,.55);}
-.ld-srcs{display:flex;flex-direction:column;gap:3px;margin-top:4px;}
-.ld-s{font-family:var(--mono);font-size:.58rem;padding:2px 10px;border-radius:3px;text-align:center;color:rgba(255,255,255,.45);transition:all .3s;}
-.ld-s.ok{color:#86efac;background:rgba(134,239,172,.1);}
-.ld-s.err{color:#fca5a5;}
+ 
+/* ══ TOAST ══════════════════════════════════════════════════════ */
 #toast{position:fixed;bottom:calc(var(--btm) + 10px);left:50%;transform:translateX(-50%) translateY(8px);z-index:9999;background:rgba(185,28,28,.1);border:1px solid rgba(185,28,28,.3);color:#991b1b;padding:7px 16px;border-radius:var(--r);font-family:var(--mono);font-size:.65rem;letter-spacing:.04em;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
 #toast.ok{background:rgba(21,128,61,.08);border-color:rgba(21,128,61,.3);color:#14532d;}
 </style>
 </head>
 <body>
-
-<!-- ══ LOADING ═══════════════════════════════════════════════════ -->
-<div id="loading">
-  <div class="ld-ring"></div>
-  <div class="ld-title">🐊 Gharial Ecology Project</div>
-  <div class="ld-sub" id="ld-sub">Initialising multi-source telemetry…</div>
-  <div class="ld-srcs">
-    <div class="ld-s" id="ls-m">◌ Master Radio Database</div>
-    <div class="ld-s" id="ls-a">◌ ATS Satellite Log</div>
-    <div class="ld-s" id="ls-f">◌ Field Log (VHF)</div>
-    <div class="ld-s" id="ls-p">◌ Pali FT Hatchlings</div>
-    <div class="ld-s" id="ls-g">◌ River Zone GeoJSON</div>
+ 
+<!-- ══ SPLASH ════════════════════════════════════════════════════ -->
+<div id="splash">
+  <div class="splash-overlay"></div>
+  <div class="splash-content">
+    <div class="splash-logos">
+      <img src="mcbt.png" alt="MCBT" onerror="this.style.opacity='.35'">
+      <div class="ldiv"></div>
+      <img src="gep.png"  alt="GEP"  onerror="this.style.opacity='.35'">
+    </div>
+    <div class="splash-title">🐊 Gharial Ecology Project<br>Real-Time Telemetry Dashboard</div>
+    <div class="splash-sub">Multi-Source Monitoring · VHF + SAT + Hatchling</div>
+    <div class="splash-ring"></div>
+    <div class="splash-status" id="sp-status">Initialising multi-source telemetry…</div>
+    <div class="splash-srcs">
+      <div class="splash-src" id="ls-m">Master Radio Database</div>
+      <div class="splash-src" id="ls-a">ATS Satellite Log</div>
+      <div class="splash-src" id="ls-f">Field Log (VHF)</div>
+      <div class="splash-src" id="ls-p">Pali FT Hatchlings</div>
+      <div class="splash-src" id="ls-g">River Zone GeoJSON</div>
+    </div>
   </div>
 </div>
 <div id="toast"></div>
-
+ 
 <!-- ══ HEADER ════════════════════════════════════════════════════ -->
 <header id="hdr">
   <div class="hdr-logos">
-    <img src="image.png" alt="Logo" onerror="this.style.display='none'">
-    <img src="unnamed.png" alt="Logo" onerror="this.style.display='none'">
+    <img src="mcbt.png" alt="MCBT" onerror="this.style.display='none'">
+    <img src="gep.png"  alt="GEP"  onerror="this.style.display='none'">
   </div>
   <div class="hdr-div"></div>
   <div class="hdr-brand">
@@ -257,12 +256,10 @@ button{cursor:pointer;font-family:var(--font);}
     <div class="hdr-sub">Multi-Source Monitoring · VHF + SAT + Hatchling Tracking</div>
   </div>
   <div id="pills">
-    <!-- Adults -->
     <div class="hpill" id="pill-active" onclick="setPill('active')"><div class="pill-dot" style="background:#93c5fd;box-shadow:0 0 5px #93c5fd66;"></div>Active ≤7d<span class="pill-cnt" id="c-active">—</span></div>
     <div class="hpill" id="pill-s7"     onclick="setPill('s7')"><div class="pill-dot" style="background:#fcd34d;box-shadow:0 0 5px #fcd34d66;"></div>Silent &gt;7d<span class="pill-cnt" id="c-s7">—</span></div>
     <div class="hpill" id="pill-s30"    onclick="setPill('s30')"><div class="pill-dot" style="background:#fca5a5;box-shadow:0 0 5px #fca5a566;"></div>Silent &gt;30d<span class="pill-cnt" id="c-s30">—</span></div>
     <div class="hpill" id="pill-crit"   onclick="setPill('crit')"><div class="pill-dot" style="background:#f97316;box-shadow:0 0 5px #f9731666;"></div>Crit ≥45d<span class="pill-cnt" id="c-crit">—</span></div>
-    <!-- Hatchlings -->
     <div class="hpill" id="pill-tmiss"  onclick="setPill('tmiss')"><div class="pill-dot" style="background:#fde68a;box-shadow:0 0 5px #fde68a66;"></div>H: Temp Miss<span class="pill-cnt" id="c-tmiss">—</span></div>
     <div class="hpill" id="pill-gone"   onclick="setPill('gone')"><div class="pill-dot" style="background:#9ca3af;box-shadow:0 0 5px #9ca3af66;"></div>H: Gone<span class="pill-cnt" id="c-gone">—</span></div>
     <div class="hpill" id="pill-dead"   onclick="setPill('dead')"><div class="pill-dot" style="background:#fca5a5;box-shadow:0 0 5px #fca5a566;"></div>H: Dead<span class="pill-cnt" id="c-dead">—</span></div>
@@ -274,13 +271,14 @@ button{cursor:pointer;font-family:var(--font);}
     </div>
     <button class="hbtn" id="btn-ref" onclick="loadAllData()"><span class="spin-ic">⟳</span> Refresh</button>
     <button class="hbtn on" onclick="toggleFBar()" id="fbtn">⚙ Filters</button>
-    <button class="hbtn" onclick="openStats()">📊 Stats</button>
-    <button class="hbtn" onclick="toggleFP()">📋 Field Updates</button>
+    <!-- Contextual: only shown when PaliFT is selected source -->
+    <button class="hbtn" id="btn-fp" onclick="toggleFP()" style="display:none;">📋 Field Updates</button>
   </div>
 </header>
-
+ 
 <!-- ══ FILTER BAR ════════════════════════════════════════════════ -->
 <div id="fbar">
+  <!-- Source: auto-applies immediately on change -->
   <div class="fg"><label>Source</label>
     <select class="fsel" id="f-source" onchange="onSourceChange()">
       <option value="all">All Sources</option>
@@ -290,6 +288,7 @@ button{cursor:pointer;font-family:var(--font);}
     </select>
   </div>
   <div class="fsep"></div>
+  <!-- Sub-filters: wait for Apply button -->
   <div class="fg"><label>Radio ID</label>
     <select class="fsel" id="f-rid"><option value="all">All IDs</option></select>
   </div>
@@ -307,33 +306,42 @@ button{cursor:pointer;font-family:var(--font);}
   </div>
   <div class="fsep"></div>
   <button class="fbtn fbtn-apply" onclick="applyFilters()">▶ Apply</button>
-  <button class="fbtn fbtn-clr" onclick="clearFilters()">✕ Clear All</button>
+  <button class="fbtn fbtn-clr" onclick="clearAll()">✕ Clear All</button>
   <div class="fsep"></div>
   <button class="fbtn" id="btnHeat" onclick="toggleHeatmap()">🌡 Heatmap</button>
   <button class="fbtn" id="btnKDE"  onclick="toggleKDE()">📍 KDE</button>
   <div class="fsep"></div>
   <button class="fbtn" onclick="exportCSV()">📤 Export CSV</button>
 </div>
-
+ 
 <!-- ══ MAP ════════════════════════════════════════════════════════ -->
 <div id="map-wrap">
   <div id="map"></div>
+  <div id="blank-hint">
+    <div class="bh-ico">🐊</div>
+    <div class="bh-t">Select a Source to begin</div>
+    <div class="bh-s">Choose a Source above, then click <b>Apply</b>,<br>or click any status pill in the header.</div>
+  </div>
   <div class="map-fab">
     <button class="fab" onclick="resetView()" title="Reset view">🏠</button>
   </div>
   <div id="track-badge">🗺 Track Mode — <span id="track-lbl"></span></div>
   <div id="legend">
-    <div id="legend-title">Days Since Fix</div>
+    <div id="legend-title">Status Legend</div>
     <div class="leg-row"><div class="leg-dot" style="background:#1565c0;"></div>Active ≤7d (Adult)</div>
     <div class="leg-row"><div class="leg-dot" style="background:#b45309;"></div>Silent 8–30d</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#b91c1c;"></div>Silent 31–44d / H:Active</div>
-    <div class="leg-row"><div class="leg-dot" style="background:#7f1d1d;"></div>Crit ≥45d</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#b91c1c;"></div>Silent 31–44d</div>
+    <div class="leg-row"><div class="leg-dot" style="background:#7f1d1d;"></div>Critical ≥45d</div>
     <div class="leg-row"><div class="leg-dot" style="background:#d97706;"></div>H: Temp Missing</div>
     <div class="leg-row"><div class="leg-dot" style="background:#374151;"></div>H: Gone / Dead</div>
   </div>
-  <div id="mfoot"><div class="mf-dot"></div><span id="mf-txt">Loading telemetry…</span><span style="margin-left:auto;font-size:.58rem;color:var(--text4);" id="mf-cnt"></span></div>
+  <div id="mfoot">
+    <div class="mf-dot"></div>
+    <span id="mf-txt">Ready — select a source to begin.</span>
+    <span style="margin-left:auto;font-size:.58rem;color:var(--text4);" id="mf-cnt"></span>
+  </div>
 </div>
-
+ 
 <!-- ══ FIELD PANEL ═══════════════════════════════════════════════ -->
 <div id="fp-bg" onclick="closeFP()"></div>
 <div id="fp">
@@ -345,62 +353,7 @@ button{cursor:pointer;font-family:var(--font);}
   </div>
   <div class="fp-scroll"><h4>Previous Updates</h4><div id="fuList"></div></div>
 </div>
-
-<!-- ══ STATS MODAL ════════════════════════════════════════════════ -->
-<div class="modal-bg" id="statsModal">
-  <div class="modal">
-    <div class="modal-hdr">
-      <h2>📊 Population Statistics — Gharial Ecology Project</h2>
-      <button class="mcl" onclick="closeStats()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="mtabs">
-        <button class="mtab on" onclick="mTab('ms')">🛡 Survival</button>
-        <button class="mtab" onclick="mTab('mm')">📍 Movement</button>
-        <button class="mtab" onclick="mTab('ma')">🌊 Activity</button>
-        <button class="mtab" onclick="mTab('me')">🔬 Ecology</button>
-      </div>
-      <div class="mtc on" id="ms">
-        <div class="scards" id="survCards"></div>
-        <div class="cgrid">
-          <div class="cc"><h4>Status Distribution — Adults</h4><div class="cw"><canvas id="cStatusAdult"></canvas></div></div>
-          <div class="cc"><h4>Status Distribution — Hatchlings</h4><div class="cw"><canvas id="cStatusHatch"></canvas></div></div>
-        </div>
-        <div class="cgrid">
-          <div class="cc"><h4>Mortality Log (Known)</h4><table class="mort-tbl" id="mortTbl"><thead><tr><th>ID</th><th>Cause</th><th>Type</th></tr></thead><tbody></tbody></table></div>
-          <div class="cc"><h4>Days Since Last Fix (All Animals)</h4><div class="cw"><canvas id="cRecency"></canvas></div></div>
-        </div>
-      </div>
-      <div class="mtc" id="mm">
-        <div class="scards" id="movCards"></div>
-        <div class="cgrid">
-          <div class="cc"><h4>Top Animals — Fix Count</h4><div class="cw"><canvas id="cFixes"></canvas></div></div>
-          <div class="cc"><h4>Max Displacement from Release (m)</h4><div class="cw"><canvas id="cDisp"></canvas></div></div>
-        </div>
-      </div>
-      <div class="mtc" id="ma">
-        <div class="cgrid">
-          <div class="cc"><h4>Activity Distribution</h4><div class="cw"><canvas id="cAct"></canvas></div></div>
-          <div class="cc"><h4>Signal Strength Distribution</h4><div class="cw"><canvas id="cSig"></canvas></div></div>
-        </div>
-        <div class="cgrid full">
-          <div class="cc"><h4>Observations Over Time (Monthly)</h4><div class="cw" style="height:205px;"><canvas id="cTime"></canvas></div></div>
-        </div>
-      </div>
-      <div class="mtc" id="me">
-        <div class="scards" id="ecoCards"></div>
-        <div class="cgrid">
-          <div class="cc"><h4>Step Length Distribution (m)</h4><div class="cw"><canvas id="cStep"></canvas></div></div>
-          <div class="cc"><h4>Turn Angle Distribution (°)</h4><div class="cw"><canvas id="cAngle"></canvas></div></div>
-        </div>
-        <div class="cc" style="margin-bottom:12px;"><h4>Per-Animal Home Range & Ecology</h4>
-          <div class="eco-scroll"><table class="eco-tbl" id="ecoTbl"><thead><tr><th>ID</th><th>Type</th><th>Status</th><th>Fixes</th><th>MCP (ha)</th><th>SI</th><th>Mean Step (m)</th><th>Max Disp (m)</th></tr></thead><tbody></tbody></table></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+ 
 <!-- ══ BOTTOM TABLE ══════════════════════════════════════════════ -->
 <div id="btm">
   <div id="rbar"></div>
@@ -414,697 +367,495 @@ button{cursor:pointer;font-family:var(--font);}
     <table class="dtbl">
       <thead><tr>
         <th onclick="sortTbl(0)">Radio ID ↕</th>
-        <th onclick="sortTbl(1)">Last Fix ↕</th>
+        <th onclick="sortTbl(1)">Date / Time ↕</th>
         <th onclick="sortTbl(2)">Days ↕</th>
         <th onclick="sortTbl(3)">Status ↕</th>
-        <th onclick="sortTbl(4)">Type</th>
-        <th onclick="sortTbl(5)">Category ↕</th>
+        <th onclick="sortTbl(4)">Category ↕</th>
         <th>Sex</th>
-        <th onclick="sortTbl(7)">Source ↕</th>
-        <th onclick="sortTbl(8)">Zone ↕</th>
-        <th>Collar #</th>
-        <th>Latitude</th><th>Longitude</th>
-        <th>Tag Place</th><th>T.L (cm)</th><th>Remarks</th>
+        <th onclick="sortTbl(6)">Source ↕</th>
+        <th onclick="sortTbl(7)">Zone ↕</th>
+        <th id="col-collar-hdr">Collar #</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Tag Place</th>
+        <th>T.L (cm)</th>
+        <th>Remarks</th>
       </tr></thead>
-      <tbody id="tbl-body"><tr class="no-data-row"><td colspan="15">Apply filters to display telemetry records</td></tr></tbody>
+      <tbody id="tbl-body">
+        <tr class="no-data-row"><td colspan="14">Select a source and click Apply to display records</td></tr>
+      </tbody>
     </table>
   </div>
 </div>
-
+ 
 <!-- ══ SCRIPTS ═══════════════════════════════════════════════════ -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 /* ════════════════════════════════════════════════════════════════
    CONFIG
 ════════════════════════════════════════════════════════════════ */
 const URLS = {
-  master : 'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
-  ats    : 'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
-  fl     : 'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
-  pali   : 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  updates: 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
-  geojson: 'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
+  master  : 'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
+  ats     : 'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
+  fl      : 'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
+  pali    : 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  updates : 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
+  geojson : 'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
+  river   : 'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/river.geojson',
 };
-
+ 
 const MAP_CENTER = [25.84, 76.56];
 const MAP_ZOOM   = 12;
 const TODAY      = new Date();
-
-// Placeholder Chambal River centreline [lng, lat] for Turf.js river-distance calculations
-const RIVER_LINE = turf.lineString([
-  [76.478,25.922],[76.492,25.910],[76.505,25.899],[76.517,25.889],
-  [76.528,25.880],[76.537,25.872],[76.545,25.864],[76.552,25.856],
-  [76.558,25.847],[76.563,25.838],[76.568,25.829],[76.574,25.820],
-  [76.581,25.810],[76.590,25.800],[76.600,25.790],[76.612,25.779],
-  [76.625,25.768],[76.638,25.757],[76.651,25.746],[76.665,25.735],
-]);
-
-// ── Hatchling criteria (sourced from Pali FT only) ─────────────
-const DEAD_IDS    = new Set(['30','33','34','38','96','64','98']);
-const SETTLER_IDS = new Set(['32','35','84','92','90','88','72','74','66','76','37','36','31','68','86','78','94','39','62','70']);
-const MORT = {
-  '64': { c:'Fish net mortality',           t:'Confirmed Dead'    },
-  '30': { c:'Unknown — Missing',            t:'Missing'           },
-  '33': { c:'Unknown — Missing',            t:'Missing'           },
-  '96': { c:'Unknown — Missing',            t:'Missing'           },
-  '34': { c:'Suspected Mugger Predation',   t:'Presumed Dead'     },
-  '38': { c:'Suspected Mugger Predation',   t:'Presumed Dead'     },
-  '98': { c:'Confirmed Mugger Predation',   t:'Confirmed Dead'    },
-};
-
-// Collar that is not yet deployed (ATS)
+ 
+// Dead hatchling IDs (Pali FT / '|H' scope ONLY)
+// ID "64" from FieldLog ('|A') is a LIVING Adult/Juv — not affected.
+const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
 const NOT_DEPLOYED_COLLAR = '060336';
-
-/* ════════════════════════════════════════════════════════════════
-   STATUS META — keyed by status string
-════════════════════════════════════════════════════════════════ */
+ 
 const SM = {
-  active:{ color:'#1565c0', lt:'#dbeafe', br:'#bfdbfe', cls:'sb-active', label:'Active ≤7d'     },
-  s7:    { color:'#b45309', lt:'#fef3c7', br:'#fde68a', cls:'sb-s7',     label:'Silent >7d'     },
-  s30:   { color:'#b91c1c', lt:'#fee2e2', br:'#fecaca', cls:'sb-s30',    label:'Silent >30d'    },
-  crit:  { color:'#7f1d1d', lt:'#fee2e2', br:'#fca5a5', cls:'sb-crit',   label:'Crit ≥45d'     },
-  tmiss: { color:'#d97706', lt:'#fef9c3', br:'#fde68a', cls:'sb-tmiss',  label:'Temp Missing'  },
-  gone:  { color:'#374151', lt:'#f3f4f6', br:'#d1d5db', cls:'sb-gone',   label:'Gone >30d'     },
-  dead:  { color:'#b91c1c', lt:'#fee2e2', br:'#fecaca', cls:'sb-dead',   label:'Dead'          },
-  ndep:  { color:'#7c3aed', lt:'#f3e8ff', br:'#ddd6fe', cls:'sb-ndep',   label:'Not Deployed'  },
+  active:{ color:'#1565c0', lt:'#dbeafe', br:'#bfdbfe', cls:'sb-active', label:'Active ≤7d'    },
+  s7:    { color:'#b45309', lt:'#fef3c7', br:'#fde68a', cls:'sb-s7',     label:'Silent >7d'    },
+  s30:   { color:'#b91c1c', lt:'#fee2e2', br:'#fecaca', cls:'sb-s30',    label:'Silent >30d'   },
+  crit:  { color:'#7f1d1d', lt:'#fee2e2', br:'#fca5a5', cls:'sb-crit',   label:'Crit ≥45d'    },
+  tmiss: { color:'#d97706', lt:'#fef9c3', br:'#fde68a', cls:'sb-tmiss',  label:'Temp Missing' },
+  gone:  { color:'#374151', lt:'#f3f4f6', br:'#d1d5db', cls:'sb-gone',   label:'Gone >30d'    },
+  dead:  { color:'#b91c1c', lt:'#fee2e2', br:'#fecaca', cls:'sb-dead',   label:'Dead'         },
+  ndep:  { color:'#7c3aed', lt:'#f3e8ff', br:'#ddd6fe', cls:'sb-ndep',   label:'Not Deployed' },
 };
-
+ 
 /* ════════════════════════════════════════════════════════════════
    STATE
 ════════════════════════════════════════════════════════════════ */
 let map, oms, markerLayer, trackLayer, zoneGeoLayer;
-let heatLayer = null, kdeLayer = null;
-let masterMapA = {}, masterMapH = {};  // adult and hatchling master lookups
-let allFixes = {};                     // composite key → fix[]
-let allAnimals = [];                   // merged latest per entity
-let displayed = [];
-let geojsonData = null;
-let mapMarkers = [];
-let justSpider = false;
-let btmCollapsed = false, btmH = 220;
-let activePill = null;
-let sortCol = 2, sortDir = 1;
-let fbarHidden = false;
-let heatmapOn = false;
-const CH = {};  // chart instances
-
+let heatLayer=null, kdeLayer=null;
+let masterMapA={}, masterMapH={};
+let allFixes={};
+let allAnimals=[];
+let displayed=[];
+let geojsonData=null;
+let riverLine=null;    // fetched from river.geojson
+let mapMarkers=[];
+let justSpider=false;
+let btmCollapsed=false, btmH=220;
+let activePill=null;
+let sortCol=2, sortDir=1;
+let fbarHidden=false;
+let isBlank=true;
+ 
 /* ════════════════════════════════════════════════════════════════
-   ══ DATE PARSERS (Three explicit, source-specific parsers) ══
+   DATE PARSERS — three explicit, source-specific parsers
 ════════════════════════════════════════════════════════════════ */
-
-/**
- * Field Log (VHF) parser — format: MM/DD/YYYY HH:MM:SS
- * e.g. "2/22/2026 17:22:18"
- */
+ 
+/** Field Log (VHF): MM/DD/YYYY HH:MM:SS */
 function parseFLDate(s) {
-  if (!s || !String(s).trim()) return null;
-  s = String(s).trim();
-  // Match MM/DD/YYYY optionally followed by HH:MM[:SS]
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!s||!String(s).trim()) return null;
+  s=String(s).trim();
+  const m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if (!m) return null;
-  const d = new Date(+m[3], +m[1] - 1, +m[2], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
-  return isNaN(d.getTime()) ? null : d;
+  const d=new Date(+m[3],+m[1]-1,+m[2],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  return isNaN(d.getTime())?null:d;
 }
-
-/**
- * Pali FT (Hatchlings) parser — format: DD-MM-YYYY HH:MM
- * e.g. "25-03-2026 09:48"
- * CRITICAL: first group = DAY, second = MONTH (NOT swapped by JS).
- */
+ 
+/** Pali FT (Hatchlings): DD-MM-YYYY HH:MM — DAY first, then MONTH (never swap!) */
 function parsePaliDate(s) {
-  if (!s || !String(s).trim()) return null;
-  s = String(s).trim();
-  // Explicitly capture DAY first, then MONTH, then YEAR
-  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!s||!String(s).trim()) return null;
+  s=String(s).trim();
+  const m=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if (!m) return null;
-  const day = +m[1], month = +m[2], year = +m[3];
-  const d = new Date(year, month - 1, day, +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
-  return isNaN(d.getTime()) ? null : d;
+  const day=+m[1],month=+m[2],year=+m[3];
+  const d=new Date(year,month-1,day,+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  return isNaN(d.getTime())?null:d;
 }
-
-/**
- * ATS (Satellite) parser — ISO 8601 format
- * e.g. "2026-03-12T13:00:00+00:00"
- * JS Date constructor handles ISO 8601 correctly.
- */
+ 
+/** ATS Satellite: ISO 8601 */
 function parseATSDate(s) {
-  if (!s || !String(s).trim()) return null;
-  const d = new Date(String(s).trim());
-  return isNaN(d.getTime()) ? null : d;
+  if (!s||!String(s).trim()) return null;
+  const d=new Date(String(s).trim());
+  return isNaN(d.getTime())?null:d;
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    UTILITIES
 ════════════════════════════════════════════════════════════════ */
-/** Flexible column getter — normalise key, ignore case/separators */
-function gc(row, ...keys) {
-  const rowKeys = Object.keys(row);
-  for (const k of keys) {
-    const norm = k.toLowerCase().replace(/[\s_\-\.\/]+/g, '');
-    for (const rk of rowKeys) {
-      if (rk.trim().toLowerCase().replace(/[\s_\-\.\/]+/g, '') === norm) {
-        const v = String(row[rk] || '').trim();
-        if (v && !['na', 'n/a', '-', '—', ''].includes(v.toLowerCase())) return v;
+function gc(row,...keys){
+  const rowKeys=Object.keys(row);
+  for(const k of keys){
+    const norm=k.toLowerCase().replace(/[\s_\-\.\/]+/g,'');
+    for(const rk of rowKeys){
+      if(rk.trim().toLowerCase().replace(/[\s_\-\.\/]+/g,'')=== norm){
+        const v=String(row[rk]||'').trim();
+        if(v&&!['na','n/a','-','—',''].includes(v.toLowerCase()))return v;
       }
     }
   }
   return '';
 }
-
-/** Normalise radio ID: uppercase, no spaces */
-function nid(raw) { return String(raw || '').trim().toUpperCase().replace(/\s+/g, ''); }
-
-function daysSince(ts) {
-  if (!ts || isNaN(ts.getTime())) return 9999;
-  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
-}
-
-/** Status key for ADULT/JUVENILE animals */
-function sKeyAdult(days, collar) {
-  if (collar === NOT_DEPLOYED_COLLAR) return 'ndep';
-  if (days <= 7)  return 'active';
-  if (days <= 30) return 's7';
-  if (days < 45)  return 's30';
-  return 'crit';
-}
-
-/** Status key for HATCHLING animals (Pali FT source only) */
-function sKeyHatchling(rawId, days) {
-  if (DEAD_IDS.has(rawId)) return 'dead';
-  if (days <= 10) return 'active';
-  if (days <= 30) return 'tmiss';
-  return 'gone';
-}
-
-function markerColor(st) {
-  return SM[st]?.color || '#6b7280';
-}
-
-function fmtDT(ts) {
-  if (!ts || isNaN(ts.getTime())) return '—';
-  return ts.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) +
-    ' ' + ts.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
-}
-function fmtDateOnly(ts) {
-  if (!ts || isNaN(ts.getTime())) return '—';
-  return ts.toLocaleDateString('en-GB', { day:'2-digit', month:'long', year:'numeric' });
-}
-
-function setLd(id, ok) {
-  const e = document.getElementById(id); if (!e) return;
-  e.className = 'ld-s ' + (ok ? 'ok' : 'err');
-  e.textContent = (ok ? '✓  ' : '✗  ') + e.textContent.replace(/^[◌✓✗]\s*/, '');
-}
-
-function getZoneName(feat) {
-  return feat?.properties?.name || feat?.properties?.Name ||
-    feat?.properties?.ZONE || feat?.properties?.zone ||
-    feat?.properties?.STRETCH || feat?.properties?.stretch || null;
-}
-
-/** Haversine distance in meters between two [lat,lon] pairs */
-function hav(a, b) {
-  const R = 6371000, tr = Math.PI / 180;
-  const dl = (b[0] - a[0]) * tr, dn = (b[1] - a[1]) * tr;
-  const x = Math.sin(dl/2)**2 + Math.cos(a[0]*tr) * Math.cos(b[0]*tr) * Math.sin(dn/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-}
-
-/** River-curve distance between two fix objects using Turf lineSlice */
-function calcRiverDist(fix1, fix2) {
-  try {
-    const p1 = turf.point([fix1.lon, fix1.lat]);
-    const p2 = turf.point([fix2.lon, fix2.lat]);
-    const s1 = turf.nearestPointOnLine(RIVER_LINE, p1);
-    const s2 = turf.nearestPointOnLine(RIVER_LINE, p2);
-    const seg = turf.lineSlice(s1, s2, RIVER_LINE);
-    return Math.round(turf.length(seg, { units: 'meters' }));
-  } catch(e) { return null; }
-}
-
-function toast(msg, ok = false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'on' + (ok ? ' ok' : '');
-  clearTimeout(t._t); t._t = setTimeout(() => t.className = '', 4000);
-}
-
+function nid(raw){return String(raw||'').trim().toUpperCase().replace(/\s+/g,'');}
+function daysSince(ts){if(!ts||isNaN(ts.getTime()))return 9999;return Math.max(0,Math.floor((TODAY-ts)/86400000));}
+function sKeyAdult(days,collar){if(collar===NOT_DEPLOYED_COLLAR)return 'ndep';if(days<=7)return 'active';if(days<=30)return 's7';if(days<45)return 's30';return 'crit';}
+function sKeyHatchling(rawId,days){if(DEAD_IDS.has(rawId))return 'dead';if(days<=10)return 'active';if(days<=30)return 'tmiss';return 'gone';}
+function markerColor(st){return SM[st]?.color||'#6b7280';}
+function fmtDT(ts){if(!ts||isNaN(ts.getTime()))return '—';return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function fmtDateOnly(ts){if(!ts||isNaN(ts.getTime()))return '—';return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});}
+function setSrc(id,ok){const e=document.getElementById(id);if(!e)return;e.className='splash-src '+(ok?'ok':'err');}
+function getZoneName(f){return f?.properties?.name||f?.properties?.Name||f?.properties?.ZONE||f?.properties?.zone||f?.properties?.STRETCH||f?.properties?.stretch||null;}
+function hav(a,b){const R=6371000,tr=Math.PI/180,dl=(b[0]-a[0])*tr,dn=(b[1]-a[1])*tr,x=Math.sin(dl/2)**2+Math.cos(a[0]*tr)*Math.cos(b[0]*tr)*Math.sin(dn/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+function calcRiverDist(f1,f2){if(!riverLine)return null;try{const p1=turf.point([f1.lon,f1.lat]),p2=turf.point([f2.lon,f2.lat]),s1=turf.nearestPointOnLine(riverLine,p1),s2=turf.nearestPointOnLine(riverLine,p2),seg=turf.lineSlice(s1,s2,riverLine);return Math.round(turf.length(seg,{units:'meters'}));}catch(e){return null;}}
+function toast(msg,ok=false){const t=document.getElementById('toast');t.textContent=msg;t.className='on'+(ok?' ok':'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='',4500);}
+function setBlank(v){isBlank=v;document.getElementById('blank-hint').style.display=v?'':'none';}
+ 
 /* ════════════════════════════════════════════════════════════════
    MAP INIT
 ════════════════════════════════════════════════════════════════ */
-function initMap() {
-  map = L.map('map', { zoomControl: false, attributionControl: false })
-    .setView(MAP_CENTER, MAP_ZOOM);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
-  L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
-    { maxZoom: 21, attribution: '© Google' }).addTo(map);
-
-  markerLayer = L.layerGroup().addTo(map);
-  trackLayer  = L.layerGroup().addTo(map);
-
-  oms = new OverlappingMarkerSpiderfier(map, {
-    keepSpiderfied: true, nearbyDistance: 30,
-    circleSpiralSwitchover: 8, circleFootSeparation: 55,
-    spiralFootSeparation: 35, spiralLengthStart: 22, spiralLengthFactor: 6,
-    legWeight: 2, legColors: { usual: '#2d6a4f', highlighted: '#e65100' },
+function initMap(){
+  map=L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21,attribution:'© Google'}).addTo(map);
+  markerLayer=L.layerGroup().addTo(map);
+  trackLayer =L.layerGroup().addTo(map);
+  oms=new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:30,circleSpiralSwitchover:8,circleFootSeparation:55,spiralFootSeparation:35,spiralLengthStart:22,spiralLengthFactor:6,legWeight:2,legColors:{usual:'#2d6a4f',highlighted:'#e65100'}});
+  oms.addListener('spiderfy',markers=>{justSpider=true;markers.forEach(m=>{try{m.closePopup();}catch(e){}});setTimeout(()=>{justSpider=false;},400);});
+  oms.addListener('click',marker=>{
+    if(justSpider)return;
+    marker._clickCount=(marker._clickCount||0)+1;
+    if(marker._clickCount===1){marker.setLatLng(marker._origLL);marker.openPopup();setTimeout(()=>{marker._clickCount=0;},3000);}
+    else{marker._clickCount=0;map.flyTo(marker._origLL,16,{duration:1.0});setTimeout(()=>marker.openPopup(),1100);}
   });
-  oms.addListener('spiderfy', markers => {
-    justSpider = true;
-    markers.forEach(m => { try { m.closePopup(); } catch(e) {} });
-    setTimeout(() => { justSpider = false; }, 400);
-  });
-  oms.addListener('click', marker => {
-    if (justSpider) return;
-    marker._clickCount = (marker._clickCount || 0) + 1;
-    if (marker._clickCount === 1) {
-      marker.setLatLng(marker._origLL);
-      marker.openPopup();
-      setTimeout(() => { marker._clickCount = 0; }, 3000);
-    } else {
-      marker._clickCount = 0;
-      map.flyTo(marker._origLL, 16, { duration: 1.0 });
-      setTimeout(() => marker.openPopup(), 1100);
-    }
-  });
-  map.on('click', () => { /* No extra close needed */ });
 }
-
-function resetView() { map.setView(MAP_CENTER, MAP_ZOOM); }
-
+function resetView(){map.setView(MAP_CENTER,MAP_ZOOM);}
+ 
 /* ════════════════════════════════════════════════════════════════
    DATA LOADING
 ════════════════════════════════════════════════════════════════ */
-function fetchCSV(url) {
-  return new Promise((res, rej) =>
-    Papa.parse(url + '&_t=' + Date.now(), {
-      download: true, header: true, skipEmptyLines: true,
-      complete: r => res(r.data), error: e => rej(e),
-    })
-  );
+function fetchCSV(url){
+  return new Promise((res,rej)=>Papa.parse(url+'&_t='+Date.now(),{download:true,header:true,skipEmptyLines:true,complete:r=>res(r.data),error:e=>rej(e)}));
 }
-
-async function loadAllData() {
-  const btn = document.getElementById('btn-ref');
+ 
+async function loadAllData(){
+  const btn=document.getElementById('btn-ref');
   btn.classList.add('loading');
-  document.getElementById('loading').classList.remove('hide');
-  document.getElementById('ld-sub').textContent = 'Fetching 4 sheets + GeoJSON…';
-  ['ls-m','ls-a','ls-f','ls-p','ls-g'].forEach(id => {
-    const e = document.getElementById(id); if (!e) return;
-    e.className = 'ld-s'; e.textContent = '◌  ' + e.textContent.replace(/^[◌✓✗]\s*/, '');
-  });
-
-  try {
-    const [masterR, atsR, flR, paliR, gjData, updatesR] = await Promise.all([
-      fetchCSV(URLS.master ).then(d=>{setLd('ls-m',true);return d;}).catch(e=>{setLd('ls-m',false);console.warn('Master:',e);return[];}),
-      fetchCSV(URLS.ats    ).then(d=>{setLd('ls-a',true);return d;}).catch(e=>{setLd('ls-a',false);console.warn('ATS:',e);return[];}),
-      fetchCSV(URLS.fl     ).then(d=>{setLd('ls-f',true);return d;}).catch(e=>{setLd('ls-f',false);console.warn('FL:',e);return[];}),
-      fetchCSV(URLS.pali   ).then(d=>{setLd('ls-p',true);return d;}).catch(e=>{setLd('ls-p',false);console.warn('Pali:',e);return[];}),
-      fetch(URLS.geojson   ).then(r=>r.json()).then(d=>{setLd('ls-g',true);return d;}).catch(e=>{setLd('ls-g',false);return null;}),
-      fetchCSV(URLS.updates).catch(() => []),
+  const splash=document.getElementById('splash');
+  splash.classList.remove('hide');
+  ['ls-m','ls-a','ls-f','ls-p','ls-g'].forEach(id=>{const e=document.getElementById(id);if(e)e.className='splash-src';});
+ 
+  try{
+    document.getElementById('sp-status').textContent='Fetching 4 data sheets + 2 GeoJSONs…';
+    const [masterR,atsR,flR,paliR,gjData,riverGJ,updatesR]=await Promise.all([
+      fetchCSV(URLS.master ).then(d=>{setSrc('ls-m',true);return d;}).catch(e=>{setSrc('ls-m',false);return[];}),
+      fetchCSV(URLS.ats    ).then(d=>{setSrc('ls-a',true);return d;}).catch(e=>{setSrc('ls-a',false);return[];}),
+      fetchCSV(URLS.fl     ).then(d=>{setSrc('ls-f',true);return d;}).catch(e=>{setSrc('ls-f',false);return[];}),
+      fetchCSV(URLS.pali   ).then(d=>{setSrc('ls-p',true);return d;}).catch(e=>{setSrc('ls-p',false);return[];}),
+      fetch(URLS.geojson   ).then(r=>r.json()).then(d=>{setSrc('ls-g',true);return d;}).catch(e=>{setSrc('ls-g',false);return null;}),
+      fetch(URLS.river     ).then(r=>r.json()).catch(()=>null),
+      fetchCSV(URLS.updates).catch(()=>[]),
     ]);
-
-    document.getElementById('ld-sub').textContent = 'Building master lookups…';
+ 
+    // Build river centreline for Turf distance calculations
+    riverLine=null;
+    if(riverGJ?.features?.length){
+      const lf=riverGJ.features.filter(f=>f.geometry?.type==='LineString'||f.geometry?.type==='MultiLineString');
+      if(lf.length)riverLine=lf[0];
+    }
+ 
+    document.getElementById('sp-status').textContent='Building master lookups…';
     buildMasterMaps(masterR);
-
-    document.getElementById('ld-sub').textContent = 'Processing telemetry streams…';
-    allFixes = {};
+ 
+    document.getElementById('sp-status').textContent='Processing telemetry streams…';
+    allFixes={};
     ingestATS(atsR);
     ingestFL(flR);
     ingestPali(paliR);
-
-    document.getElementById('ld-sub').textContent = 'Merging animals…';
-    geojsonData = gjData;
-    allAnimals  = mergeAnimals();
-
-    if (geojsonData?.features?.length) {
-      document.getElementById('ld-sub').textContent = 'Assigning river zones…';
+ 
+    document.getElementById('sp-status').textContent='Merging animals…';
+    geojsonData=gjData;
+    allAnimals=mergeAnimals();
+ 
+    if(geojsonData?.features?.length){
+      document.getElementById('sp-status').textContent='Assigning river zones…';
       assignZones();
     }
-
-    document.getElementById('ld-sub').textContent = 'Building filters…';
+ 
+    document.getElementById('sp-status').textContent='Building filters…';
     rebuildFilters();
     updatePills();
     drawZonePolygons();
     loadUpdates(updatesR);
-
-    const latestTs = allAnimals.reduce((mx, a) => a.ts && a.ts > mx ? a.ts : mx, new Date(0));
-    document.getElementById('mf-txt').textContent =
-      `Latest fix: ${fmtDT(latestTs)} · ${Object.keys(allFixes).length} unique entities`;
-    document.getElementById('mf-cnt').textContent = `${allAnimals.length} animals`;
-    document.getElementById('sync-t').textContent =
-      new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
-    toast(`✓ Loaded ${allAnimals.length} animals across all sources`, true);
-
-  } catch(err) {
-    console.error(err); toast('Error: ' + err.message);
-  } finally {
+ 
+    const latestTs=allAnimals.reduce((mx,a)=>a.ts&&a.ts>mx?a.ts:mx,new Date(0));
+    document.getElementById('mf-txt').textContent=`Ready · ${allAnimals.length} animals loaded · Latest fix: ${fmtDT(latestTs)}`;
+    document.getElementById('mf-cnt').textContent=`${Object.keys(allFixes).length} entities`;
+    document.getElementById('sync-t').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    toast(`✓ Loaded ${allAnimals.length} animals across all sources`,true);
+  }catch(err){
+    console.error(err);toast('Error: '+err.message);
+  }finally{
     btn.classList.remove('loading');
-    document.getElementById('loading').classList.add('hide');
+    setTimeout(()=>splash.classList.add('hide'),900);
   }
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   DATA INGESTION
-   Composite key = nid(radioId) + '|A' for adults (ATS + FieldLog)
-                   nid(radioId) + '|H' for hatchlings (PaliFT)
-   This resolves ID collisions for IDs 82 and 64.
+   MASTER MAP BUILD
 ════════════════════════════════════════════════════════════════ */
-
-function buildMasterMaps(rows) {
-  masterMapA = {}; masterMapH = {};
-  rows.forEach(row => {
-    const id  = nid(gc(row, 'Radio_ID', 'RadioID', 'Radio ID', 'ID', 'AnimalID'));
-    if (!id) return;
-    const cat = gc(row, 'Category', 'Type', 'TagType', 'Tag_Type', 'Species_Category');
-    if (cat.toLowerCase().includes('hatchling')) {
-      masterMapH[id] = row;
-    } else {
-      masterMapA[id] = row;
-    }
+function buildMasterMaps(rows){
+  masterMapA={};masterMapH={};
+  rows.forEach(row=>{
+    const id=nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
+    if(!id)return;
+    const cat=gc(row,'Category','Type','TagType','Tag_Type','Species_Category');
+    if(cat.toLowerCase().includes('hatchling'))masterMapH[id]=row;
+    else masterMapA[id]=row;
   });
 }
-
-/** ATS Log: CollarSerialNumber, RadioID, Date (ISO 8601), Latitude, Longitude */
-function ingestATS(rows) {
-  rows.forEach(row => {
-    const id  = nid(gc(row, 'RadioID', 'Radio_ID', 'Radio ID'));
-    if (!id) return;
-    const lat = parseFloat(gc(row, 'Latitude', 'Lat'));
-    const lon = parseFloat(gc(row, 'Longitude', 'Lon', 'Long'));
-    if (isNaN(lat) || isNaN(lon)) return;
-    const ts     = parseATSDate(gc(row, 'Date', 'Timestamp', 'DateTime', 'date'));
-    const collar = gc(row, 'CollarSerialNumber', 'Collar', 'SerialNumber', 'Collar_Serial');
-    const key    = id + '|A';
-    if (!allFixes[key]) allFixes[key] = [];
-    allFixes[key].push({ lat, lon, ts, source: 'ATS', collar, rawId: id,
-      remarks: gc(row, 'Remarks', 'Notes') });
-  });
-}
-
-/** Field Log (VHF): Radio_ID, LatLong ("25.84, 76.56"), Datetime (MM/DD/YYYY HH:MM:SS) */
-function ingestFL(rows) {
-  rows.forEach(row => {
-    const id = nid(gc(row, 'Radio_ID', 'RadioID', 'Radio ID', 'ID', 'AnimalID'));
-    if (!id) return;
-    let lat, lon;
-    const ll = gc(row, 'LatLong', 'Lat_Long', 'LatLng', 'GPS_Coordinates', 'Coordinates', 'Lat Long');
-    if (ll && ll.includes(',')) {
-      const parts = ll.split(',');
-      lat = parseFloat(parts[0].trim());
-      lon = parseFloat(parts[1].trim());
-    } else {
-      lat = parseFloat(gc(row, 'Latitude', 'Lat'));
-      lon = parseFloat(gc(row, 'Longitude', 'Lon', 'Long'));
-    }
-    if (isNaN(lat) || isNaN(lon)) return;
-    // ── EXPLICIT Field Log date parser (MM/DD/YYYY HH:MM:SS) ──
-    const ts  = parseFLDate(gc(row, 'Datetime', 'DateTime', 'Timestamp', 'Date', 'date'));
-    const key = id + '|A';
-    if (!allFixes[key]) allFixes[key] = [];
-    allFixes[key].push({ lat, lon, ts, source: 'FieldLog', rawId: id,
-      activity: gc(row, 'Activity', 'Behavior', 'Behaviour'),
-      signal  : gc(row, 'Signal', 'SignalStrength', 'Signal_Strength'),
-      place   : gc(row, 'Place', 'Location', 'Site'),
-      remarks : gc(row, 'Remarks', 'Notes') });
-  });
-}
-
-/** Pali FT: Animal ID, Timestamp (DD-MM-YYYY HH:MM), Latitude, Longitude */
-function ingestPali(rows) {
-  rows.forEach(row => {
-    const id = nid(gc(row, 'Animal ID', 'AnimalID', 'Animal_ID', 'RadioID', 'Radio_ID', 'ID'));
-    if (!id) return;
-    const lat = parseFloat(gc(row, 'Latitude', 'Lat'));
-    const lon = parseFloat(gc(row, 'Longitude', 'Lon'));
-    if (isNaN(lat) || isNaN(lon)) return;
-    // ── EXPLICIT Pali FT date parser (DD-MM-YYYY HH:MM) ──
-    const ts  = parsePaliDate(gc(row, 'Timestamp', 'Date', 'timestamp', 'date'));
-    const key = id + '|H';
-    if (!allFixes[key]) allFixes[key] = [];
-    allFixes[key].push({ lat, lon, ts, source: 'PaliFT', rawId: id,
-      activity: gc(row, 'Activity', 'activity'),
-      signal  : gc(row, 'Signal', 'signal'),
-      place   : gc(row, 'Place', 'Location', 'place'),
-      remarks : gc(row, 'Remarks', 'Notes', 'remarks') });
-  });
-}
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   MERGE ANIMALS
-   Dual-tagged adults (ATS + FieldLog) share the same '|A' key.
-   Each composite key becomes ONE animal record.
+   INGESTION
+   Composite key:
+     Adults (ATS + FieldLog) → nid(id) + '|A'
+     Hatchlings (PaliFT)     → nid(id) + '|H'
+   IDs "82" and "64" that exist in both sources are kept separate.
 ════════════════════════════════════════════════════════════════ */
-function mergeAnimals() {
-  const out = [];
-  Object.entries(allFixes).forEach(([compKey, arr]) => {
-    const [rawId, scope] = compKey.split('|');  // scope = 'A' or 'H'
-    const isHatchling = scope === 'H';
-
-    arr.sort((a, b) => {
-      if (!a.ts && !b.ts) return 0;
-      if (!a.ts) return 1; if (!b.ts) return -1;
-      return b.ts - a.ts;
-    });
-
-    const latest  = arr[0];
-    const mr      = isHatchling ? (masterMapH[rawId] || {}) : (masterMapA[rawId] || {});
-
-    // ── Dual-tag: does this adult have fixes from BOTH ATS and FieldLog? ──
-    const sources  = [...new Set(arr.map(f => f.source))];
-    const isDual   = !isHatchling && sources.includes('ATS') &&
-                     sources.includes('FieldLog');
-
-    // Separate latest SAT and VHF fixes (for dual-tag popup)
-    const latestSAT = isDual ? arr.find(f => f.source === 'ATS')    || null : null;
-    const latestVHF = isDual ? arr.find(f => f.source === 'FieldLog') || null : null;
-
-    const collar  = arr.find(f => f.collar)?.collar ||
-                    gc(mr, 'SAT', 'Collar', 'CollarSerial', 'CollarSerialNumber');
-    const tagDateRaw = gc(mr,
-      'Tag Date', 'Release Date', 'Tag Date/Release Date', 'TagDate', 'ReleaseDate',
-      'Tag_Date', 'Release_Date', 'DeploymentDate', 'Release');
-    const tagDate   = isHatchling ? parsePaliDate(tagDateRaw) : parseFLDate(tagDateRaw) || parseATSDate(tagDateRaw);
-    const tagPlace  = gc(mr, 'Tag Place', 'Tag_Place', 'TagPlace', 'Release_Location', 'Release Location', 'Site');
-    const sex       = gc(mr, 'Sex', 'Gender');
-    const category  = gc(mr, 'Category', 'Type', 'Tag_Type', 'TagType', 'Species_Category');
-    const tl        = gc(mr, 'T.L', 'TL', 'Total_Length', 'TotalLength', 'Total Length', 'Length');
-    const remarks   = gc(mr, 'Remarks', 'Notes');
-
-    const daysFix = daysSince(latest.ts);
-    const oldest  = arr[arr.length - 1];
-    const relDate = tagDate || oldest?.ts || null;
-    const daysRel = relDate ? daysSince(relDate) : null;
-
-    const status = isHatchling ? sKeyHatchling(rawId, daysFix) : sKeyAdult(daysFix, collar);
-
-    // Determine display source label
-    let displaySrc = latest.source;
-    if (isDual) displaySrc = 'ATS+VHF';
-    else if (isHatchling) displaySrc = 'PaliFT';
-
-    out.push({
-      compKey, rawId,
-      id: rawId,           // display ID (no scope suffix)
-      isHatchling, isDual,
-      lat: latest.lat, lon: latest.lon, ts: latest.ts,
-      source: displaySrc, sources, collar,
-      category, sex, tl, tagPlace, tagDate, remarks,
-      daysFix, daysRel, status, zone: '—',
-      activity: latest.activity || '',
-      signal:   latest.signal   || '',
-      place:    latest.place    || '',
-      totalFixes: arr.length,
-      history:  [...arr].reverse(),
-      // Dual-tag last-fix info
-      latestSAT, latestVHF,
-    });
+function ingestATS(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'RadioID','Radio_ID','Radio ID'));
+    if(!id)return;
+    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(isNaN(lat)||isNaN(lon))return;
+    const ts=parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
+    const collar=gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial');
+    const key=id+'|A';
+    if(!allFixes[key])allFixes[key]=[];
+    allFixes[key].push({lat,lon,ts,source:'ATS',collar,rawId:id,remarks:gc(row,'Remarks','Notes')});
   });
-  out.sort((a, b) => a.daysFix - b.daysFix);
+}
+ 
+function ingestFL(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
+    if(!id)return;
+    let lat,lon;
+    const ll=gc(row,'LatLong','Lat_Long','LatLng','GPS_Coordinates','Coordinates','Lat Long');
+    if(ll&&ll.includes(',')){const p=ll.split(',');lat=parseFloat(p[0].trim());lon=parseFloat(p[1].trim());}
+    else{lat=parseFloat(gc(row,'Latitude','Lat'));lon=parseFloat(gc(row,'Longitude','Lon','Long'));}
+    if(isNaN(lat)||isNaN(lon))return;
+    const ts=parseFLDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
+    const key=id+'|A';
+    if(!allFixes[key])allFixes[key]=[];
+    allFixes[key].push({lat,lon,ts,source:'FieldLog',rawId:id,
+      activity:gc(row,'Activity','Behavior','Behaviour'),
+      signal  :gc(row,'Signal','SignalStrength','Signal_Strength'),
+      place   :gc(row,'Place','Location','Site'),
+      remarks :gc(row,'Remarks','Notes')});
+  });
+}
+ 
+function ingestPali(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'Animal ID','AnimalID','Animal_ID','RadioID','Radio_ID','ID'));
+    if(!id)return;
+    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon'));
+    if(isNaN(lat)||isNaN(lon))return;
+    const ts=parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
+    const key=id+'|H';
+    if(!allFixes[key])allFixes[key]=[];
+    allFixes[key].push({lat,lon,ts,source:'PaliFT',rawId:id,
+      activity:gc(row,'Activity','activity'),
+      signal  :gc(row,'Signal','signal'),
+      place   :gc(row,'Place','Location','place'),
+      remarks :gc(row,'Remarks','Notes','remarks')});
+  });
+}
+ 
+/* ════════════════════════════════════════════════════════════════
+   MERGE ANIMALS — one record per composite key
+════════════════════════════════════════════════════════════════ */
+function mergeAnimals(){
+  const out=[];
+  Object.entries(allFixes).forEach(([compKey,arr])=>{
+    const[rawId,scope]=compKey.split('|');
+    const isHatchling=scope==='H';
+    arr.sort((a,b)=>{if(!a.ts&&!b.ts)return 0;if(!a.ts)return 1;if(!b.ts)return -1;return b.ts-a.ts;});
+    const latest=arr[0];
+    const mr=isHatchling?(masterMapH[rawId]||{}):(masterMapA[rawId]||{});
+    const sources=[...new Set(arr.map(f=>f.source))];
+    const isDual=!isHatchling&&sources.includes('ATS')&&sources.includes('FieldLog');
+    const latestSAT=isDual?arr.find(f=>f.source==='ATS')||null:null;
+    const latestVHF=isDual?arr.find(f=>f.source==='FieldLog')||null:null;
+    const collar=arr.find(f=>f.collar)?.collar||gc(mr,'SAT','Collar','CollarSerial','CollarSerialNumber');
+    const tagDateRaw=gc(mr,'Tag Date','Release Date','Tag Date/Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Release');
+    const tagDate=isHatchling?parsePaliDate(tagDateRaw):(parseFLDate(tagDateRaw)||parseATSDate(tagDateRaw));
+    const tagPlace=gc(mr,'Tag Place','Tag_Place','TagPlace','Release_Location','Release Location','Site');
+    const sex=gc(mr,'Sex','Gender');
+    const category=gc(mr,'Category','Type','Tag_Type','TagType','Species_Category');
+    const tl=gc(mr,'T.L','TL','Total_Length','TotalLength','Total Length','Length');
+    const remarks=gc(mr,'Remarks','Notes');
+    const daysFix=daysSince(latest.ts);
+    const oldest=arr[arr.length-1];
+    const relDate=tagDate||oldest?.ts||null;
+    const daysRel=relDate?daysSince(relDate):null;
+    const status=isHatchling?sKeyHatchling(rawId,daysFix):sKeyAdult(daysFix,collar);
+    let displaySrc=latest.source;
+    if(isDual)displaySrc='ATS+VHF';
+    else if(isHatchling)displaySrc='PaliFT';
+    out.push({compKey,rawId,id:rawId,isHatchling,isDual,
+      lat:latest.lat,lon:latest.lon,ts:latest.ts,
+      source:displaySrc,sources,collar,category,sex,tl,tagPlace,tagDate,remarks,
+      daysFix,daysRel,status,zone:'—',
+      activity:latest.activity||'',signal:latest.signal||'',place:latest.place||'',
+      totalFixes:arr.length,
+      history:[...arr].reverse(),  // chronological (oldest first)
+      latestSAT,latestVHF});
+  });
+  out.sort((a,b)=>a.daysFix-b.daysFix);
   return out;
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    ZONE ASSIGNMENT
-   Uses booleanPointInPolygon first. If outside all polygons,
-   falls back to nearest polygon boundary (bank animal).
 ════════════════════════════════════════════════════════════════ */
-function assignZones() {
-  if (!geojsonData?.features) return;
-  const polys = geojsonData.features.filter(
-    f => f.geometry?.type === 'Polygon' || f.geometry?.type === 'MultiPolygon');
-  allAnimals.forEach(a => {
-    const pt = turf.point([a.lon, a.lat]);
-
-    // 1. Try exact containment
-    for (const feat of polys) {
-      try {
-        if (turf.booleanPointInPolygon(pt, feat)) {
-          a.zone = getZoneName(feat) || '—'; return;
-        }
-      } catch(e) {}
-    }
-
-    // 2. Fallback: assign nearest polygon (handles bank-sitting animals)
-    let minDist = Infinity, nearestName = '—';
-    for (const feat of polys) {
-      try {
-        const line = turf.polygonToLine(feat);
-        const nearest = turf.nearestPointOnLine(line, pt);
-        const dist = turf.distance(pt, nearest, { units: 'kilometers' });
-        if (dist < minDist) { minDist = dist; nearestName = getZoneName(feat) || '—'; }
-      } catch(e) {}
-    }
-    a.zone = nearestName;
+function assignZones(){
+  if(!geojsonData?.features)return;
+  const polys=geojsonData.features.filter(f=>f.geometry?.type==='Polygon'||f.geometry?.type==='MultiPolygon');
+  allAnimals.forEach(a=>{
+    const pt=turf.point([a.lon,a.lat]);
+    for(const feat of polys){try{if(turf.booleanPointInPolygon(pt,feat)){a.zone=getZoneName(feat)||'—';return;}}catch(e){}}
+    let minD=Infinity,nn='—';
+    for(const feat of polys){try{const l=turf.polygonToLine(feat),np=turf.nearestPointOnLine(l,pt),d=turf.distance(pt,np,{units:'kilometers'});if(d<minD){minD=d;nn=getZoneName(feat)||'—';}}catch(e){}}
+    a.zone=nn;
   });
 }
-
-function drawZonePolygons() {
-  if (zoneGeoLayer) map.removeLayer(zoneGeoLayer);
-  if (!geojsonData) return;
-  zoneGeoLayer = L.geoJSON(geojsonData, {
-    style: { color:'rgba(27,67,50,.5)', weight:1.5, dashArray:'5,10',
-             fillColor:'rgba(27,67,50,.04)', fillOpacity:1 },
-    onEachFeature(feat, layer) {
-      const n = getZoneName(feat) || 'Zone';
-      layer.bindTooltip(n, { className:'zone-lbl', direction:'center', permanent:false });
-    }
+ 
+function drawZonePolygons(){
+  if(zoneGeoLayer)map.removeLayer(zoneGeoLayer);
+  if(!geojsonData)return;
+  zoneGeoLayer=L.geoJSON(geojsonData,{
+    style:{color:'rgba(27,67,50,.5)',weight:1.5,dashArray:'5,10',fillColor:'rgba(27,67,50,.04)',fillOpacity:1},
+    onEachFeature(feat,layer){layer.bindTooltip(getZoneName(feat)||'Zone',{className:'zone-lbl',direction:'center',permanent:false});}
   }).addTo(map);
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   FILTER DROPDOWNS (cascading)
+   FILTER DROPDOWNS
 ════════════════════════════════════════════════════════════════ */
-function rebuildFilters() {
-  const src = document.getElementById('f-source').value;
-  const pool = src === 'all' ? allAnimals :
-    allAnimals.filter(a => a.sources.includes(src) || a.source === src);
-
-  // RID
-  const ridSel = document.getElementById('f-rid');
-  const curRid = ridSel.value;
-  ridSel.innerHTML = '<option value="all">All IDs</option>';
-  [...new Set(pool.map(a => a.id))].sort().forEach(id => {
-    const o = document.createElement('option');
-    o.value = id; o.textContent = id;
-    ridSel.appendChild(o);
+function rebuildFilters(){
+  const src=document.getElementById('f-source').value;
+  const pool=src==='all'?allAnimals:allAnimals.filter(a=>{
+    if(src==='PaliFT')return a.isHatchling;
+    if(src==='ATS')   return !a.isHatchling&&a.sources.includes('ATS');
+    if(src==='FieldLog')return !a.isHatchling&&a.sources.includes('FieldLog');
+    return true;
   });
-  ridSel.value = ridSel.querySelector(`option[value="${curRid}"]`) ? curRid : 'all';
-
-  // Category
-  const catSel = document.getElementById('f-cat');
-  const curCat = catSel.value;
-  catSel.innerHTML = '<option value="all">All Categories</option>';
-  [...new Set(pool.map(a => a.category || '—'))].sort().forEach(c => {
-    const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o);
-  });
-  catSel.value = catSel.querySelector(`option[value="${curCat}"]`) ? curCat : 'all';
-
-  // Zone
-  const zoneSel = document.getElementById('f-zone');
-  const curZone = zoneSel.value;
-  zoneSel.innerHTML = '<option value="all">All Zones</option>';
-  const zoneCts = {};
-  pool.forEach(a => { if (a.zone && a.zone !== '—') zoneCts[a.zone] = (zoneCts[a.zone] || 0) + 1; });
-  Object.entries(zoneCts).sort((a, b) => b[1] - a[1]).forEach(([z, c]) => {
-    const o = document.createElement('option'); o.value = z; o.textContent = `${z} (${c})`; zoneSel.appendChild(o);
-  });
-  zoneSel.value = zoneSel.querySelector(`option[value="${curZone}"]`) ? curZone : 'all';
-
-  // Status
-  const stSel = document.getElementById('f-status');
-  const curSt = stSel.value;
-  stSel.innerHTML = '<option value="all">All Statuses</option>';
-  Object.entries(SM).forEach(([k, v]) => {
-    const o = document.createElement('option'); o.value = k; o.textContent = v.label; stSel.appendChild(o);
-  });
-  stSel.value = stSel.querySelector(`option[value="${curSt}"]`) ? curSt : 'all';
+  function repop(selId,defOpt,items){
+    const sel=document.getElementById(selId);const saved=sel.value;
+    sel.innerHTML=defOpt;
+    items.forEach(it=>{const o=document.createElement('option');o.value=it.v;o.textContent=it.t;sel.appendChild(o);});
+    if(sel.querySelector(`option[value="${saved}"]`))sel.value=saved;
+  }
+  repop('f-rid','<option value="all">All IDs</option>',[...new Set(pool.map(a=>a.id))].sort().map(id=>({v:id,t:id})));
+  repop('f-cat','<option value="all">All Categories</option>',[...new Set(pool.map(a=>a.category||'—'))].sort().map(c=>({v:c,t:c})));
+  const zc={};pool.forEach(a=>{if(a.zone&&a.zone!=='—')zc[a.zone]=(zc[a.zone]||0)+1;});
+  repop('f-zone','<option value="all">All Zones</option>',Object.entries(zc).sort((a,b)=>b[1]-a[1]).map(([z,c])=>({v:z,t:`${z} (${c})`})));
+  repop('f-status','<option value="all">All Statuses</option>',Object.entries(SM).map(([k,v])=>({v:k,t:v.label})));
 }
-
-function onSourceChange() { rebuildFilters(); updatePills(); }
-
+ 
+function onSourceChange(){
+  const src=document.getElementById('f-source').value;
+  // Field Updates button only when PaliFT selected
+  document.getElementById('btn-fp').style.display=src==='PaliFT'?'':'none';
+  // Collar column: hide for VHF and PaliFT
+  const hideCollar=(src==='FieldLog'||src==='PaliFT');
+  document.getElementById('col-collar-hdr').classList.toggle('col-hidden',hideCollar);
+  rebuildFilters();
+  updatePills();
+  // Source auto-applies
+  applyFilters();
+}
+ 
 /* ════════════════════════════════════════════════════════════════
    APPLY FILTERS
 ════════════════════════════════════════════════════════════════ */
-function applyFilters() {
-  const src    = document.getElementById('f-source').value;
-  const rid    = document.getElementById('f-rid').value;
-  const cat    = document.getElementById('f-cat').value;
-  const zone   = document.getElementById('f-zone').value;
-  const status = document.getElementById('f-status').value;
-
-  displayed = allAnimals.filter(a => {
-    if (src !== 'all' && !a.sources.includes(src) && a.source !== src) return false;
-    if (rid !== 'all' && a.id !== rid) return false;
-    if (cat !== 'all' && (a.category || '—') !== cat) return false;
-    if (zone !== 'all' && a.zone !== zone) return false;
-    if (status !== 'all' && a.status !== status) return false;
+function applyFilters(){
+  const src   =document.getElementById('f-source').value;
+  const rid   =document.getElementById('f-rid').value;
+  const cat   =document.getElementById('f-cat').value;
+  const zone  =document.getElementById('f-zone').value;
+  const status=document.getElementById('f-status').value;
+ 
+  displayed=allAnimals.filter(a=>{
+    if(src==='PaliFT'){if(!a.isHatchling)return false;}
+    else if(src==='ATS'){if(a.isHatchling||!a.sources.includes('ATS'))return false;}
+    else if(src==='FieldLog'){if(a.isHatchling||!a.sources.includes('FieldLog'))return false;}
+    if(rid   !=='all'&&a.id!==rid)return false;
+    if(cat   !=='all'&&(a.category||'—')!==cat)return false;
+    if(zone  !=='all'&&a.zone!==zone)return false;
+    if(status!=='all'&&a.status!==status)return false;
     return true;
   });
-
-  // Track mode: draw historical lines only when a specific RID is selected
-  const trackId = rid !== 'all' ? rid : null;
+ 
+  setBlank(false);
+  const trackId=rid!=='all'?rid:null;
   renderMarkers(trackId);
-  renderTable();
-
-  if (trackId) {
-    document.getElementById('track-badge').style.display = 'block';
-    document.getElementById('track-lbl').textContent = trackId;
-  } else {
-    document.getElementById('track-badge').style.display = 'none';
-  }
-
-  // Fly to zone if zone filter active
-  if (zone !== 'all' && geojsonData?.features) {
-    const feat = geojsonData.features.find(f => getZoneName(f) === zone);
-    if (feat) {
-      try {
-        const b = L.geoJSON(feat).getBounds();
-        if (b.isValid()) map.flyToBounds(b, { padding:[50,50] });
-      } catch(e) {}
-    }
+  renderTable(trackId);
+ 
+  document.getElementById('track-badge').style.display=trackId?'block':'none';
+  if(trackId)document.getElementById('track-lbl').textContent=trackId;
+ 
+  if(zone!=='all'&&geojsonData?.features){
+    const feat=geojsonData.features.find(f=>getZoneName(f)===zone);
+    if(feat){try{const b=L.geoJSON(feat).getBounds();if(b.isValid())map.flyToBounds(b,{padding:[50,50]});}catch(e){}}
   }
 }
-
-function clearFilters() {
-  document.getElementById('f-source').value = 'all';
-  document.getElementById('f-rid').value    = 'all';
-  document.getElementById('f-cat').value    = 'all';
-  document.getElementById('f-zone').value   = 'all';
-  document.getElementById('f-status').value = 'all';
-  activePill = null;
-  document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
-  rebuildFilters();
-  // Clear track lines
-  trackLayer.clearLayers();
-  document.getElementById('track-badge').style.display = 'none';
-  // Reset map view
-  resetView();
-  // Re-render all markers
-  displayed = [...allAnimals];
-  renderMarkers(null);
-  renderTable();
-}
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   MARKER ICON — standard divIcon, no nested circles
+   NUCLEAR CLEAR ALL — returns to blank initial state
 ════════════════════════════════════════════════════════════════ */
-function buildIcon(a) {
-  const c   = markerColor(a.status);
-  const lbl = a.id.length > 6 ? a.id.slice(0, 5) + '…' : a.id;
-  const sz  = a.id.length > 5 ? 38 : 32;
-  const fs  = a.id.length > 5 ? '7.5px' : '8.5px';
-  const pulse = (a.status === 'active' && a.daysFix <= 2) ?
-    `<div style="position:absolute;top:50%;left:50%;width:${sz}px;height:${sz}px;margin-left:-${sz/2}px;margin-top:-${sz/2}px;border-radius:50%;background:${c};opacity:.3;animation:mPulse 2.3s ease-out infinite;pointer-events:none;"></div>` : '';
-  // Small scope indicator (H = hatchling, SAT+VHF = dual)
-  const badge = a.isHatchling ?
-    `<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#16a34a;border:1.5px solid white;"></div>` :
-    a.isDual ? `<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#f59e0b;border:1.5px solid white;"></div>` : '';
+function clearAll(){
+  ['f-source','f-rid','f-cat','f-zone','f-status'].forEach(id=>document.getElementById(id).value='all');
+  activePill=null;
+  document.querySelectorAll('.hpill').forEach(p=>p.classList.remove('on'));
+  // Remove overlays
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(kdeLayer) {map.removeLayer(kdeLayer); kdeLayer=null;}
+  document.getElementById('btnHeat').classList.remove('on');
+  document.getElementById('btnKDE').classList.remove('on');
+  // Clear all map layers
+  markerLayer.clearLayers();trackLayer.clearLayers();mapMarkers=[];
+  try{oms.clearMarkers?.();}catch(e){}
+  if(!map.hasLayer(markerLayer))map.addLayer(markerLayer);
+  document.getElementById('track-badge').style.display='none';
+  // Hide Field Updates
+  document.getElementById('btn-fp').style.display='none';
+  closeFP();
+  // Restore Collar column
+  document.getElementById('col-collar-hdr').classList.remove('col-hidden');
+  // Reset table
+  displayed=[];
+  document.getElementById('tbl-badge').textContent='—';
+  document.getElementById('tbl-body').innerHTML='<tr class="no-data-row"><td colspan="14">Select a source and click Apply to display records</td></tr>';
+  rebuildFilters();
+  resetView();
+  setBlank(true);
+}
+ 
+/* ════════════════════════════════════════════════════════════════
+   MARKER ICON — standard circular divIcon, no nested rings
+════════════════════════════════════════════════════════════════ */
+function buildIcon(a){
+  const c=markerColor(a.status);
+  const lbl=a.id.length>6?a.id.slice(0,5)+'…':a.id;
+  const sz=a.id.length>5?38:32,fs=a.id.length>5?'7.5px':'8.5px';
+  const pulse=(a.status==='active'&&a.daysFix<=2)
+    ?`<div style="position:absolute;top:50%;left:50%;width:${sz}px;height:${sz}px;margin-left:-${sz/2}px;margin-top:-${sz/2}px;border-radius:50%;background:${c};opacity:.3;animation:mPulse 2.3s ease-out infinite;pointer-events:none;"></div>`:'';
+  const badge=a.isHatchling
+    ?`<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#16a34a;border:1.5px solid white;"></div>`
+    :a.isDual?`<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#f59e0b;border:1.5px solid white;"></div>`:'';
   return L.divIcon({
-    html: `<div style="position:relative;width:${sz}px;height:${sz}px;">${pulse}
+    html:`<div style="position:relative;width:${sz}px;height:${sz}px;">${pulse}
       <div style="width:${sz}px;height:${sz}px;border-radius:50%;background:${c};
         border:2.5px solid rgba(255,255,255,.9);
         box-shadow:0 3px 12px rgba(0,0,0,.45),0 0 0 1.5px ${c}66;
@@ -1114,69 +865,60 @@ function buildIcon(a) {
         text-shadow:0 1px 3px rgba(0,0,0,.5);cursor:pointer;">${lbl}</div>
       ${badge}
     </div>`,
-    className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2], popupAnchor: [0, -(sz/2+10)],
+    className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-(sz/2+10)],
   });
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    POPUP
 ════════════════════════════════════════════════════════════════ */
-function buildPopup(a) {
-  const st  = SM[a.status];
-  const srcCls = a.isDual ? 'sr-merged' :
-    { ATS:'sr-ats', FieldLog:'sr-fl', PaliFT:'sr-pali' }[a.source] || 'sr-pali';
-  const srcLabel = a.isDual ? '📡 VHF + SAT' : a.source;
-
-  // Build fix rows — dual-tag gets two separate last-fix lines
-  let fixRows = '';
-  if (a.isDual) {
-    const dSAT = a.latestSAT ? daysSince(a.latestSAT.ts) : '—';
-    const dVHF = a.latestVHF ? daysSince(a.latestVHF.ts) : '—';
-    fixRows += `<div class="pop-row"><span class="pop-lbl">Last SAT Fix</span><span class="pop-val">${fmtDT(a.latestSAT?.ts)} <span style="color:var(--text3);font-size:.55rem;">(${dSAT}d)</span></span></div>`;
-    fixRows += `<div class="pop-row"><span class="pop-lbl">Last VHF Fix</span><span class="pop-val">${fmtDT(a.latestVHF?.ts)} <span style="color:var(--text3);font-size:.55rem;">(${dVHF}d)</span></span></div>`;
-  } else {
-    fixRows = `<div class="pop-row"><span class="pop-lbl">Last Fix</span><span class="pop-val">${fmtDT(a.ts)}</span></div>`;
+function buildPopup(a){
+  const st=SM[a.status];
+  const srcCls=a.isDual?'sr-merged':({ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali');
+  const srcLabel=a.isDual?'📡 VHF + SAT':a.source;
+  let fixRows='';
+  if(a.isDual){
+    const dSAT=a.latestSAT?daysSince(a.latestSAT.ts):'—',dVHF=a.latestVHF?daysSince(a.latestVHF.ts):'—';
+    fixRows+=`<div class="pop-row"><span class="pop-lbl">Last SAT Fix</span><span class="pop-val">${fmtDT(a.latestSAT?.ts)} <span style="color:var(--text3);font-size:.55rem;">(${dSAT}d)</span></span></div>`;
+    fixRows+=`<div class="pop-row"><span class="pop-lbl">Last VHF Fix</span><span class="pop-val">${fmtDT(a.latestVHF?.ts)} <span style="color:var(--text3);font-size:.55rem;">(${dVHF}d)</span></span></div>`;
+  }else{
+    fixRows=`<div class="pop-row"><span class="pop-lbl">Last Fix</span><span class="pop-val">${fmtDT(a.ts)}</span></div>`;
   }
-
-  const rows = [
-    a.category  ? ['Category',        a.category]                   : null,
-    a.sex       ? ['Sex',             a.sex]                        : null,
-    a.tl        ? ['Total Length',    a.tl + ' cm']                 : null,
-    a.tagPlace  ? ['Tag / Rel. Site', a.tagPlace]                   : null,
-    a.tagDate   ? ['Release Date',    fmtDT(a.tagDate)]             : null,
-    ['Coordinates', `${a.lat.toFixed(5)}°, ${a.lon.toFixed(5)}°`],
-    a.zone !== '—' ? ['Zone', a.zone]                               : null,
-    a.daysRel !== null ? ['Days Since Release', a.daysRel + 'd']    : null,
-    a.collar    ? ['Collar Serial',   a.collar]                     : null,
-    a.activity  ? ['Activity',        a.activity]                   : null,
-    a.signal    ? ['Signal',          a.signal]                     : null,
-    ['Total Fixes', a.totalFixes],
+  const rows=[
+    a.category?['Category',a.category]:null,
+    a.sex?['Sex',a.sex]:null,
+    a.tl?['Total Length',a.tl+' cm']:null,
+    a.tagPlace?['Tag / Rel. Site',a.tagPlace]:null,
+    a.tagDate?['Release Date',fmtDT(a.tagDate)]:null,
+    ['Coordinates',`${a.lat.toFixed(5)}°, ${a.lon.toFixed(5)}°`],
+    a.zone!=='—'?['Zone',a.zone]:null,
+    a.daysRel!==null?['Days Since Release',a.daysRel+'d']:null,
+    (!a.isHatchling&&a.collar)?['Collar Serial',a.collar]:null,
+    a.activity?['Activity',a.activity]:null,
+    a.signal?['Signal',a.signal]:null,
+    ['Total Fixes',a.totalFixes],
   ].filter(Boolean);
-
-  const notDeployed = a.status === 'ndep' ?
-    `<div style="margin:6px 0;padding:5px 8px;background:var(--s-ndep-lt);border:1px solid var(--s-ndep-br);border-radius:4px;font-family:var(--mono);font-size:.62rem;color:var(--s-ndep);">⚠ Collar not yet deployed in field</div>` : '';
-
+  const notDep=a.status==='ndep'
+    ?`<div style="margin:6px 0;padding:5px 8px;background:var(--s-ndep-lt);border:1px solid var(--s-ndep-br);border-radius:4px;font-family:var(--mono);font-size:.62rem;color:var(--s-ndep);">⚠ Collar not yet deployed</div>`:'';
   return `<div>
     <div class="pop-top">
-      <div class="pop-badge" style="background:${st.color};">${a.id.length > 6 ? a.id.slice(0,5)+'…' : a.id}</div>
+      <div class="pop-badge" style="background:${st.color};">${a.id.length>6?a.id.slice(0,5)+'…':a.id}</div>
       <div>
         <div class="pop-id">📡 ${a.id}</div>
         <div class="pop-sub">
           <span class="sbadge ${st.cls}">${st.label}</span>
           <span class="pop-src ${srcCls}">${srcLabel}</span>
-          ${a.isHatchling ? '<span style="font-size:.55rem;color:#86efac;margin-left:4px;">🐣 Hatchling</span>' : ''}
-          ${a.isDual ? '<span style="font-size:.55rem;color:#fde68a;margin-left:4px;">⚡ Dual Tag</span>' : ''}
+          ${a.isHatchling?'<span style="font-size:.55rem;color:#86efac;margin-left:4px;">🐣 Hatchling</span>':''}
+          ${a.isDual?'<span style="font-size:.55rem;color:#fde68a;margin-left:4px;">⚡ Dual Tag</span>':''}
         </div>
       </div>
     </div>
     <div class="pop-body">
       ${fixRows}
-      ${rows.map(([l, v]) => `<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
-      ${notDeployed}
-      <div class="pop-days" style="background:${st.lt};color:${st.color};border:1px solid ${st.br};">
-        ${a.daysFix === 0 ? 'Today' : a.daysFix + 'd ago'}
-      </div>
-      ${a.remarks ? `<div style="margin-top:5px;font-size:.59rem;color:var(--text3);font-style:italic;border-top:1px solid var(--border);padding-top:4px;">${a.remarks}</div>` : ''}
+      ${rows.map(([l,v])=>`<div class="pop-row"><span class="pop-lbl">${l}</span><span class="pop-val">${v}</span></div>`).join('')}
+      ${notDep}
+      <div class="pop-days" style="background:${st.lt};color:${st.color};border:1px solid ${st.br};">${a.daysFix===0?'Today':a.daysFix+'d ago'}</div>
+      ${a.remarks?`<div style="margin-top:5px;font-size:.59rem;color:var(--text3);font-style:italic;border-top:1px solid var(--border);padding-top:4px;">${a.remarks}</div>`:''}
     </div>
     <div class="pop-acts">
       <button class="pab" onclick="flyTo('${a.compKey}')">🗺 Focus</button>
@@ -1185,136 +927,96 @@ function buildPopup(a) {
     </div>
   </div>`;
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    RENDER MARKERS
-   trackId: if set, draw track polyline for that raw ID (all scopes)
-   No nested circles — standard divIcon only.
 ════════════════════════════════════════════════════════════════ */
-function renderMarkers(trackId) {
-  markerLayer.clearLayers();
-  trackLayer.clearLayers();
-  mapMarkers = [];
-  try { oms.clearMarkers?.(); } catch(e) {}
-
-  // Track lines (polyline + small dots at each historical fix)
-  if (trackId) {
-    allAnimals.filter(a => a.id === trackId).forEach(a => {
-      if (!a.history?.length) return;
-      const color = markerColor(a.status);
-      const pts   = a.history.filter(f => !isNaN(f.lat) && !isNaN(f.lon));
-      if (pts.length > 1) {
-        L.polyline(pts.map(f => [f.lat, f.lon]),
-          { color, weight: 2.5, opacity: .8, dashArray: '8,14' }).addTo(trackLayer);
-      }
-      pts.forEach((fix, idx) => {
-        const isLast = idx === pts.length - 1;
-        const sz = isLast ? 12 : 6;
-        const icon = L.divIcon({
-          html: `<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}" fill="${color}" fill-opacity=".75" stroke="white" stroke-width="1.2"/></svg>`,
-          className: '', iconSize: [sz, sz], iconAnchor: [sz/2, sz/2],
-        });
-        const m = L.marker([fix.lat, fix.lon], { icon, zIndexOffset: isLast ? 200 : 0 });
-        // River distance from previous fix
-        let rivRow = '';
-        if (idx > 0) {
-          const rd = calcRiverDist(pts[idx-1], fix);
-          if (rd !== null) rivRow = `<div class="pop-row"><span class="pop-lbl">River Dist (prev)</span><span class="pop-val">${rd} m</span></div>`;
-        }
+function renderMarkers(trackId){
+  markerLayer.clearLayers();trackLayer.clearLayers();mapMarkers=[];
+  try{oms.clearMarkers?.();}catch(e){}
+  if(!map.hasLayer(markerLayer))map.addLayer(markerLayer);
+ 
+  if(trackId){
+    allAnimals.filter(a=>a.id===trackId).forEach(a=>{
+      if(!a.history?.length)return;
+      const color=markerColor(a.status);
+      const pts=a.history.filter(f=>!isNaN(f.lat)&&!isNaN(f.lon));
+      if(pts.length>1)L.polyline(pts.map(f=>[f.lat,f.lon]),{color,weight:2.5,opacity:.8,dashArray:'8,14'}).addTo(trackLayer);
+      pts.forEach((fix,idx)=>{
+        const isLast=idx===pts.length-1,sz=isLast?12:6;
+        const ic=L.divIcon({html:`<svg width="${sz}" height="${sz}"><circle cx="${sz/2}" cy="${sz/2}" r="${sz/2-1}" fill="${color}" fill-opacity=".75" stroke="white" stroke-width="1.2"/></svg>`,className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]});
+        const m=L.marker([fix.lat,fix.lon],{icon:ic,zIndexOffset:isLast?200:0});
+        let rivRow='';
+        if(idx>0){const rd=calcRiverDist(pts[idx-1],fix);if(rd!==null)rivRow=`<div class="pop-row"><span class="pop-lbl">River Dist (prev)</span><span class="pop-val">${rd} m</span></div>`;}
         m.bindPopup(`<div class="pop-body">
-          <div style="font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--forest);margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--green-lt);">
-            📍 ${trackId} <span style="font-size:.6rem;color:var(--text3);">Fix ${idx+1}/${pts.length}</span>
-          </div>
+          <div style="font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--forest);margin-bottom:7px;padding-bottom:5px;border-bottom:2px solid var(--green-lt);">📍 ${trackId} <span style="font-size:.6rem;color:var(--text3);">Fix ${idx+1}/${pts.length}</span></div>
           <div class="pop-row"><span class="pop-lbl">Time</span><span class="pop-val">${fmtDT(fix.ts)}</span></div>
           <div class="pop-row"><span class="pop-lbl">Source</span><span class="pop-val">${fix.source}</span></div>
           ${rivRow}
-          ${fix.place ? `<div class="pop-row"><span class="pop-lbl">Place</span><span class="pop-val">${fix.place}</span></div>` : ''}
-          ${fix.activity ? `<div class="pop-row"><span class="pop-lbl">Activity</span><span class="pop-val">${fix.activity}</span></div>` : ''}
-        </div>`, { maxWidth: 270 });
+          ${fix.place?`<div class="pop-row"><span class="pop-lbl">Place</span><span class="pop-val">${fix.place}</span></div>`:''}
+          ${fix.activity?`<div class="pop-row"><span class="pop-lbl">Activity</span><span class="pop-val">${fix.activity}</span></div>`:''}
+        </div>`,{maxWidth:270});
         trackLayer.addLayer(m);
       });
     });
   }
-
-  // Latest-location markers for all displayed animals
-  displayed.forEach(a => {
-    if (isNaN(a.lat) || isNaN(a.lon)) return;
-    const origLL = L.latLng(a.lat, a.lon);
-    const marker = L.marker(origLL, { icon: buildIcon(a) });
-    marker._origLL = origLL; marker._clickCount = 0; marker._ck = a.compKey;
-    marker.bindPopup(buildPopup(a), { maxWidth: 315, className: '' });
-    marker.on('popupclose', function() { this.setLatLng(this._origLL); });
+ 
+  displayed.forEach(a=>{
+    if(isNaN(a.lat)||isNaN(a.lon))return;
+    const origLL=L.latLng(a.lat,a.lon);
+    const marker=L.marker(origLL,{icon:buildIcon(a)});
+    marker._origLL=origLL;marker._clickCount=0;marker._ck=a.compKey;
+    marker.bindPopup(buildPopup(a),{maxWidth:315});
+    marker.on('popupclose',function(){this.setLatLng(this._origLL);});
     markerLayer.addLayer(marker);
     oms.addMarker(marker);
     mapMarkers.push(marker);
   });
-
-  if (mapMarkers.length > 0) {
-    try {
-      map.fitBounds(L.latLngBounds(mapMarkers.map(m => m.getLatLng())),
-        { padding:[55,55], maxZoom:16 });
-    } catch(e) {}
-  }
+ 
+  if(mapMarkers.length>0){try{map.fitBounds(L.latLngBounds(mapMarkers.map(m=>m.getLatLng())),{padding:[55,55],maxZoom:16});}catch(e){}}
 }
-
-function flyTo(compKey) {
-  const a = allAnimals.find(x => x.compKey === compKey); if (!a) return;
-  map.flyTo([a.lat, a.lon], 16, { duration: 1.1 });
-  setTimeout(() => {
-    const m = mapMarkers.find(m => m._ck === compKey);
-    if (m) m.openPopup();
-  }, 1200);
+ 
+function flyTo(compKey){
+  const a=allAnimals.find(x=>x.compKey===compKey);if(!a)return;
+  map.flyTo([a.lat,a.lon],16,{duration:1.1});
+  setTimeout(()=>{const m=mapMarkers.find(m=>m._ck===compKey);if(m)m.openPopup();},1200);
 }
-
-function trackSingle(rawId) {
-  document.getElementById('f-rid').value = rawId;
-  applyFilters();
-}
-
+function trackSingle(rawId){document.getElementById('f-rid').value=rawId;applyFilters();}
+ 
 /* ════════════════════════════════════════════════════════════════
-   HEATMAP — removes/restores marker layer
+   HEATMAP
 ════════════════════════════════════════════════════════════════ */
-function toggleHeatmap() {
-  heatmapOn = !heatmapOn;
-  const btn = document.getElementById('btnHeat');
-  btn.classList.toggle('on', heatmapOn);
-
-  if (heatmapOn) {
-    // Build heat layer from all raw fixes
-    if (!heatLayer) {
-      const pts = Object.values(allFixes).flat()
-        .filter(f => !isNaN(f.lat) && !isNaN(f.lon))
-        .map(f => [f.lat, f.lon, 0.6]);
-      heatLayer = L.heatLayer(pts, {
-        radius:22, blur:16, maxZoom:17,
-        gradient:{0.2:'#ffffb2',0.4:'#fecc5c',0.6:'#fd8d3c',0.8:'#f03b20',1:'#bd0026'}
-      });
+function toggleHeatmap(){
+  const on=!document.getElementById('btnHeat').classList.contains('on');
+  document.getElementById('btnHeat').classList.toggle('on',on);
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;document.getElementById('btnKDE').classList.remove('on');}
+  if(on){
+    if(!heatLayer){
+      const pts=Object.values(allFixes).flat().filter(f=>!isNaN(f.lat)&&!isNaN(f.lon)).map(f=>[f.lat,f.lon,.6]);
+      heatLayer=L.heatLayer(pts,{radius:22,blur:16,maxZoom:17,gradient:{0.2:'#ffffb2',0.4:'#fecc5c',0.6:'#fd8d3c',0.8:'#f03b20',1:'#bd0026'}});
     }
-    map.removeLayer(markerLayer);   // ← HIDE markers
-    map.addLayer(heatLayer);
-  } else {
-    if (heatLayer) map.removeLayer(heatLayer);
-    map.addLayer(markerLayer);      // ← RESTORE markers
+    map.removeLayer(markerLayer);map.addLayer(heatLayer);
+  }else{
+    if(heatLayer)map.removeLayer(heatLayer);
+    if(!map.hasLayer(markerLayer))map.addLayer(markerLayer);
   }
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   KDE — custom canvas layer (also removes markers when active)
+   KDE
 ════════════════════════════════════════════════════════════════ */
-function toggleKDE() {
-  const btn = document.getElementById('btnKDE');
-  const on  = !btn.classList.contains('on');
-  btn.classList.toggle('on', on);
-  if (kdeLayer) { map.removeLayer(kdeLayer); kdeLayer = null; }
-  if (!on) { map.addLayer(markerLayer); return; }
-  const pts = Object.values(allFixes).flat()
-    .filter(f => !isNaN(f.lat) && !isNaN(f.lon))
-    .map(f => [f.lat, f.lon]);
-  if (pts.length < 4) return;
+function toggleKDE(){
+  const on=!document.getElementById('btnKDE').classList.contains('on');
+  document.getElementById('btnKDE').classList.toggle('on',on);
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;document.getElementById('btnHeat').classList.remove('on');}
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  if(!on){if(!map.hasLayer(markerLayer))map.addLayer(markerLayer);return;}
+  const pts=Object.values(allFixes).flat().filter(f=>!isNaN(f.lat)&&!isNaN(f.lon)).map(f=>[f.lat,f.lon]);
+  if(pts.length<4)return;
   function std2(a){const m=a.reduce((x,y)=>x+y,0)/a.length;return Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length);}
-  const KDE = L.Layer.extend({
+  const KDE=L.Layer.extend({
     initialize(){this._pts=pts;},
-    onAdd(m){this._map=m;const c=document.createElement('canvas');c.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:0.52;z-index:200;';m.getPanes().overlayPane.appendChild(c);this._c=c;m.on('viewreset moveend zoomend resize',this._draw,this);this._draw();},
+    onAdd(m){this._map=m;const c=document.createElement('canvas');c.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:200;';m.getPanes().overlayPane.appendChild(c);this._c=c;m.on('viewreset moveend zoomend resize',this._draw,this);this._draw();},
     onRemove(m){if(this._c?.parentNode)this._c.parentNode.removeChild(this._c);m.off('viewreset moveend zoomend resize',this._draw,this);},
     _draw(){
       const sz=this._map.getSize();this._c.width=sz.x;this._c.height=sz.y;
@@ -1322,7 +1024,7 @@ function toggleKDE() {
       L.DomUtil.setPosition(this._c,this._map.containerPointToLayerPoint([0,0]));
       const px=this._pts.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
       const xs=px.map(p=>p.x),ys=px.map(p=>p.y),n=xs.length;
-      const bw=Math.max(0.9*Math.min(std2(xs),std2(ys))*Math.pow(n,-0.2),16),bw2=bw*bw;
+      const bw=Math.max(.9*Math.min(std2(xs),std2(ys))*Math.pow(n,-.2),16),bw2=bw*bw;
       const cs=Math.max(3,Math.round(bw/7)),nc=Math.ceil(sz.x/cs),nr=Math.ceil(sz.y/cs);
       const den=new Float32Array(nr*nc);let mx=0;
       for(let r=0;r<nr;r++)for(let c=0;c<nc;c++){const x=(c+.5)*cs,y=(r+.5)*cs;let d=0;for(let k=0;k<n;k++){const dx=x-xs[k],dy=y-ys[k];d+=Math.exp(-.5*(dx*dx+dy*dy)/bw2);}den[r*nc+c]=d;if(d>mx)mx=d;}
@@ -1340,452 +1042,231 @@ function toggleKDE() {
       ctx.putImageData(img,0,0);
     }
   });
-  map.removeLayer(markerLayer);   // hide markers during KDE
-  kdeLayer = new KDE(); map.addLayer(kdeLayer);
+  map.removeLayer(markerLayer);
+  kdeLayer=new KDE();map.addLayer(kdeLayer);
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    STATUS PILLS
 ════════════════════════════════════════════════════════════════ */
-function updatePills() {
-  const src  = document.getElementById('f-source').value;
-  const pool = src === 'all' ? allAnimals :
-    allAnimals.filter(a => a.sources.includes(src) || a.source === src);
-  const cts = {};
-  pool.forEach(a => { cts[a.status] = (cts[a.status] || 0) + 1; });
-  ['active','s7','s30','crit','tmiss','gone','dead'].forEach(k => {
-    const el = document.getElementById('c-' + k);
-    if (el) el.textContent = cts[k] || 0;
+function updatePills(){
+  const src=document.getElementById('f-source').value;
+  const pool=src==='all'?allAnimals:allAnimals.filter(a=>{
+    if(src==='PaliFT')return a.isHatchling;
+    if(src==='ATS')   return !a.isHatchling&&a.sources.includes('ATS');
+    if(src==='FieldLog')return !a.isHatchling&&a.sources.includes('FieldLog');
+    return true;
   });
+  const cts={};pool.forEach(a=>{cts[a.status]=(cts[a.status]||0)+1;});
+  ['active','s7','s30','crit','tmiss','gone','dead'].forEach(k=>{const el=document.getElementById('c-'+k);if(el)el.textContent=cts[k]||0;});
 }
-
-function setPill(st) {
-  if (activePill === st) {
-    activePill = null;
-    document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
-    document.getElementById('f-status').value = 'all';
-  } else {
-    activePill = st;
-    document.querySelectorAll('.hpill').forEach(p => p.classList.remove('on'));
-    document.getElementById('pill-' + st)?.classList.add('on');
-    document.getElementById('f-status').value = st;
+ 
+function setPill(st){
+  if(activePill===st){
+    activePill=null;
+    document.querySelectorAll('.hpill').forEach(p=>p.classList.remove('on'));
+    document.getElementById('f-status').value='all';
+  }else{
+    activePill=st;
+    document.querySelectorAll('.hpill').forEach(p=>p.classList.remove('on'));
+    document.getElementById('pill-'+st)?.classList.add('on');
+    document.getElementById('f-status').value=st;
   }
   applyFilters();
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    TABLE
+   trackId set → show ALL historical fixes per animal (full history)
+   trackId null → show one row per animal (latest fix only)
+   "Type" column REMOVED per spec.
+   "Collar #" column hidden for VHF / PaliFT sources.
 ════════════════════════════════════════════════════════════════ */
-function renderTable() {
-  document.getElementById('tbl-badge').textContent = `${displayed.length} animals`;
-  const body = document.getElementById('tbl-body');
-  body.innerHTML = '';
-  if (!displayed.length) {
-    body.innerHTML = '<tr class="no-data-row"><td colspan="15">No animals match current filters</td></tr>';
+function renderTable(trackId){
+  const src=document.getElementById('f-source').value;
+  const hideCollar=(src==='FieldLog'||src==='PaliFT');
+  document.getElementById('col-collar-hdr').classList.toggle('col-hidden',hideCollar);
+ 
+  const badge=document.getElementById('tbl-badge');
+  const body =document.getElementById('tbl-body');
+  body.innerHTML='';
+ 
+  if(!displayed.length){
+    badge.textContent='0 animals';
+    body.innerHTML='<tr class="no-data-row"><td colspan="14">No animals match current filters</td></tr>';
     return;
   }
-  displayed.forEach(a => {
-    const st = SM[a.status];
-    const srcCls = a.isDual ? 'sr-merged' :
-      { ATS:'sr-ats', FieldLog:'sr-fl', PaliFT:'sr-pali' }[a.source] || 'sr-pali';
-    const tr = document.createElement('tr'); tr.dataset.ck = a.compKey;
-    tr.innerHTML = `
+ 
+  const mkCollar=(collar)=>hideCollar
+    ?`<td class="col-hidden"></td>`
+    :`<td style="font-family:var(--mono);font-size:.6rem;">${collar||'—'}</td>`;
+ 
+  // Full history mode
+  if(trackId){
+    const allRows=[];
+    displayed.forEach(a=>a.history.forEach((fix,idx)=>allRows.push({a,fix,idx})));
+    badge.textContent=`${allRows.length} fixes (${displayed.length} animal${displayed.length>1?'s':''})`;
+    allRows.forEach(({a,fix,idx})=>{
+      const st=SM[a.status];
+      const srcCls={ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[fix.source]||'sr-pali';
+      const tr=document.createElement('tr');tr.dataset.ck=a.compKey;
+      tr.innerHTML=`
+        <td><b style="font-family:var(--mono);color:${st.color};">${a.id}</b></td>
+        <td style="font-size:.6rem;">${fmtDT(fix.ts)}</td>
+        <td><b style="color:${st.color};">${daysSince(fix.ts)}</b></td>
+        <td><span class="sbadge ${st.cls}">${st.label}</span></td>
+        <td>${a.category||'—'}</td>
+        <td>${a.sex||'—'}</td>
+        <td><span class="pop-src ${srcCls}">${fix.source}</span></td>
+        <td>${a.zone}</td>
+        ${mkCollar(fix.collar||a.collar)}
+        <td style="font-size:.6rem;">${isNaN(fix.lat)?'—':fix.lat.toFixed(5)}</td>
+        <td style="font-size:.6rem;">${isNaN(fix.lon)?'—':fix.lon.toFixed(5)}</td>
+        <td>${a.tagPlace||'—'}</td>
+        <td>${a.tl||'—'}</td>
+        <td style="font-size:.59rem;color:var(--text3);">${fix.remarks||a.remarks||'—'}</td>`;
+      tr.onclick=()=>flyTo(a.compKey);
+      body.appendChild(tr);
+    });
+    return;
+  }
+ 
+  // Default: latest fix per animal
+  badge.textContent=`${displayed.length} animal${displayed.length>1?'s':''}`;
+  displayed.forEach(a=>{
+    const st=SM[a.status];
+    const srcCls=a.isDual?'sr-merged':({ATS:'sr-ats',FieldLog:'sr-fl',PaliFT:'sr-pali'}[a.source]||'sr-pali');
+    const tr=document.createElement('tr');tr.dataset.ck=a.compKey;
+    tr.innerHTML=`
       <td><b style="font-family:var(--mono);color:${st.color};">${a.id}</b></td>
       <td style="font-size:.6rem;">${fmtDT(a.ts)}</td>
       <td><b style="color:${st.color};">${a.daysFix}</b></td>
       <td><span class="sbadge ${st.cls}">${st.label}</span></td>
-      <td style="font-size:.6rem;">${a.isHatchling ? '🐣 Hatchling' : '🐊 Adult/Juv'}</td>
-      <td>${a.category || '—'}</td>
-      <td>${a.sex || '—'}</td>
-      <td><span class="pop-src ${srcCls}">${a.isDual ? 'VHF+SAT' : a.source}</span></td>
+      <td>${a.category||'—'}</td>
+      <td>${a.sex||'—'}</td>
+      <td><span class="pop-src ${srcCls}">${a.isDual?'VHF+SAT':a.source}</span></td>
       <td>${a.zone}</td>
-      <td style="font-family:var(--mono);font-size:.6rem;">${a.collar || '—'}</td>
-      <td style="font-size:.6rem;">${isNaN(a.lat) ? '—' : a.lat.toFixed(5)}</td>
-      <td style="font-size:.6rem;">${isNaN(a.lon) ? '—' : a.lon.toFixed(5)}</td>
-      <td>${a.tagPlace || '—'}</td>
-      <td>${a.tl || '—'}</td>
-      <td style="font-size:.59rem;color:var(--text3);">${a.remarks || '—'}</td>`;
-    tr.onclick = () => flyTo(a.compKey);
+      ${mkCollar(a.collar)}
+      <td style="font-size:.6rem;">${isNaN(a.lat)?'—':a.lat.toFixed(5)}</td>
+      <td style="font-size:.6rem;">${isNaN(a.lon)?'—':a.lon.toFixed(5)}</td>
+      <td>${a.tagPlace||'—'}</td>
+      <td>${a.tl||'—'}</td>
+      <td style="font-size:.59rem;color:var(--text3);">${a.remarks||'—'}</td>`;
+    tr.onclick=()=>flyTo(a.compKey);
     body.appendChild(tr);
   });
 }
-
-function sortTbl(col) {
-  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
-  const keys = ['id','ts','daysFix','status','isHatchling','category','sex','source','zone'];
-  const k = keys[col]; if (!k) return;
-  displayed.sort((a, b) => {
-    let va = a[k], vb = b[k];
-    if (va == null) va = sortDir > 0 ? Infinity : 'zzz';
-    if (vb == null) vb = sortDir > 0 ? Infinity : 'zzz';
-    if (va instanceof Date) va = va.getTime();
-    if (vb instanceof Date) vb = vb.getTime();
-    return (typeof va === 'string' ? va.localeCompare(String(vb)) : va - vb) * sortDir;
+ 
+function sortTbl(col){
+  if(sortCol===col)sortDir*=-1;else{sortCol=col;sortDir=1;}
+  const keys=['id','ts','daysFix','status','category','sex','source','zone'];
+  const k=keys[col];if(!k)return;
+  displayed.sort((a,b)=>{
+    let va=a[k],vb=b[k];
+    if(va==null)va=sortDir>0?Infinity:'zzz';if(vb==null)vb=sortDir>0?Infinity:'zzz';
+    if(va instanceof Date)va=va.getTime();if(vb instanceof Date)vb=vb.getTime();
+    return(typeof va==='string'?va.localeCompare(String(vb)):va-vb)*sortDir;
   });
-  renderTable();
+  const trackId=document.getElementById('f-rid').value!=='all'?document.getElementById('f-rid').value:null;
+  renderTable(trackId);
 }
-
-function hiliteRow(ck) {
-  document.querySelectorAll('#tbl-body tr').forEach(r => {
-    if (r.dataset.ck === ck) { r.classList.add('sel'); r.scrollIntoView({ block:'center', behavior:'smooth' }); }
+ 
+function hiliteRow(ck){
+  document.querySelectorAll('#tbl-body tr').forEach(r=>{
+    if(r.dataset.ck===ck){r.classList.add('sel');r.scrollIntoView({block:'center',behavior:'smooth'});}
     else r.classList.remove('sel');
   });
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   FIELD UPDATES PANEL (Pali FT / Hatchling source only)
+   FIELD UPDATES PANEL
 ════════════════════════════════════════════════════════════════ */
-function loadUpdates(rows) {
-  if (!rows?.length) {
-    document.getElementById('fuDate').textContent = 'No updates found.';
-    return;
-  }
-  // Use Pali date parser for the updates sheet
-  const sorted = rows
-    .filter(r => gc(r, 'Date', 'date'))
-    .sort((a, b) => {
-      const da = parsePaliDate(gc(a, 'Date', 'date'));
-      const db = parsePaliDate(gc(b, 'Date', 'date'));
-      if (!da && !db) return 0; if (!da) return 1; if (!db) return -1;
-      return db - da;
-    });
-  if (!sorted.length) return;
-  const latestDate = parsePaliDate(gc(sorted[0], 'Date', 'date'));
-  document.getElementById('fuDate').textContent = fmtDateOnly(latestDate);
-  document.getElementById('fuText').textContent = gc(sorted[0], 'Update', 'Notes', 'Text', 'update') || '';
-  const list = document.getElementById('fuList');
-  if (sorted.length <= 1) { list.innerHTML = '<p style="color:var(--text4);font-size:.74rem;">No previous updates.</p>'; return; }
-  sorted.slice(1).forEach(r => {
-    const d = document.createElement('div'); d.className = 'fu';
-    const dt = parsePaliDate(gc(r, 'Date', 'date'));
-    d.innerHTML = `<div class="fd">${fmtDateOnly(dt)}</div><div class="ft">${gc(r, 'Update', 'Notes', 'Text', 'update') || ''}</div>`;
+function loadUpdates(rows){
+  if(!rows?.length){document.getElementById('fuDate').textContent='No updates found.';return;}
+  const sorted=rows.filter(r=>gc(r,'Date','date')).sort((a,b)=>{
+    const da=parsePaliDate(gc(a,'Date','date')),db=parsePaliDate(gc(b,'Date','date'));
+    if(!da&&!db)return 0;if(!da)return 1;if(!db)return -1;return db-da;
+  });
+  if(!sorted.length)return;
+  document.getElementById('fuDate').textContent=fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
+  document.getElementById('fuText').textContent=gc(sorted[0],'Update','Notes','Text','update')||'';
+  const list=document.getElementById('fuList');
+  if(sorted.length<=1){list.innerHTML='<p style="color:var(--text4);font-size:.74rem;">No previous updates.</p>';return;}
+  sorted.slice(1).forEach(r=>{
+    const d=document.createElement('div');d.className='fu';
+    const dt=parsePaliDate(gc(r,'Date','date'));
+    d.innerHTML=`<div class="fd">${fmtDateOnly(dt)}</div><div class="ft">${gc(r,'Update','Notes','Text','update')||''}</div>`;
     list.appendChild(d);
   });
 }
-
-function toggleFP() { document.getElementById('fp').classList.toggle('open'); document.getElementById('fp-bg').classList.toggle('open'); }
-function closeFP()  { document.getElementById('fp').classList.remove('open'); document.getElementById('fp-bg').classList.remove('open'); }
-
+ 
+function toggleFP(){document.getElementById('fp').classList.toggle('open');document.getElementById('fp-bg').classList.toggle('open');}
+function closeFP(){document.getElementById('fp').classList.remove('open');document.getElementById('fp-bg').classList.remove('open');}
+ 
 /* ════════════════════════════════════════════════════════════════
-   STATS MODAL — 4 tabs
+   EXPORT CSV
 ════════════════════════════════════════════════════════════════ */
-Chart.defaults.color = '#374151';
-Chart.defaults.borderColor = '#e5e7eb';
-Chart.defaults.font.family = "'Inter',sans-serif";
-Chart.defaults.font.size = 10;
-
-function dCH(id) { if (CH[id]) { CH[id].destroy(); delete CH[id]; } }
-function noData(id, msg) {
-  dCH(id);
-  const ctx = document.getElementById(id)?.getContext('2d'); if (!ctx) return;
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  ctx.fillStyle = '#9ca3af'; ctx.font = '11px Inter'; ctx.textAlign = 'center';
-  ctx.fillText(msg, ctx.canvas.width/2, ctx.canvas.height/2);
-}
-function mkDonut(id, labels, data, colors) {
-  dCH(id); const ctx = document.getElementById(id)?.getContext('2d'); if (!ctx) return;
-  CH[id] = new Chart(ctx, { type:'doughnut', data:{labels, datasets:[{data, backgroundColor:colors, borderWidth:2, borderColor:'#fff'}]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right', labels:{font:{size:9}, boxWidth:11, color:'#374151'}}}}});
-}
-function mkBar(id, labels, data, color, multiColor) {
-  dCH(id); const ctx = document.getElementById(id)?.getContext('2d'); if (!ctx) return;
-  const bg = multiColor && Array.isArray(color) ? color : labels.map(() => typeof color === 'string' ? color : '#2d6a4f');
-  CH[id] = new Chart(ctx, { type:'bar', data:{labels, datasets:[{label:'Count', data, backgroundColor:bg, borderRadius:4, borderWidth:0}]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true, grid:{color:'rgba(0,0,0,.05)'}}, x:{grid:{color:'rgba(0,0,0,.03)'}, ticks:{maxRotation:45}}}}});
-}
-function mkLine(id, labels, data) {
-  dCH(id); const ctx = document.getElementById(id)?.getContext('2d'); if (!ctx) return;
-  CH[id] = new Chart(ctx, { type:'line', data:{labels, datasets:[{label:'Count', data, borderColor:'#2d6a4f', backgroundColor:'transparent', borderWidth:2, pointRadius:3, fill:false, tension:.3}]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
-      scales:{y:{beginAtZero:true}, x:{ticks:{maxRotation:45, maxTicksLimit:14}}}}});
-}
-
-function openStats()  { document.getElementById('statsModal').classList.add('open'); mTab('ms'); }
-function closeStats() { document.getElementById('statsModal').classList.remove('open'); }
-function mTab(id) {
-  document.querySelectorAll('.mtc').forEach(t => t.classList.remove('on'));
-  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  ['ms','mm','ma','me'].forEach((t, i) => { if (t===id) document.querySelectorAll('.mtab')[i]?.classList.add('on'); });
-  if (id === 'ms') renderSurvTab();
-  if (id === 'mm') renderMovTab();
-  if (id === 'ma') renderActTab();
-  if (id === 'me') renderEcoTab();
-}
-
-function cntSt(st) { return allAnimals.filter(a => a.status === st).length; }
-function arrMean(a) { return a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0; }
-
-function calcSteps(ord) {
-  const s = [];
-  for (let i = 1; i < ord.length; i++) {
-    const a = [+ord[i-1].lat, +ord[i-1].lon], b = [+ord[i].lat, +ord[i].lon];
-    if (!isNaN(a[0]) && !isNaN(b[0])) s.push(hav(a, b));
-  }
-  return s;
-}
-function calcSI(ord) {
-  const pts = ord.map(f => [+f.lat, +f.lon]).filter(ll => !isNaN(ll[0]));
-  if (pts.length < 2) return 0;
-  const net = hav(pts[0], pts[pts.length-1]);
-  let tot = 0; for (let i = 1; i < pts.length; i++) tot += hav(pts[i-1], pts[i]);
-  return tot > 0 ? net / tot : 0;
-}
-function calcAngles(ord) {
-  const pts = ord.map(f => [+f.lat, +f.lon]).filter(ll => !isNaN(ll[0]));
-  const ang = [];
-  for (let i = 1; i < pts.length - 1; i++) {
-    const a1 = Math.atan2(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]) * 180/Math.PI;
-    const a2 = Math.atan2(pts[i+1][0]-pts[i][0], pts[i+1][1]-pts[i][1]) * 180/Math.PI;
-    let t = a2 - a1; while (t > 180) t -= 360; while (t < -180) t += 360;
-    ang.push(Math.round(t));
-  }
-  return ang;
-}
-function convexHull(pts) {
-  if (pts.length < 3) return pts;
-  pts = [...pts].sort((a,b) => a[0]-b[0] || a[1]-b[1]);
-  const cross = (O,A,B) => (A[0]-O[0])*(B[1]-O[1])-(A[1]-O[1])*(B[0]-O[0]);
-  const lo=[], hi=[];
-  for (const p of pts){while(lo.length>=2&&cross(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p);}
-  for (let i=pts.length-1;i>=0;i--){const p=pts[i];while(hi.length>=2&&cross(hi[hi.length-2],hi[hi.length-1],p)<=0)hi.pop();hi.push(p);}
-  hi.pop();lo.pop();return lo.concat(hi);
-}
-function llAreaHa(pts) {
-  const R=6371,tr=x=>x*Math.PI/180;let a=0;
-  for(let i=0;i<pts.length;i++){const j=(i+1)%pts.length;a+=(tr(pts[j][1])-tr(pts[i][1]))*(2+Math.sin(tr(pts[i][0]))+Math.sin(tr(pts[j][0])));}
-  return (Math.abs(a)*R*R/2*100).toFixed(2);
-}
-function calcMCPArea(fixes) {
-  const pts = fixes.map(f=>[+f.lat,+f.lon]).filter(ll=>!isNaN(ll[0]));
-  if (pts.length < 3) return null;
-  const hull = convexHull(pts.map(([la,ln])=>[ln,la])).map(([ln,la])=>[la,ln]);
-  return hull.length >= 3 ? llAreaHa(hull) : null;
-}
-
-function renderSurvTab() {
-  const tot = allAnimals.length;
-  const adults = allAnimals.filter(a => !a.isHatchling);
-  const hatch  = allAnimals.filter(a =>  a.isHatchling);
-  const nA=cntSt('active'),nS7=cntSt('s7'),nS30=cntSt('s30'),nCrit=cntSt('crit');
-  const nTm=cntSt('tmiss'),nGone=cntSt('gone'),nDead=cntSt('dead'),nNdep=cntSt('ndep');
-  const surv = tot ? ((allAnimals.filter(a=>!['dead','gone'].includes(a.status)).length/tot)*100).toFixed(1)+'%' : '—';
-  document.getElementById('survCards').innerHTML = `
-    <div class="sc"><div class="sv">${tot}</div><div class="sl">Total Entities</div></div>
-    <div class="sc g"><div class="sv">${adults.length}</div><div class="sl">Adults/Juv</div></div>
-    <div class="sc g"><div class="sv">${hatch.length}</div><div class="sl">Hatchlings</div></div>
-    <div class="sc"><div class="sv">${nA}</div><div class="sl">Active ≤7d</div></div>
-    <div class="sc y"><div class="sv">${nTm}</div><div class="sl">H: Temp Miss</div></div>
-    <div class="sc r"><div class="sv">${nDead}</div><div class="sl">Dead</div></div>
-    <div class="sc gr"><div class="sv">${nGone}</div><div class="sl">Gone >30d</div></div>
-    <div class="sc g"><div class="sv">${surv}</div><div class="sl">Active Rate</div></div>`;
-
-  mkDonut('cStatusAdult', ['Active','Silent>7d','Silent>30d','Crit≥45d','Not Dep.'],
-    [nA, nS7, nS30, nCrit, nNdep], ['#1565c0','#b45309','#b91c1c','#7f1d1d','#7c3aed']);
-  mkDonut('cStatusHatch', ['Active','Temp Miss','Gone>30d','Dead'],
-    [hatch.filter(a=>a.status==='active').length, nTm, nGone, nDead],
-    ['#1565c0','#d97706','#374151','#b91c1c']);
-
-  const mortTb = document.querySelector('#mortTbl tbody'); mortTb.innerHTML = '';
-  Object.entries(MORT).forEach(([id, m]) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td><b style="font-family:var(--mono)">${id}</b></td><td>${m.c}</td><td><span class="sbadge sb-dead">${m.t}</span></td>`;
-    mortTb.appendChild(tr);
+function exportCSV(){
+  if(!displayed.length){toast('Apply filters first to export');return;}
+  const src=document.getElementById('f-source').value;
+  const hideCollar=(src==='FieldLog'||src==='PaliFT');
+  const hdrs=['Radio_ID','Date_Time','Days_Since_Fix','Status','Category','Sex','Source','Zone',
+    ...(hideCollar?[]:['Collar_Serial']),'Latitude','Longitude','Tag_Place','TL_cm','Remarks'];
+  const rows=[hdrs];
+  displayed.forEach(a=>{
+    rows.push([a.id,fmtDT(a.ts),a.daysFix,a.status,a.category||'',a.sex||'',a.source,a.zone,
+      ...(hideCollar?[]:[a.collar||'']),a.lat,a.lon,a.tagPlace||'',a.tl||'',a.remarks||'']);
   });
-
-  const bk = {'0–3d':0,'4–7d':0,'8–14d':0,'15–30d':0,'31–60d':0,'>60d':0};
-  allAnimals.forEach(a => {
-    const d = a.daysFix;
-    if(d<=3)bk['0–3d']++;else if(d<=7)bk['4–7d']++;else if(d<=14)bk['8–14d']++;else if(d<=30)bk['15–30d']++;else if(d<=60)bk['31–60d']++;else bk['>60d']++;
-  });
-  mkBar('cRecency', Object.keys(bk), Object.values(bk), '#1565c0');
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const el=document.createElement('a');
+  el.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  el.download=`gep_telemetry_${new Date().toISOString().slice(0,10)}.csv`;
+  el.click();URL.revokeObjectURL(el.href);
 }
-
-function renderMovTab() {
-  const dm = {};
-  for (const [ck, fixes] of Object.entries(allFixes)) {
-    const ord = [...fixes].sort((a,b) => a.ts - b.ts);
-    const rel = ord[0] ? [+ord[0].lat, +ord[0].lon] : null;
-    if (!rel || isNaN(rel[0])) continue;
-    let mx = 0;
-    fixes.forEach(v => { const p=[+v.lat,+v.lon]; if(!isNaN(p[0])){const d=hav(rel,p);if(d>mx)mx=d;} });
-    dm[ck.split('|')[0]] = (dm[ck.split('|')[0]] || 0) < mx ? mx : dm[ck.split('|')[0]];
-  }
-  const vals = Object.values(dm), mxD = Math.round(Math.max(...vals)||0);
-  const avgD = Math.round(arrMean(vals));
-  const totFixes = Object.values(allFixes).reduce((s, a) => s + a.length, 0);
-  const avgFx = (totFixes / Math.max(Object.keys(allFixes).length, 1)).toFixed(1);
-  document.getElementById('movCards').innerHTML = `
-    <div class="ms"><div class="v">${totFixes}</div><div class="l">Total Fixes</div></div>
-    <div class="ms"><div class="v">${avgFx}</div><div class="l">Avg Fixes/Entity</div></div>
-    <div class="ms"><div class="v">${mxD}m</div><div class="l">Max Dispersal</div></div>
-    <div class="ms"><div class="v">${avgD}m</div><div class="l">Avg Max Disp.</div></div>`;
-
-  const topFix = Object.entries(allFixes).map(([k,a])=>({id:k.split('|')[0],n:a.length})).sort((a,b)=>b.n-a.n).slice(0,14);
-  if (topFix.length) mkBar('cFixes', topFix.map(x=>x.id), topFix.map(x=>x.n), '#2d6a4f');
-  else noData('cFixes','No fix data');
-
-  const sorted = Object.entries(dm).sort((a,b)=>b[1]-a[1]).slice(0,20);
-  if (sorted.length) {
-    const colors = sorted.map(([id]) => {
-      const a = allAnimals.find(x=>x.id===id);
-      return a ? markerColor(a.status) : '#2d6a4f';
-    });
-    mkBar('cDisp', sorted.map(x=>x[0]), sorted.map(x=>Math.round(x[1])), colors, true);
-  } else noData('cDisp','No displacement data');
-}
-
-function renderActTab() {
-  const allR = Object.values(allFixes).flat();
-  const acts = {};
-  allR.forEach(r => { const a=(r.activity||'').trim(); if(a)acts[a]=(acts[a]||0)+1; });
-  const aS = Object.entries(acts).sort((a,b)=>b[1]-a[1]);
-  if (aS.length) mkBar('cAct', aS.map(x=>x[0]), aS.map(x=>x[1]), aS.map((_,i)=>['#2d6a4f','#1d4ed8','#d97706','#dc2626','#7c3aed','#0891b2'][i%6]));
-  else noData('cAct','No activity data');
-
-  const ss = {};
-  allR.forEach(r => { const s=(r.signal||'').trim(); if(s)ss[s]=(ss[s]||0)+1; });
-  const sf = Object.entries(ss).filter(([,v])=>v>0);
-  if (sf.length) mkDonut('cSig', sf.map(x=>x[0]), sf.map(x=>x[1]), ['#2d6a4f','#d97706','#dc2626','#1d4ed8']);
-  else noData('cSig','No signal data');
-
-  const wk = {};
-  allR.forEach(r => {
-    if (!r.ts || isNaN(r.ts.getTime())) return;
-    const m = r.ts.getFullYear()+'-'+String(r.ts.getMonth()+1).padStart(2,'0');
-    wk[m] = (wk[m]||0)+1;
-  });
-  const wS = Object.entries(wk).sort((a,b)=>a[0].localeCompare(b[0]));
-  if (wS.length) mkLine('cTime', wS.map(x=>x[0]), wS.map(x=>x[1]));
-  else noData('cTime','No timeline data');
-}
-
-function renderEcoTab() {
-  const allSteps=[], allAngles=[], siArr=[], rows=[];
-  for (const [ck, fixes] of Object.entries(allFixes)) {
-    const rawId = ck.split('|')[0];
-    const ord = [...fixes].sort((a,b) => (a.ts||0) - (b.ts||0));
-    const steps = calcSteps(ord), si = calcSI(ord), angles = calcAngles(ord);
-    allSteps.push(...steps.filter(s=>s>0)); allAngles.push(...angles);
-    siArr.push({ id: rawId, si, n: ord.length });
-    const mHa = calcMCPArea(ord);
-    const rel  = ord[0] ? [+ord[0].lat, +ord[0].lon] : null;
-    let mxD = 0;
-    ord.forEach(f => { const p=[+f.lat,+f.lon]; if(rel&&!isNaN(rel[0])&&!isNaN(p[0])){const d=hav(rel,p);if(d>mxD)mxD=d;} });
-    const animal = allAnimals.find(a => a.compKey === ck);
-    rows.push({ id: rawId, type: animal?.isHatchling ? 'H' : 'A', s: animal?.status||'—',
-      n: ord.length, mcp: mHa??'—', si: si.toFixed(3),
-      ms: steps.length ? Math.round(arrMean(steps)) : '—', mxD: Math.round(mxD) });
-  }
-
-  const mSI = siArr.length ? arrMean(siArr.map(x=>x.si)).toFixed(3) : '—';
-  const mSt = allSteps.length ? Math.round(arrMean(allSteps)) : '—';
-  document.getElementById('ecoCards').innerHTML = `
-    <div class="sc g"><div class="sv">${siArr.length}</div><div class="sl">Analysed</div></div>
-    <div class="sc"><div class="sv">${mSI}</div><div class="sl">Mean Straightness</div></div>
-    <div class="sc t"><div class="sv">${mSt}m</div><div class="sl">Mean Step</div></div>
-    <div class="sc y"><div class="sv">${allAngles.length}</div><div class="sl">Turn Angles</div></div>`;
-
-  if (allSteps.length) {
-    const ms=Math.min(Math.max(...allSteps),2000),bs=100,bins=[],lbls=[];
-    for(let b=0;b<ms;b+=bs){bins.push(0);lbls.push(b+'-'+(b+bs));}
-    allSteps.forEach(s=>{const i=Math.min(Math.floor(s/bs),bins.length-1);if(i>=0)bins[i]++;});
-    mkBar('cStep',lbls,bins,'#2d6a4f');
-  } else noData('cStep','No step data');
-
-  if (allAngles.length) {
-    const ab={};for(let a=-180;a<180;a+=30)ab[a]=0;
-    allAngles.forEach(a=>{const b=Math.floor(a/30)*30;if(ab[b]!==undefined)ab[b]++;});
-    mkBar('cAngle',Object.keys(ab).map(k=>k+'°'),Object.values(ab),'#1d4ed8');
-  } else noData('cAngle','No angle data');
-
-  const tb = document.querySelector('#ecoTbl tbody'); tb.innerHTML = '';
-  rows.sort((a,b)=>b.mxD-a.mxD).forEach(r => {
-    const tr = document.createElement('tr');
-    const st = SM[r.s] || SM.gone;
-    tr.innerHTML = `<td><b style="font-family:var(--mono)">${r.id}</b></td>
-      <td>${r.type==='H'?'🐣 Hatchling':'🐊 Adult'}</td>
-      <td><span class="sbadge ${st.cls}">${st.label}</span></td>
-      <td>${r.n}</td><td>${r.mcp}</td>
-      <td>${r.si}<div class="si-bar" style="width:${Math.round(parseFloat(r.si||0)*45)}px"></div></td>
-      <td>${r.ms}</td><td>${r.mxD}</td>`;
-    tb.appendChild(tr);
-  });
-}
-
-/* ════════════════════════════════════════════════════════════════
-   EXPORT
-════════════════════════════════════════════════════════════════ */
-function exportCSV() {
-  if (!displayed.length) { toast('Apply filters first to export'); return; }
-  const rows = [['Radio_ID','Type','Last_Fix','Days_Since_Fix','Status','Category','Sex',
-    'Source','Zone','Latitude','Longitude','Collar_Serial','Tag_Place','TL_cm','Remarks']];
-  displayed.forEach(a => rows.push([
-    a.id, a.isHatchling ? 'Hatchling' : 'Adult/Juv', fmtDT(a.ts), a.daysFix,
-    a.status, a.category||'', a.sex||'', a.source, a.zone,
-    a.lat, a.lon, a.collar||'', a.tagPlace||'', a.tl||'', a.remarks||'',
-  ]));
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const el = document.createElement('a');
-  el.href = URL.createObjectURL(new Blob([csv], { type:'text/csv' }));
-  el.download = `gep_telemetry_${new Date().toISOString().slice(0,10)}.csv`;
-  el.click(); URL.revokeObjectURL(el.href);
-}
-
+ 
 /* ════════════════════════════════════════════════════════════════
    BOTTOM TABLE RESIZE + TOGGLE
 ════════════════════════════════════════════════════════════════ */
-function initResize() {
-  const rbar = document.getElementById('rbar');
-  const btm  = document.getElementById('btm');
-  const mapW = document.getElementById('map-wrap');
-  let drag=false, sy=0, sh=0;
-  const start = y => { if(btmCollapsed)return; drag=true; sy=y; sh=btm.offsetHeight; document.body.style.cursor='ns-resize'; };
-  const move  = y => { if(!drag)return; const h=Math.min(Math.max(40,sh+(sy-y)),window.innerHeight*.65); btmH=h; btm.style.height=h+'px'; mapW.style.bottom=h+'px'; };
-  const end   = ()=> { drag=false; document.body.style.cursor=''; setTimeout(()=>map.invalidateSize(),80); };
-  rbar.addEventListener('mousedown',  e => { start(e.clientY); e.preventDefault(); });
-  document.addEventListener('mousemove', e => move(e.clientY));
-  document.addEventListener('mouseup', end);
-  rbar.addEventListener('touchstart',   e => start(e.touches[0].clientY), { passive:true });
-  document.addEventListener('touchmove', e => { if(drag) move(e.touches[0].clientY); }, { passive:true });
-  document.addEventListener('touchend', end);
+function initResize(){
+  const rbar=document.getElementById('rbar'),btm=document.getElementById('btm'),mapW=document.getElementById('map-wrap');
+  let drag=false,sy=0,sh=0;
+  const start=y=>{if(btmCollapsed)return;drag=true;sy=y;sh=btm.offsetHeight;document.body.style.cursor='ns-resize';};
+  const move =y=>{if(!drag)return;const h=Math.min(Math.max(40,sh+(sy-y)),window.innerHeight*.65);btmH=h;btm.style.height=h+'px';mapW.style.bottom=h+'px';};
+  const end  =()=>{drag=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),80);};
+  rbar.addEventListener('mousedown',e=>{start(e.clientY);e.preventDefault();});
+  document.addEventListener('mousemove',e=>move(e.clientY));
+  document.addEventListener('mouseup',end);
+  rbar.addEventListener('touchstart',e=>start(e.touches[0].clientY),{passive:true});
+  document.addEventListener('touchmove',e=>{if(drag)move(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchend',end);
 }
-
-function toggleBtm() {
-  btmCollapsed = !btmCollapsed;
-  const btm  = document.getElementById('btm');
-  const mapW = document.getElementById('map-wrap');
-  const btn  = document.getElementById('btm-tog');
-  if (btmCollapsed) { btm.style.height='32px'; mapW.style.bottom='32px'; btn.textContent='▲ Show'; }
-  else              { btm.style.height=btmH+'px'; mapW.style.bottom=btmH+'px'; btn.textContent='▼ Hide'; }
-  setTimeout(() => map.invalidateSize(), 280);
+ 
+function toggleBtm(){
+  btmCollapsed=!btmCollapsed;
+  const btm=document.getElementById('btm'),mapW=document.getElementById('map-wrap'),btn=document.getElementById('btm-tog');
+  if(btmCollapsed){btm.style.height='32px';mapW.style.bottom='32px';btn.textContent='▲ Show';}
+  else{btm.style.height=btmH+'px';mapW.style.bottom=btmH+'px';btn.textContent='▼ Hide';}
+  setTimeout(()=>map.invalidateSize(),280);
 }
-
-function toggleFBar() {
-  fbarHidden = !fbarHidden;
-  document.getElementById('fbar').classList.toggle('hidden', fbarHidden);
-  document.getElementById('fbtn').classList.toggle('on', !fbarHidden);
-  document.getElementById('map-wrap').style.top = fbarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
-  setTimeout(() => map.invalidateSize(), 250);
+ 
+function toggleFBar(){
+  fbarHidden=!fbarHidden;
+  document.getElementById('fbar').classList.toggle('hidden',fbarHidden);
+  document.getElementById('fbtn').classList.toggle('on',!fbarHidden);
+  document.getElementById('map-wrap').style.top=fbarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
+  setTimeout(()=>map.invalidateSize(),250);
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
-   BOOT
+   BOOT — blank initial state; no markers until user applies filter
 ════════════════════════════════════════════════════════════════ */
-(async function boot() {
+(async function boot(){
   initMap();
   initResize();
+  setBlank(true);
   await loadAllData();
-  // Initial render — show everything
-  displayed = [...allAnimals];
-  renderMarkers(null);
-  renderTable();
-  window.addEventListener('resize', () => setTimeout(() => map.invalidateSize(), 150));
-  // Close stats modal on background click
-  document.getElementById('statsModal').addEventListener('click', e => {
-    if (e.target === document.getElementById('statsModal')) closeStats();
-  });
+  // intentionally do NOT render markers on boot — keep blank state
+  window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
 })();
 </script>
 </body>
