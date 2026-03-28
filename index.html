@@ -24,7 +24,7 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:118px;
+  --hdr:132px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -39,9 +39,10 @@ button{cursor:pointer}
 ::-webkit-scrollbar-thumb{background:#bfd0c2;border-radius:999px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* FIX 1: Splash screen z-index raised to 99999 so nothing bleeds through */
 #loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
 #loading.hide{opacity:0;visibility:hidden;pointer-events:none}
+body.splash-active #hdr,
+body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .loading-bg{position:absolute;inset:0;background:url('background.gif') center/cover no-repeat}
 .loading-veil{position:absolute;inset:0;background:rgba(9,22,15,.72);backdrop-filter:blur(4px)}
 .loading-card{position:relative;z-index:2;width:min(720px,92vw);padding:36px 28px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:rgba(12,24,18,.45);box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;color:#fff}
@@ -60,7 +61,7 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:minmax(42px,auto) minmax(48px,auto);align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28);overflow:visible}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
@@ -78,21 +79,17 @@ button{cursor:pointer}
 .sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
 
-/* FIX 2: hdr-actions z-index must not create a stacking context that clashes with fixed dropdowns */
-.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
-.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;align-self:start;position:relative;z-index:10021}
+.syncbox{display:flex;flex-direction:column;align-items:flex-end;align-self:start;min-width:92px;justify-self:end;position:relative;z-index:10021}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
 .syncbox span{font:600 .64rem var(--mono);color:#fff}
 .hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-/* FIX 3: fbar must not clip dropdowns. Keep overflow-x:auto on an inner wrapper instead */
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
-#fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-/* Inner scroll track so parent #fbar stays overflow:visible */
-#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;overflow-y:visible}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10030;display:flex;align-items:center;gap:8px;padding:0 16px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow-x:auto;overflow-y:visible}
+#fbar.hidden{height:0;padding:0 16px;border-bottom:none;opacity:0;pointer-events:none}
+.fg{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:visible}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 .fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
@@ -102,14 +99,12 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-/* FIX 4: ms-wrap no longer needs position:relative since drop is fixed */
-.ms-wrap{position:static;flex-shrink:0}
+.ms-wrap{position:relative;flex-shrink:0;z-index:10031;overflow:visible}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-/* FIX 5: ms-drop uses position:fixed so it escapes any overflow clipping. z-index 99999. */
-.ms-drop{display:none;position:fixed;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:10032;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -127,11 +122,7 @@ button{cursor:pointer}
 .leaflet-popup-content{margin:0}
 .leaflet-popup-tip{background:#fff}
 .leaflet-popup-close-button{top:10px!important;right:10px!important}
-/* FIX 6: Remove all default Leaflet focus/active highlight circles and outlines */
-.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
-path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
-.leaflet-interactive:active{outline:none!important}
-.leaflet-container a.leaflet-popup-close-button:focus{outline:none}
+.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
@@ -160,35 +151,34 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 
-#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
+#fpBg{display:none;position:fixed;inset:0;z-index:10040;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100%;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column}
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100%;z-index:10050;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
-.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
 .fp-hdr h3{font:700 .88rem var(--mono)}
 .fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
-.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
+.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line)}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/* FIX 7: Field Updates scroll container - flex:1 + min-height:0 + overflow-y:auto */
-.fp-scroll{padding:12px 16px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+.fp-scroll{flex:1;min-height:0;max-height:calc(100vh - 182px);padding:12px 16px;overflow-y:auto}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
 .fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
 
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
-#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center}
 #resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
-#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
 .btm-actions{display:flex;align-items:center;gap:6px}
 .bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
 .bc:hover{background:rgba(255,255,255,.2)}
-#btmScroll{flex:1;overflow:auto;min-height:0}
+#btmScroll{flex:1;overflow:auto}
 .dtbl{width:100%;border-collapse:collapse;font:600 .66rem var(--mono);white-space:nowrap}
 .dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
@@ -202,7 +192,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 }
 </style>
 </head>
-<body>
+<body class="splash-active">
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
@@ -232,7 +222,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
       <img src="mcbt.png" alt="MCBT" onerror="this.style.display='none'">
     </a>
-    <!-- FIX: GEP Instagram link exactly as required -->
     <a href="https://www.instagram.com/gharialecologyproject/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
       <img src="gep.png" alt="GEP" onerror="this.style.display='none'">
     </a>
@@ -260,86 +249,83 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 </header>
 
 <div id="fbar">
-  <!-- FIX: Inner scroll wrapper so #fbar itself stays overflow:visible, preventing dropdown clipping -->
-  <div id="fbar-inner">
-    <div class="fg">
-      <label for="sourceFilter">Source</label>
-      <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
-        <option value="">Select Source</option>
-        <option value="ATS">ATS Satellite</option>
-        <option value="FieldLog">Field Log (VHF)</option>
-        <option value="PaliFT">Pali FT (Hatchlings)</option>
-      </select>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Radio ID</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-        <div class="ms-drop" id="msd-rid">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
-            <span class="ms-count" id="msc-rid"></span>
-          </div>
-          <div class="ms-items" id="msi-rid"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Category</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-        <div class="ms-drop" id="msd-cat">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
-            <span class="ms-count" id="msc-cat"></span>
-          </div>
-          <div class="ms-items" id="msi-cat"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Zone</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-        <div class="ms-drop" id="msd-zone">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
-            <span class="ms-count" id="msc-zone"></span>
-          </div>
-          <div class="ms-items" id="msi-zone"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Status</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
-        <div class="ms-drop" id="msd-status">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
-            <span class="ms-count" id="msc-status"></span>
-          </div>
-          <div class="ms-items" id="msi-status"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
-    <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
-    <div class="fsep"></div>
-    <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-    <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
-    <div class="fsep"></div>
-    <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
+  <div class="fg">
+    <label for="sourceFilter">Source</label>
+    <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
+      <option value="">Select Source</option>
+      <option value="ATS">ATS Satellite</option>
+      <option value="FieldLog">Field Log (VHF)</option>
+      <option value="PaliFT">Pali FT (Hatchlings)</option>
+    </select>
   </div>
+  <div class="fsep"></div>
+  <div class="fg">
+    <label>Radio ID</label>
+    <div class="ms-wrap">
+      <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
+      <div class="ms-drop" id="msd-rid">
+        <div class="ms-head">
+          <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
+          <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
+          <span class="ms-count" id="msc-rid"></span>
+        </div>
+        <div class="ms-items" id="msi-rid"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fsep"></div>
+  <div class="fg">
+    <label>Category</label>
+    <div class="ms-wrap">
+      <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
+      <div class="ms-drop" id="msd-cat">
+        <div class="ms-head">
+          <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
+          <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
+          <span class="ms-count" id="msc-cat"></span>
+        </div>
+        <div class="ms-items" id="msi-cat"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fsep"></div>
+  <div class="fg">
+    <label>Zone</label>
+    <div class="ms-wrap">
+      <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
+      <div class="ms-drop" id="msd-zone">
+        <div class="ms-head">
+          <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
+          <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
+          <span class="ms-count" id="msc-zone"></span>
+        </div>
+        <div class="ms-items" id="msi-zone"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fsep"></div>
+  <div class="fg">
+    <label>Status</label>
+    <div class="ms-wrap">
+      <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
+      <div class="ms-drop" id="msd-status">
+        <div class="ms-head">
+          <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
+          <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
+          <span class="ms-count" id="msc-status"></span>
+        </div>
+        <div class="ms-items" id="msi-status"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fsep"></div>
+  <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
+  <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
+  <div class="fsep"></div>
+  <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
+  <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+  <div class="fsep"></div>
+  <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
 </div>
 
 <div id="map-wrap">
@@ -367,7 +353,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fp-date" id="fuDate">Loading...</div>
     <div class="fp-copy" id="fuText"></div>
   </div>
-  <!-- FIX 7: fp-scroll now properly scrollable via flex:1 + min-height:0 in CSS -->
   <div class="fp-scroll">
     <h4>Previous Updates</h4>
     <div id="fuList"></div>
@@ -416,7 +401,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script>
-/* ─────────────── STRICT DATA SOURCE URLS ─────────────── */
 const URLS = {
   master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
@@ -489,7 +473,7 @@ const VIEW_META = {
       {key:null,label:'Not applicable'}
     ],
     legend:[
-      {label:'Merged adult latest positions',color:'#2f7a5a'}
+      {label:'Field Log latest positions',color:'#2f7a5a'}
     ],
     statusKeys:[],
     showFieldUpdates:false,
@@ -514,6 +498,12 @@ const VIEW_META = {
     hideCollar:true,
     statusEnabled:true
   }
+};
+
+const SOURCE_LABELS = {
+  ATS:'ATS Satellite',
+  FieldLog:'Field Log (VHF)',
+  PaliFT:'Pali FT (Hatchlings)'
 };
 
 let map;
@@ -550,14 +540,8 @@ function initMap() {
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   trackLayer = L.layerGroup().addTo(map);
-  /* FIX: OMS config - keepSpiderfied prevents markers snapping back, circleSpiralSwitchover
-     controls when layout changes from circle to spiral for many overlapping markers */
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
   oms.addListener('click', marker => marker.openPopup());
-  /* Suppress Leaflet's default blue focus circle on path elements */
-  map.on('click', () => {
-    document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur());
-  });
 }
 
 function fetchCSV(url){
@@ -609,6 +593,12 @@ function nid(raw){
 function isHatchCategory(row){
   const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
   return /hatch|hatchling|fth|pali\s*ft/i.test(category);
+}
+
+function resolveEntityScope(id, row, fallback = 'A'){
+  if(masterHatchMap[id]) return 'H';
+  if(masterAdultMap[id]) return 'A';
+  return isHatchCategory(row) ? 'H' : fallback;
 }
 
 function parseFieldDate(value){
@@ -705,11 +695,11 @@ function buildMasterMaps(rows){
   });
 }
 
-/* ── ATS: only adults (satellite source), read exclusively from ATS sheet ── */
 function ingestATS(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
     if(!id) return;
+    if(resolveEntityScope(id, row, 'A') === 'H') return;
     const lat = parseFloat(gc(row,'Latitude','Lat'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
@@ -727,17 +717,11 @@ function ingestATS(rows){
   });
 }
 
-/* ── VHF FIX: Field Log ingestion COMPLETELY skips any record whose ID
-   resolves to a known hatchling in masterHatchMap. Hatchling data belongs
-   exclusively in the PaliFT source.  ── */
 function ingestFieldLog(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
     if(!id) return;
-    /* CRITICAL: Skip hatchlings – they must only come from PaliFT */
-    if(masterHatchMap[id]) return;
-    /* Also skip rows whose own category column identifies them as hatchlings */
-    if(isHatchCategory(row)) return;
+    if(resolveEntityScope(id, row, 'A') === 'H') return;
     let lat = parseFloat(gc(row,'Latitude','Lat'));
     let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
@@ -760,7 +744,6 @@ function ingestFieldLog(rows){
   });
 }
 
-/* ── PaliFT: only hatchlings, read exclusively from Pali FT sheet ── */
 function ingestPali(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
@@ -924,20 +907,17 @@ function calcRiverDistance(prevFix, nextFix){
   }
 }
 
-/* ── DATA ISOLATION: getViewEntities enforces strict per-source data routing ── */
 function getViewEntities(source){
   if(!source) return [];
   return entities.map(entity=>{
     if(source === 'PaliFT'){
-      /* Hatchlings only – exclusively from PaliFT histories */
-      if(!entity.isHatchling) return null;
-      const relevantFix = entity.latestPali || null;
-      const locationFix = relevantFix || entity.latestOverall || null;
+      if(!entity.isHatchling || !entity.latestPali) return null;
+      const relevantFix = entity.latestPali;
+      const locationFix = entity.latestPali;
       const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
       return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-'};
     }
     if(source === 'ATS'){
-      /* Adults only – last location exclusively from ATS Log, ignore Field Log */
       if(entity.isHatchling || !entity.latestATS) return null;
       const relevantFix = entity.latestATS;
       const locationFix = entity.latestATS;
@@ -945,8 +925,6 @@ function getViewEntities(source){
       return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
     }
     if(source === 'FieldLog'){
-      /* Adults only – last location exclusively from Field Log, ignore ATS Log.
-         Hatchlings are already excluded at ingestion AND here for absolute safety. */
       if(entity.isHatchling || !entity.latestVHF) return null;
       const relevantFix = entity.latestVHF;
       const locationFix = entity.latestVHF;
@@ -967,6 +945,10 @@ function snapFixToRiver(fix){
   }catch(error){
     return {lat:fix.lat, lon:fix.lon};
   }
+}
+
+function sourceLabel(source){
+  return SOURCE_LABELS[source] || source || '-';
 }
 
 function statusLabel(status, source){
@@ -1101,9 +1083,6 @@ function updateMSBtn(key){
   }
 }
 
-/* FIX 8: toggleMS uses position:fixed on the dropdown, calculated from the
-   button's viewport rect. This escapes any overflow clipping on parent
-   elements (fbar, map, etc.) and clears the z-index/leaflet pane conflict. */
 function toggleMS(key, event){
   if(event) event.stopPropagation();
   const button = document.getElementById('msb-' + key);
@@ -1111,16 +1090,7 @@ function toggleMS(key, event){
   const drop = document.getElementById('msd-' + key);
   const isOpen = drop.classList.contains('open');
   document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
-  if(!isOpen){
-    const rect = button.getBoundingClientRect();
-    drop.style.top = (rect.bottom + 6) + 'px';
-    drop.style.left = rect.left + 'px';
-    /* Clamp to viewport width */
-    const dropWidth = 220;
-    const overflow = rect.left + dropWidth - window.innerWidth;
-    if(overflow > 0) drop.style.left = Math.max(0, rect.left - overflow - 8) + 'px';
-    drop.classList.add('open');
-  }
+  if(!isOpen) drop.classList.add('open');
 }
 
 function msSelectAll(key){
@@ -1269,6 +1239,7 @@ function clearVisuals(resetViewport){
   trackLayer.clearLayers();
   historyMarkerMap = {};
   entityMarkerMap = {};
+  try{ oms.unspiderfy && oms.unspiderfy(); }catch(error){}
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(heatLayer){
     map.removeLayer(heatLayer);
@@ -1302,25 +1273,19 @@ function markerIcon(entity, text){
 function popupHtml(entity){
   const display = entity.displayFix;
   const status = badgeHtml(entity.status, entity.viewSource);
-  const latestSat = entity.latestATS ? fmtDateTime(entity.latestATS.ts) : '-';
-  const latestVhf = entity.latestVHF ? fmtDateTime(entity.latestVHF.ts) : '-';
-  const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
-  const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
+  const latestFix = entity.relevantFix ? fmtDateTime(entity.relevantFix.ts) : '-';
+  const latestLabel = entity.viewSource === 'ATS' ? 'Last ATS fix' : (entity.viewSource === 'FieldLog' ? 'Last VHF fix' : 'Last hatchling fix');
   return '' +
     '<div>' +
       '<div class="pop-top">' +
         '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
         '<div>' +
           '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
-          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
+          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel(entity.viewSource)) + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="pop-body">' +
-        '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">' + escapeHtml(fmtDateTime(display?.ts)) + '</span></div>' +
-        (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
-        (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
-        (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Latest VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
+        '<div class="pop-row"><span class="pop-label">' + escapeHtml(latestLabel) + '</span><span class="pop-value">' + escapeHtml(latestFix || fmtDateTime(display?.ts)) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
@@ -1342,24 +1307,46 @@ function fixKey(compKey, fix){
   return compKey + '|' + (fix.ts ? fix.ts.getTime() : 'na') + '|' + fix.lat + '|' + fix.lon + '|' + fix.source;
 }
 
-/* ── TRACK BUTTON LOGIC (rewritten per spec) ──
-   When Track is clicked for an entity, this function:
-   1. Sets trackEntityKey to isolate that animal
-   2. Reads ONLY the literal historical coordinates already parsed from the
-      active source sheet (entity.trackHistory – set in getViewEntities per source)
-   3. If no valid coordinate history exists, shows the latest marker only
-   4. Clears all other non-tracked animal markers (enforced in renderMarkers)
-   5. Path is snapped along river.geojson via Turf.js lineSlice (no straight lines)
-   6. All non-tracked markers are hidden (renderMarkers early-returns in track mode)
-*/
-function trackSingle(compKey, focusFix = null){
-  const entity = displayedEntities.find(e=>e.compKey === compKey);
-  if(!entity) return;
-  trackEntityKey = compKey;
-  pendingFocusFixKey = focusFix;
+function bringMarkerToFront(marker, zIndex = 12000){
+  if(!marker) return;
+  if(typeof marker.setZIndexOffset === 'function') marker.setZIndexOffset(zIndex);
+  if(typeof marker.bringToFront === 'function') marker.bringToFront();
+  if(marker._icon) marker._icon.style.zIndex = String(zIndex);
+}
+
+function focusMarker(marker, zoom = 16, spiderfy = false){
+  if(!marker) return;
   map.closePopup();
-  renderMarkers();
-  renderTable();
+  bringMarkerToFront(marker, 12000);
+  map.flyTo(marker.getLatLng(), zoom, {duration:1});
+  setTimeout(()=>{
+    bringMarkerToFront(marker, 12001);
+    if(spiderfy){
+      try{ marker.fire('click'); }catch(error){}
+    }
+    setTimeout(()=>marker.openPopup(), 80);
+  }, 700);
+}
+
+function buildRiverTrackCoords(snappedHistory){
+  if(snappedHistory.length < 2) return [];
+  const line = activeRiverLine();
+  const riverCoords = [];
+  for(let i = 0; i < snappedHistory.length - 1; i += 1){
+    try{
+      const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon,snappedHistory[i].snapped.lat]));
+      const end = turf.nearestPointOnLine(line, turf.point([snappedHistory[i + 1].snapped.lon,snappedHistory[i + 1].snapped.lat]));
+      const segment = turf.lineSlice(start, end, line);
+      const coords = (segment?.geometry?.coordinates || []).map(coord=>[coord[1],coord[0]]);
+      if(!coords.length) throw new Error('Empty river segment');
+      if(i === 0) riverCoords.push(...coords);
+      else riverCoords.push(...coords.slice(1));
+    }catch(error){
+      if(i === 0) riverCoords.push([snappedHistory[i].snapped.lat,snappedHistory[i].snapped.lon]);
+      riverCoords.push([snappedHistory[i + 1].snapped.lat,snappedHistory[i + 1].snapped.lon]);
+    }
+  }
+  return riverCoords.filter((coord, index, list)=>index === 0 || coord[0] !== list[index - 1][0] || coord[1] !== list[index - 1][1]);
 }
 
 function renderMarkers(){
@@ -1367,6 +1354,7 @@ function renderMarkers(){
   trackLayer.clearLayers();
   historyMarkerMap = {};
   entityMarkerMap = {};
+  try{ oms.unspiderfy && oms.unspiderfy(); }catch(error){}
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(!displayedEntities.length){
     document.getElementById('trackBadge').style.display = 'none';
@@ -1375,79 +1363,44 @@ function renderMarkers(){
     return;
   }
   const trackEntity = trackEntityKey ? displayedEntities.find(item=>item.compKey === trackEntityKey) : null;
-
+  let trackHistory = [];
+  let trackRiverCoords = [];
   if(trackEntity){
-    /* ── TRACK MODE ──
-       - Only tracked animal shown; ALL other markers hidden (we return early below)
-       - Path snapped along river.geojson using Turf.js lineSlice
-       - No straight-line rendering
-       - Blue Leaflet focus highlight suppressed via CSS + tabIndex management
-       - If no history coords, we fall through and just show the latest fix dot */
-    const history = trackEntity.trackHistory.filter(item=>Number.isFinite(item.lat) && Number.isFinite(item.lon));
-    const snappedHistory = history.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
-
-    /* Disable heatmap/kde in track mode */
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    heatmapOn = false;
-    kdeOn = false;
-    document.getElementById('heatBtn').classList.remove('on');
-    document.getElementById('kdeBtn').classList.remove('on');
-
-    if(snappedHistory.length > 1){
-      /* River-snapped path using Turf.js lineSlice between consecutive fixes */
-      const line = activeRiverLine();
-      const riverCoords = [];
-      for(let i = 0; i < snappedHistory.length - 1; i += 1){
-        try{
-          const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon,snappedHistory[i].snapped.lat]));
-          const end = turf.nearestPointOnLine(line, turf.point([snappedHistory[i+1].snapped.lon,snappedHistory[i+1].snapped.lat]));
-          const segment = turf.lineSlice(start, end, line);
-          const coords = segment.geometry.coordinates.map(coord=>[coord[1],coord[0]]);
-          if(i === 0) riverCoords.push(...coords);
-          else riverCoords.push(...coords.slice(1));
-        }catch(error){
-          /* Fallback: straight segment between these two snapped points */
-          riverCoords.push([snappedHistory[i].snapped.lat,snappedHistory[i].snapped.lon]);
-          if(i === snappedHistory.length - 2) riverCoords.push([snappedHistory[i+1].snapped.lat,snappedHistory[i+1].snapped.lon]);
-        }
-      }
-      if(riverCoords.length > 1){
-        L.polyline(riverCoords,{
-          color:markerColor(trackEntity),
-          weight:3,
-          opacity:.9,
-          dashArray:'8 12',
-          /* FIX: interactive:false prevents Leaflet adding a focus outline on the path */
-          interactive:false
-        }).addTo(trackLayer);
-      }
-    }
-
-    /* Render snapped fix dots – larger for the latest fix */
-    snappedHistory.forEach((item, index)=>{
-      const {fix, snapped} = item;
-      const latest = index === snappedHistory.length - 1;
-      const size = latest ? 14 : 8;
-      const color = markerColor(trackEntity);
-      const fixMarker = L.marker([snapped.lat, snapped.lon],{
-        icon:L.divIcon({
-          className:'',
-          html:'<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" style="display:block"><circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + (size/2-1.5) + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/></svg>',
-          iconSize:[size,size],
-          iconAnchor:[size/2,size/2]
-        }),
-        zIndexOffset:latest ? 9000 : 0,
-        keyboard:false,       /* FIX: keyboard:false prevents tab-focus blue ring */
-        interactive:true
+    trackHistory = trackEntity.trackHistory
+      .filter(item=>Number.isFinite(item.lat) && Number.isFinite(item.lon))
+      .slice()
+      .sort((a,b)=>{
+        const ta = a.ts ? a.ts.getTime() : -Infinity;
+        const tb = b.ts ? b.ts.getTime() : -Infinity;
+        return ta - tb;
       });
-      const previous = index > 0 ? snappedHistory[index-1].fix : null;
+    const snappedHistory = trackHistory.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
+    trackRiverCoords = buildRiverTrackCoords(snappedHistory);
+    if(trackRiverCoords.length > 1){
+      L.polyline(trackRiverCoords,{color:markerColor(trackEntity),weight:3,opacity:.9,dashArray:'8 12'}).addTo(trackLayer);
+    }
+    snappedHistory.forEach((item, index)=>{
+      const {fix} = item;
+      const latest = index === snappedHistory.length - 1;
+      const color = markerColor(trackEntity);
+      const size = latest ? 34 : 10;
+      const fixMarker = L.marker([fix.lat,fix.lon],{
+        icon:latest ? markerIcon(trackEntity, trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id) : L.divIcon({
+          className:'',
+          html:'<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '"><circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2 - 1.5) + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/></svg>',
+          iconSize:[size,size],
+          iconAnchor:[size / 2,size / 2]
+        }),
+        zIndexOffset:latest ? 12000 : 0,
+        keyboard:false
+      });
+      const previous = index > 0 ? snappedHistory[index - 1].fix : null;
       const riverDistance = previous ? calcRiverDistance(previous, fix) : null;
       fixMarker.bindPopup(
         '<div class="pop-body">' +
           '<div class="pop-row"><span class="pop-label">Radio ID</span><span class="pop-value">' + escapeHtml(trackEntity.id) + '</span></div>' +
           '<div class="pop-row"><span class="pop-label">Fix time</span><span class="pop-value">' + escapeHtml(fmtDateTime(fix.ts)) + '</span></div>' +
-          '<div class="pop-row"><span class="pop-label">Source</span><span class="pop-value">' + escapeHtml(fix.source) + '</span></div>' +
+          '<div class="pop-row"><span class="pop-label">Source</span><span class="pop-value">' + escapeHtml(sourceLabel(fix.source)) + '</span></div>' +
           (riverDistance !== null ? '<div class="pop-row"><span class="pop-label">River dist from prev</span><span class="pop-value">' + riverDistance + ' m</span></div>' : '') +
           '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(fix.zone || '-') + '</span></div>' +
           (fix.place ? '<div class="pop-row"><span class="pop-label">Place</span><span class="pop-value">' + escapeHtml(fix.place) + '</span></div>' : '') +
@@ -1457,53 +1410,39 @@ function renderMarkers(){
       trackLayer.addLayer(fixMarker);
       historyMarkerMap[fixKey(trackEntity.compKey, fix)] = fixMarker;
     });
-
-    /* If zero valid history coords, add a single latest-fix marker */
-    if(snappedHistory.length === 0 && trackEntity.displayFix && Number.isFinite(trackEntity.displayFix.lat)){
-      const fix = trackEntity.displayFix;
-      const fallback = L.marker([fix.lat,fix.lon],{
-        icon:markerIcon(trackEntity, trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id),
-        keyboard:false,
-        zIndexOffset:9000
-      });
-      fallback.bindPopup(popupHtml(trackEntity),{maxWidth:330});
-      trackLayer.addLayer(fallback);
-    }
-
     document.getElementById('trackBadge').style.display = 'block';
-    document.getElementById('trackLabel').textContent = trackEntity.id + ' (' + history.length + ' fixes)';
+    document.getElementById('trackLabel').textContent = trackEntity.id;
+  }else{
+    document.getElementById('trackBadge').style.display = 'none';
+  }
 
-    /* Fit map to track bounds */
-    const points = snappedHistory.map(item=>[item.snapped.lat,item.snapped.lon]).filter(p=>Number.isFinite(p[0]) && Number.isFinite(p[1]));
-    if(!points.length && trackEntity.displayFix){
-      points.push([trackEntity.displayFix.lat,trackEntity.displayFix.lon]);
-    }
+  if(trackEntity){
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    heatmapOn = false;
+    kdeOn = false;
+    document.getElementById('heatBtn').classList.remove('on');
+    document.getElementById('kdeBtn').classList.remove('on');
+  }
+
+  if(trackEntity){
+    const points = (trackRiverCoords.length ? trackRiverCoords : trackHistory.map(fix=>[fix.lat,fix.lon]));
     if(points.length){
-      map.fitBounds(L.latLngBounds(points),{padding:[52,52],maxZoom:16});
+      if(points.length === 1) map.flyTo(points[0],16,{duration:1});
+      else map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
     }
-
-    /* If we came from a table click on a specific fix, fly to it */
     if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
       const marker = historyMarkerMap[pendingFocusFixKey];
       pendingFocusFixKey = null;
-      map.flyTo(marker.getLatLng(),16,{duration:1});
-      setTimeout(()=>marker.openPopup(),700);
+      focusMarker(marker, 16, false);
     }
-
-    /* ── CRITICAL: Return here so NON-TRACKED markers are never added ── */
     return;
   }
-
-  /* ── Normal (non-track) mode: render all displayedEntities with OMS spiderfier ── */
-  document.getElementById('trackBadge').style.display = 'none';
 
   displayedEntities.forEach(entity=>{
     const fix = entity.displayFix;
     if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
-    const marker = L.marker([fix.lat,fix.lon],{
-      icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),
-      keyboard:false   /* FIX: suppress focus ring on markers */
-    });
+    const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),keyboard:false});
     marker.bindPopup(popupHtml(entity),{maxWidth:330});
     marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
     markerLayer.addLayer(marker);
@@ -1515,31 +1454,35 @@ function renderMarkers(){
   else if(kdeOn) renderKDE();
   else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
 
-  const points = displayedEntities
-    .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
-    .map(e=>[e.displayFix.lat,e.displayFix.lon]);
+  const points = [];
+  displayedEntities.forEach(entity=>{
+    if(entity.displayFix && Number.isFinite(entity.displayFix.lat) && Number.isFinite(entity.displayFix.lon)){
+      points.push([entity.displayFix.lat,entity.displayFix.lon]);
+    }
+  });
   if(points.length){
     map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
   }
-
   if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
     const marker = historyMarkerMap[pendingFocusFixKey];
     pendingFocusFixKey = null;
-    map.flyTo(marker.getLatLng(),16,{duration:1});
-    setTimeout(()=>marker.openPopup(),700);
+    focusMarker(marker, 16, false);
   }
 }
 
-/* ── Table row click → zoom marker to front and open popup ── */
 function focusEntity(compKey){
   const marker = entityMarkerMap[compKey];
   if(!marker) return;
-  /* Bring to absolute front */
-  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
-  marker.setZIndexOffset(9000);
+  Object.values(entityMarkerMap).forEach(item=>bringMarkerToFront(item, 0));
+  focusMarker(marker, 16, true);
+}
+
+function trackSingle(compKey, focusFix = null){
+  trackEntityKey = compKey;
+  pendingFocusFixKey = focusFix;
   map.closePopup();
-  map.flyTo(marker.getLatLng(),16,{duration:1});
-  setTimeout(()=>marker.openPopup(),700);
+  renderMarkers();
+  renderTable();
 }
 
 function focusTableRow(key){
@@ -1641,7 +1584,6 @@ function renderTable(){
       document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
       tr.classList.add('sel');
       if(row.type === 'entity'){
-        /* Table row click → zoom to that marker and bring it to front */
         focusEntity(row.entity.compKey);
       }else{
         if(trackEntityKey !== row.entity.compKey){
@@ -1649,10 +1591,8 @@ function renderTable(){
         }else{
           const marker = historyMarkerMap[row.rowKey];
           if(marker){
-            Object.values(historyMarkerMap).forEach(item=>item.setZIndexOffset(0));
-            marker.setZIndexOffset(9000);
-            map.flyTo(marker.getLatLng(),16,{duration:1});
-            setTimeout(()=>marker.openPopup(),700);
+            Object.values(historyMarkerMap).forEach(item=>bringMarkerToFront(item, 0));
+            focusMarker(marker, 16, false);
           }
         }
       }
@@ -1693,8 +1633,14 @@ function getOverlayFixes(){
 
 function renderHeatmap(){
   const fixes = getOverlayFixes();
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+  if(heatLayer){
+    map.removeLayer(heatLayer);
+    heatLayer = null;
+  }
+  if(kdeLayer){
+    map.removeLayer(kdeLayer);
+    kdeLayer = null;
+  }
   if(!fixes.length){
     heatmapOn = false;
     document.getElementById('heatBtn').classList.remove('on');
@@ -1711,8 +1657,14 @@ function renderHeatmap(){
 
 function renderKDE(){
   const fixes = getOverlayFixes();
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+  if(kdeLayer){
+    map.removeLayer(kdeLayer);
+    kdeLayer = null;
+  }
+  if(heatLayer){
+    map.removeLayer(heatLayer);
+    heatLayer = null;
+  }
   if(fixes.length < 4){
     kdeOn = false;
     document.getElementById('kdeBtn').classList.remove('on');
@@ -1749,7 +1701,7 @@ function renderKDE(){
         gradient.addColorStop(.45,'rgba(239,68,68,.18)');
         gradient.addColorStop(1,'rgba(255,255,255,0)');
         ctx.fillStyle = gradient;
-        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth*2,bandwidth*2);
+        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth * 2,bandwidth * 2);
       });
     }
   });
@@ -1758,13 +1710,19 @@ function renderKDE(){
 }
 
 function toggleHeatmap(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using the heatmap.'); return; }
+  if(!displayedEntities.length){
+    toast('Apply a source filter before using the heatmap.');
+    return;
+  }
   heatmapOn = !heatmapOn;
   if(heatmapOn) kdeOn = false;
   document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
   document.getElementById('kdeBtn').classList.remove('on');
   if(!heatmapOn){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    if(heatLayer){
+      map.removeLayer(heatLayer);
+      heatLayer = null;
+    }
     if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
     return;
   }
@@ -1772,13 +1730,19 @@ function toggleHeatmap(){
 }
 
 function toggleKDE(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using KDE.'); return; }
+  if(!displayedEntities.length){
+    toast('Apply a source filter before using KDE.');
+    return;
+  }
   kdeOn = !kdeOn;
   if(kdeOn) heatmapOn = false;
   document.getElementById('kdeBtn').classList.toggle('on', kdeOn);
   document.getElementById('heatBtn').classList.remove('on');
   if(!kdeOn){
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    if(kdeLayer){
+      map.removeLayer(kdeLayer);
+      kdeLayer = null;
+    }
     if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
     return;
   }
@@ -1786,7 +1750,10 @@ function toggleKDE(){
 }
 
 function exportCSV(){
-  if(!displayRows.length){ toast('No visible records to export.'); return; }
+  if(!displayRows.length){
+    toast('No visible records to export.');
+    return;
+  }
   const rows = [['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
   displayRows.forEach(row=>{
     rows.push([
@@ -1934,10 +1901,9 @@ async function loadAllData(){
     ]);
     loadingCopy('Routing records through the master dictionary...');
     fixBuckets = {};
-    /* Build master maps FIRST so ingestFieldLog can filter hatchlings */
     buildMasterMaps(masterRows);
     ingestATS(atsRows);
-    ingestFieldLog(fieldRows);   /* hatchlings already excluded at this stage */
+    ingestFieldLog(fieldRows);
     ingestPali(paliRows);
     geojsonData = zonesData;
     if(riverData?.features?.length){
@@ -1962,7 +1928,10 @@ async function loadAllData(){
     button.classList.remove('loading');
     const elapsed = performance.now() - SPLASH_START;
     const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
-    setTimeout(()=>document.getElementById('loading').classList.add('hide'), wait);
+    setTimeout(()=>{
+      document.getElementById('loading').classList.add('hide');
+      document.body.classList.remove('splash-active');
+    }, wait);
   }
 }
 
