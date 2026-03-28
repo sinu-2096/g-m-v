@@ -1,6 +1,3 @@
-Paste-ready version below. `6-Feb-25` resolves to February 6, 2025, so on March 28, 2026 it will show `415d`.
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,7 +24,7 @@ Paste-ready version below. `6-Feb-25` resolves to February 6, 2025, so on March 
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:132px;
+  --hdr:118px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -62,7 +59,7 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28);overflow:visible}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
@@ -88,10 +85,10 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10060;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#fbar-inner{position:relative;z-index:10061;display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;overflow-y:visible}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:visible}
+#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
+.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 .fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
@@ -101,12 +98,12 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-.ms-wrap{position:relative;flex-shrink:0;z-index:10062;overflow:visible}
+.ms-wrap{position:relative;flex-shrink:0}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:100%;left:0;margin-top:6px;z-index:10063;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -155,21 +152,24 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 
-#fpBg{display:none;position:fixed;inset:0;z-index:10040;background:rgba(12,24,18,.38)}
+#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:10050;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
+
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 .fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .88rem var(--mono)}
 .fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
-.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
+
+/* FIX-1: Ensure the "Latest Update" section can scroll if text is long, preventing layout clipping */
+.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:1;max-height:45vh;overflow-y:auto}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-.fp-scroll{padding:12px 16px 100px !important;flex:1;min-height:0;max-height:calc(100vh - 150px);overflow-y:auto !important;overflow-x:hidden}
+
+.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-#fuList{padding-bottom:100px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
 .fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
@@ -177,7 +177,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
 #resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
-#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:122px;flex-shrink:0}
 .btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
 .btm-actions{display:flex;align-items:center;gap:6px}
@@ -411,7 +411,6 @@ const URLS = {
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
   fl:'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
   pali:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  /* FIX-2: Field Updates target Sheet2 (gid=238985281) of the Palighat spreadsheet. */
   updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
   zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
 };
@@ -423,8 +422,6 @@ const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
 const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
 const NOT_DEPLOYED_COLLAR = '060336';
-/* FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
-   before it is labelled "Outside Defined Zones" instead of snapping to the nearest. */
 const ZONE_SNAP_MAX_KM = 0.5;
 const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
 
@@ -434,7 +431,7 @@ const STATUS_META = {
   s30:{label:'Silent 30+',color:'#b91c1c',bg:'#fee2e2',border:'#fecaca'},
   crit:{label:'Critical',color:'#7f1d1d',bg:'#fee2e2',border:'#fca5a5'},
   tmiss:{label:'Temp Missing',color:'#d97706',bg:'#fef9c3',border:'#fde68a'},
-  gone:{label:'Gone > 30d',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
+  gone:{label:'Gone',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
   dead:{label:'Dead',color:'#991b1b',bg:'#fee2e2',border:'#fecaca'},
   vhf:{label:'VHF',color:'#2f7a5a',bg:'#dcfce7',border:'#bbf7d0'},
   ndep:{label:'Not Deployed',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'}
@@ -516,14 +513,8 @@ let filterBarHidden = false;
 let activeStatusKey = null;
 let masterAdultMap = {};
 let masterHatchMap = {};
-/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. */
 let masterAdultMapRaw = {};
 let masterHatchMapRaw = {};
-/*
- * FIX-1: Tertiary lookup maps keyed by flatId (strips ALL non-alphanumeric chars).
- * Resolves IDs like "50-60" (field log) matching "50-60" in master even when
- * the two sheets store the hyphen differently or with surrounding whitespace.
- */
 let masterAdultMapFlat = {};
 let masterHatchMapFlat = {};
 let fixBuckets = {};
@@ -593,17 +584,10 @@ function nid(raw){
   return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
 }
 
-/* FIX-1: rawTrimId — preserves hyphens and other separators that nid() removes. */
 function rawTrimId(raw){
   return String(raw || '').trim().toUpperCase();
 }
 
-/*
- * FIX-1: flatId — strips ALL non-alphanumeric characters (hyphens, spaces, dots, etc.)
- * allowing "50-60" from the field log to match "50-60" or "50 60" from the master sheet
- * when the two datasets encode the separator differently.
- * Example: flatId("50-60") === flatId("50 60") === "5060"
- */
 function flatId(raw){
   return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
 }
@@ -635,15 +619,6 @@ function parseATSDate(value){
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function parseAnyDate(value, isHatch){
-  return isHatch ? (parsePaliDate(value) || parseFieldDate(value) || parseATSDate(value)) : (parseFieldDate(value) || parseATSDate(value) || parsePaliDate(value));
-}
-
-/*
- * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
- * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
- * Tag Date / Release Date column of the Master Radio sheet.
- */
 function parseTagDate(value){
   if(!value) return null;
   const s = String(value).trim();
@@ -692,7 +667,7 @@ function parseTagDate(value){
 
 function daysSince(ts){
   if(!ts || Number.isNaN(ts.getTime())) return 9999;
-  return Math.max(0, Math.floor((new Date() - ts) / 86400000));
+  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
 }
 
 function fmtDateTime(ts){
@@ -762,12 +737,12 @@ function buildMasterMaps(rows){
     if(!id) return;
     if(isHatchCategory(row)){
       masterHatchMap[id] = row;
-      if(rid && rid !== id) masterHatchMapRaw[rid] = row;
-      if(fid && fid !== id) masterHatchMapFlat[fid] = row;
+      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
     }else{
       masterAdultMap[id] = row;
-      if(rid && rid !== id) masterAdultMapRaw[rid] = row;
-      if(fid && fid !== id) masterAdultMapFlat[fid] = row;
+      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
     }
   });
 }
@@ -885,18 +860,20 @@ function mergeEntities(){
     const latestPali = latestFrom(bucket.PaliFT || []);
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
+    
+    /* FIX-2: Explicitly added the 'Tag Date/Release Date' column string to ensure daysSince release works correctly */
+    const tagDateRaw = gc(masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
     const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTL = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
 
     entities.push({
       compKey,
       rawId,
       id:rawId,
       isHatchling,
-      category:masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
+      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      tl:masterTL,
+      tl: masterTL,
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
       collar,
@@ -1244,9 +1221,9 @@ function applyFilters(){
       });
     });
     displayedEntities = allEntities.filter(entity=>{
-      if(idFilter  && !idFilter.has(entity.id)) return false;
+      if(idFilter  && !idFilter.has(entity.id))               return false;
       if(catFilter && !catFilter.has(entity.category || '-')) return false;
-      if(zoneFilter&& !zoneFilter.has(entity.zone || '-')) return false;
+      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
       return true;
     });
     displayedEntities.sort((a,b)=>{
@@ -1258,16 +1235,6 @@ function applyFilters(){
     renderMarkers();
     renderTable();
     updateMapFoot();
-    if(zoneFilter && zoneFilter.size === 1 && geojsonData){
-      const zoneName = [...zoneFilter][0];
-      const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
-      if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
-    }else{
-      const pts = displayedEntities
-        .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
-        .map(e=>[e.displayFix.lat, e.displayFix.lon]);
-      if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
-    }
     return;
   }
 
@@ -1275,10 +1242,10 @@ function applyFilters(){
   const pool = getViewEntities(source);
   updateStatusBlocks(source, pool);
   displayedEntities = pool.filter(entity=>{
-    if(idFilter && !idFilter.has(entity.id)) return false;
-    if(catFilter && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-')) return false;
-    if(statusFilter && !statusFilter.has(entity.status)) return false;
+    if(idFilter   && !idFilter.has(entity.id))               return false;
+    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
+    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
+    if(statusFilter&& !statusFilter.has(entity.status))      return false;
     return true;
   });
   displayedEntities.sort((a,b)=>{
@@ -1290,15 +1257,6 @@ function applyFilters(){
   renderMarkers();
   renderTable();
   updateMapFoot();
-  if(zoneFilter && zoneFilter.size === 1 && geojsonData){
-    const zoneName = [...zoneFilter][0];
-    const feature = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
-    if(feature){
-      try{
-        map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15});
-      }catch(error){}
-    }
-  }
 }
 
 function clearFilters(){
@@ -1370,8 +1328,6 @@ function popupHtml(entity){
         (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
-        (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
-        (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
         '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
@@ -1380,7 +1336,6 @@ function popupHtml(entity){
         '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
         (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
-        (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
         (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
       '</div>' +
       '<div class="pop-actions">' +
@@ -1847,4 +1802,3 @@ window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
 </script>
 </body>
 </html>
-```
