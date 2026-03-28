@@ -24,7 +24,7 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:132px;
+  --hdr:118px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -41,8 +41,6 @@ button{cursor:pointer}
 
 #loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
 #loading.hide{opacity:0;visibility:hidden;pointer-events:none}
-body.splash-active #hdr,
-body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .loading-bg{position:absolute;inset:0;background:url('background.gif') center/cover no-repeat}
 .loading-veil{position:absolute;inset:0;background:rgba(9,22,15,.72);backdrop-filter:blur(4px)}
 .loading-card{position:relative;z-index:2;width:min(720px,92vw);padding:36px 28px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:rgba(12,24,18,.45);box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;color:#fff}
@@ -61,7 +59,7 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:minmax(42px,auto) minmax(48px,auto);align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28);overflow:visible}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
@@ -79,18 +77,18 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
 
-.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;align-self:start;position:relative;z-index:10021}
-.syncbox{display:flex;flex-direction:column;align-items:flex-end;align-self:start;min-width:92px;justify-self:end;position:relative;z-index:10021}
+.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
+.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
 .syncbox span{font:600 .64rem var(--mono);color:#fff}
 .hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10060;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#fbar-inner{position:relative;z-index:10061;display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;overflow-y:visible}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:visible}
+#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
+.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 .fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
@@ -100,12 +98,12 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-.ms-wrap{position:relative;flex-shrink:0;z-index:10062;overflow:visible}
+.ms-wrap{position:relative;flex-shrink:0}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:100%;left:0;margin-top:6px;z-index:10063;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -123,11 +121,13 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .leaflet-popup-content{margin:0}
 .leaflet-popup-tip{background:#fff}
 .leaflet-popup-close-button{top:10px!important;right:10px!important}
-.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important}
+.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
+path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
+.leaflet-interactive:active{outline:none!important}
+.leaflet-container a.leaflet-popup-close-button:focus{outline:none}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
-#trackBadge{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;display:none;padding:8px 14px;border-radius:999px;background:rgba(23,63,49,.92);color:#fff;border:1px solid rgba(255,255,255,.16);font:700 .66rem var(--mono);letter-spacing:.05em;box-shadow:var(--shadow)}
 #legend{position:absolute;right:12px;bottom:12px;z-index:500;min-width:220px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid var(--line-2);box-shadow:var(--shadow);display:none}
 .legend-title{font:700 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .legend-row{display:flex;align-items:center;gap:8px;font:600 .62rem var(--mono);color:var(--text);margin-bottom:6px}
@@ -152,35 +152,41 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 
-#fpBg{display:none;position:fixed;inset:0;z-index:10040;background:rgba(12,24,18,.38)}
+#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:10050;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
+/* FIX-2: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
-.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between}
+.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .88rem var(--mono)}
 .fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
-.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line)}
+.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-.fp-scroll{flex:1;min-height:0;max-height:calc(100vh - 150px);padding:12px 16px 100px;overflow-y:auto;overflow-x:hidden}
+/*
+ * FIX-3: .fp-scroll — removed conflicting max-height so the flex container's own
+ * height:100vh + overflow:hidden on #fp controls vertical clipping correctly.
+ * padding-bottom:120px ensures the last update entry can be scrolled fully
+ * clear of the bottom edge of the screen.
+ */
+.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-#fuList{padding-bottom:100px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
 .fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
 
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
-#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
-#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
 .btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
 .btm-actions{display:flex;align-items:center;gap:6px}
 .bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
 .bc:hover{background:rgba(255,255,255,.2)}
-#btmScroll{flex:1;overflow:auto}
+#btmScroll{flex:1;overflow:auto;min-height:0}
 .dtbl{width:100%;border-collapse:collapse;font:600 .66rem var(--mono);white-space:nowrap}
 .dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
 .dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
@@ -194,7 +200,7 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 }
 </style>
 </head>
-<body class="splash-active">
+<body>
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
@@ -213,7 +219,6 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
       <div class="loading-item" id="ld-fl">Field Log (VHF)</div>
       <div class="loading-item" id="ld-pali">Pali FT Hatchlings</div>
       <div class="loading-item" id="ld-zones">River Zones GeoJSON</div>
-      <div class="loading-item" id="ld-river">River Centerline GeoJSON</div>
     </div>
   </div>
 </div>
@@ -252,83 +257,83 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 
 <div id="fbar">
   <div id="fbar-inner">
-  <div class="fg">
-    <label for="sourceFilter">Source</label>
-    <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
-      <option value="">Select Source</option>
-      <option value="ATS">ATS Satellite</option>
-      <option value="FieldLog">Field Log (VHF)</option>
-      <option value="PaliFT">Pali FT (Hatchlings)</option>
-    </select>
-  </div>
-  <div class="fsep"></div>
-  <div class="fg">
-    <label>Radio ID</label>
-    <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-      <div class="ms-drop" id="msd-rid">
-        <div class="ms-head">
-          <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
-          <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
-          <span class="ms-count" id="msc-rid"></span>
+    <div class="fg">
+      <label for="sourceFilter">Source</label>
+      <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
+        <option value="">Select Source</option>
+        <option value="ATS">ATS Satellite</option>
+        <option value="FieldLog">Field Log (VHF)</option>
+        <option value="PaliFT">Pali FT (Hatchlings)</option>
+      </select>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Radio ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <div class="ms-drop" id="msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
+            <span class="ms-count" id="msc-rid"></span>
+          </div>
+          <div class="ms-items" id="msi-rid"></div>
         </div>
-        <div class="ms-items" id="msi-rid"></div>
       </div>
     </div>
-  </div>
-  <div class="fsep"></div>
-  <div class="fg">
-    <label>Category</label>
-    <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-      <div class="ms-drop" id="msd-cat">
-        <div class="ms-head">
-          <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
-          <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
-          <span class="ms-count" id="msc-cat"></span>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Category</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <div class="ms-drop" id="msd-cat">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
+            <span class="ms-count" id="msc-cat"></span>
+          </div>
+          <div class="ms-items" id="msi-cat"></div>
         </div>
-        <div class="ms-items" id="msi-cat"></div>
       </div>
     </div>
-  </div>
-  <div class="fsep"></div>
-  <div class="fg">
-    <label>Zone</label>
-    <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Select source first</span><span class="ms-caret">v</span></button>
-      <div class="ms-drop" id="msd-zone">
-        <div class="ms-head">
-          <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
-          <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
-          <span class="ms-count" id="msc-zone"></span>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Zone</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <div class="ms-drop" id="msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
+            <span class="ms-count" id="msc-zone"></span>
+          </div>
+          <div class="ms-items" id="msi-zone"></div>
         </div>
-        <div class="ms-items" id="msi-zone"></div>
       </div>
     </div>
-  </div>
-  <div class="fsep"></div>
-  <div class="fg">
-    <label>Status</label>
-    <div class="ms-wrap">
-      <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
-      <div class="ms-drop" id="msd-status">
-        <div class="ms-head">
-          <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
-          <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
-          <span class="ms-count" id="msc-status"></span>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Status</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
+        <div class="ms-drop" id="msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
+            <span class="ms-count" id="msc-status"></span>
+          </div>
+          <div class="ms-items" id="msi-status"></div>
         </div>
-        <div class="ms-items" id="msi-status"></div>
       </div>
     </div>
-  </div>
-  <div class="fsep"></div>
-  <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
-  <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
-  <div class="fsep"></div>
-  <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-  <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
-  <div class="fsep"></div>
-  <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
+    <div class="fsep"></div>
+    <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
+    <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
+    <div class="fsep"></div>
+    <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
+    <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+    <div class="fsep"></div>
+    <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
   </div>
 </div>
 
@@ -337,7 +342,6 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
   <div class="map-fab">
     <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
   </div>
-  <div id="trackBadge">Track Mode - <span id="trackLabel"></span></div>
   <div id="legend"></div>
   <div id="mapFoot">
     <div class="map-foot-dot"></div>
@@ -368,7 +372,6 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
   <div id="btmHdr">
     <div class="btm-title">Telemetry Records <span class="tbl-badge" id="tableBadge">0 records</span></div>
     <div class="btm-actions">
-      <button class="bc" id="trackClearBtn" type="button" onclick="clearTrack()">Clear Track</button>
       <button class="bc" id="btmToggleBtn" type="button" onclick="toggleBottom()">Hide</button>
     </div>
   </div>
@@ -405,29 +408,28 @@ body.splash-active #fbar{opacity:0;visibility:hidden;pointer-events:none}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script>
+/* ─────────────── STRICT DATA SOURCE URLS ─────────────── */
 const URLS = {
   master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
   fl:'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
   pali:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  /* FIX-2: Field Updates target Sheet2 (gid=238985281) of the Palighat spreadsheet. */
   updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
-  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
-  river:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/river.geojson'
+  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
 };
 
 const MAP_CENTER = [25.84,76.56];
 const MAP_ZOOM = 12;
+const TODAY = new Date();
 const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
 const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
 const NOT_DEPLOYED_COLLAR = '060336';
+/* FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
+   before it is labelled "Outside Defined Zones" instead of snapping to the nearest. */
+const ZONE_SNAP_MAX_KM = 0.5;
 const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
-const RIVER_LINE_FALLBACK = turf.lineString([
-  [76.478,25.922],[76.492,25.910],[76.505,25.899],[76.517,25.889],[76.528,25.880],[76.537,25.872],
-  [76.545,25.864],[76.552,25.856],[76.558,25.847],[76.563,25.838],[76.568,25.829],[76.574,25.820],
-  [76.581,25.810],[76.590,25.800],[76.600,25.790],[76.612,25.779],[76.625,25.768],[76.638,25.757],
-  [76.651,25.746],[76.665,25.735]
-]);
 
 const STATUS_META = {
   active:{label:'Active',color:'#1565c0',bg:'#dbeafe',border:'#bfdbfe'},
@@ -476,7 +478,7 @@ const VIEW_META = {
       {key:null,label:'Not applicable'}
     ],
     legend:[
-      {label:'Field Log latest positions',color:'#2f7a5a'}
+      {label:'Merged adult latest positions',color:'#2f7a5a'}
     ],
     statusKeys:[],
     showFieldUpdates:false,
@@ -503,16 +505,9 @@ const VIEW_META = {
   }
 };
 
-const SOURCE_LABELS = {
-  ATS:'ATS Satellite',
-  FieldLog:'Field Log (VHF)',
-  PaliFT:'Pali FT (Hatchlings)'
-};
-
 let map;
 let oms;
 let markerLayer;
-let trackLayer;
 let zoneGeoLayer = null;
 let heatLayer = null;
 let kdeLayer = null;
@@ -522,12 +517,18 @@ let bottomCollapsed = false;
 let bottomHeight = 250;
 let filterBarHidden = false;
 let activeStatusKey = null;
-let trackEntityKey = null;
-let pendingFocusFixKey = null;
-let masterAdultRows = [];
-let masterHatchRows = [];
 let masterAdultMap = {};
 let masterHatchMap = {};
+/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. */
+let masterAdultMapRaw = {};
+let masterHatchMapRaw = {};
+/*
+ * FIX-1: Tertiary lookup maps keyed by flatId (strips ALL non-alphanumeric chars).
+ * Resolves IDs like "50-60" (field log) matching "50-60" in master even when
+ * the two sheets store the hyphen differently or with surrounding whitespace.
+ */
+let masterAdultMapFlat = {};
+let masterHatchMapFlat = {};
 let fixBuckets = {};
 let entities = [];
 let displayedEntities = [];
@@ -535,18 +536,18 @@ let displayRows = [];
 let updatesRows = [];
 let zonePolygons = [];
 let geojsonData = null;
-let riverLineFeature = null;
 let entityMarkerMap = {};
-let historyMarkerMap = {};
 
 function initMap() {
   map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
-  trackLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
   oms.addListener('click', marker => marker.openPopup());
+  map.on('click', () => {
+    document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur());
+  });
 }
 
 function fetchCSV(url){
@@ -592,49 +593,27 @@ function gc(row, ...keys){
 }
 
 function nid(raw){
-  return String(raw ?? '').replace(/\s/g,'');
+  return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
 }
 
-function radioIdValue(row){
-  return gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID');
+/* FIX-1: rawTrimId — preserves hyphens and other separators that nid() removes. */
+function rawTrimId(raw){
+  return String(raw || '').trim().toUpperCase();
 }
 
-function strictRadioIdMatch(a, b){
-  const left = String(a ?? '').replace(/\s/g,'');
-  const right = String(b ?? '').replace(/\s/g,'');
-  return !!left && left === right;
-}
-
-function findStrictMasterRow(rows, radioId){
-  if(!radioId || !rows?.length) return null;
-  return rows.find(master=>strictRadioIdMatch(radioIdValue(master), radioId)) || null;
-}
-
-function lookupMasterRowInScope(radioId, scope){
-  if(!radioId) return null;
-  if(scope === 'H'){
-    return masterHatchMap[nid(radioId)] || findStrictMasterRow(masterHatchRows, radioId) || null;
-  }
-  return masterAdultMap[nid(radioId)] || findStrictMasterRow(masterAdultRows, radioId) || null;
-}
-
-function lookupMasterRow(radioId, isHatchling){
-  if(!radioId) return null;
-  if(isHatchling){
-    return lookupMasterRowInScope(radioId, 'H') || lookupMasterRowInScope(radioId, 'A') || null;
-  }
-  return lookupMasterRowInScope(radioId, 'A') || lookupMasterRowInScope(radioId, 'H') || null;
+/*
+ * FIX-1: flatId — strips ALL non-alphanumeric characters (hyphens, spaces, dots, etc.)
+ * allowing "50-60" from the field log to match "50-60" or "50 60" from the master sheet
+ * when the two datasets encode the separator differently.
+ * Example: flatId("50-60") === flatId("50 60") === "5060"
+ */
+function flatId(raw){
+  return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
 }
 
 function isHatchCategory(row){
   const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
   return /hatch|hatchling|fth|pali\s*ft/i.test(category);
-}
-
-function resolveEntityScope(id, row, fallback = 'A'){
-  if(lookupMasterRowInScope(id, 'H')) return 'H';
-  if(lookupMasterRowInScope(id, 'A')) return 'A';
-  return isHatchCategory(row) ? 'H' : fallback;
 }
 
 function parseFieldDate(value){
@@ -663,54 +642,74 @@ function parseAnyDate(value, isHatch){
   return isHatch ? (parsePaliDate(value) || parseFieldDate(value) || parseATSDate(value)) : (parseFieldDate(value) || parseATSDate(value) || parsePaliDate(value));
 }
 
+/*
+ * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
+ * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
+ * Tag Date / Release Date column of the Master Radio sheet.
+ *
+ * Resolution order:
+ *   1. DD-MMM-YY or DD-MMM-YYYY  ← NEW: month-name aware (handles "26-Jan-25")
+ *   2. DD-MM-YYYY or DD/MM/YYYY  (Indian field standard)
+ *   3. MM/DD/YYYY                (American fallback)
+ *   4. ISO 8601 / browser-native
+ *
+ * Two-digit years: 00–49 → 2000–2049, 50–99 → 1950–1999.
+ * Returns null (never throws) when value is absent or unparseable.
+ */
 function parseTagDate(value){
   if(!value) return null;
-  const raw = String(value).trim();
-  if(!raw || ['na','n/a','-','—','â€”','null'].includes(raw.toLowerCase())) return null;
+  const s = String(value).trim();
+  if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
 
-  const monthMap = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-  const monthMatch = raw.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,9})[\s\-\/](\d{2,4})(?:[\s,]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-  if(monthMatch){
-    const day = +monthMatch[1];
-    const month = monthMap[monthMatch[2].slice(0,3).toLowerCase()];
-    let year = +monthMatch[3];
-    const hour = +(monthMatch[4] || 0);
-    const minute = +(monthMatch[5] || 0);
-    const second = +(monthMatch[6] || 0);
-    if(Number.isInteger(month)){
-      if(year < 100) year += year >= 70 ? 1900 : 2000;
-      const parsed = new Date(year, month, day, hour, minute, second);
-      if(!Number.isNaN(parsed.getTime())) return parsed;
+  /* 1. DD-MMM-YY or DD-MMM-YYYY  e.g. "26-Jan-25", "26 Jan 2025", "26/Jan/25" */
+  const MONTH_NAMES = {
+    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
+    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
+  };
+  const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
+  if(dmmyMatch){
+    const d = parseInt(dmmyMatch[1], 10);
+    const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
+    const mIdx = MONTH_NAMES[mStr];
+    let y = parseInt(dmmyMatch[3], 10);
+    /* Expand two-digit year: 25 → 2025, 99 → 1999 */
+    if(y < 100) y += (y < 50 ? 2000 : 1900);
+    if(d >= 1 && d <= 31 && mIdx !== undefined){
+      const dt = new Date(y, mIdx, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
     }
   }
 
-  return parseFieldDate(raw) || parsePaliDate(raw) || parseATSDate(raw);
+  /* 2. DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
+  const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if(dmyMatch){
+    const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
+    if(d >= 1 && d <= 31 && m >= 1 && m <= 12){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 3. MM/DD/YYYY (American format fallback) */
+  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(mdyMatch){
+    const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
+    if(m >= 1 && m <= 12 && d >= 1 && d <= 31){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 4. ISO 8601 and other browser-native parseable strings */
+  const iso = new Date(s);
+  if(!Number.isNaN(iso.getTime())) return iso;
+
+  return null;
 }
 
 function daysSince(ts){
   if(!ts || Number.isNaN(ts.getTime())) return 9999;
-  return Math.max(0, Math.floor((new Date() - ts) / 86400000));
-}
-
-function metricDays(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return null;
-  return daysSince(ts);
-}
-
-function formatDaysMetric(value){
-  return value === null || value === 9999 ? '-' : String(value);
-}
-
-function parseCoordValue(value, axis){
-  const parsed = parseFloat(String(value ?? '').trim());
-  if(!Number.isFinite(parsed)) return null;
-  if(axis === 'lat' && (parsed < -90 || parsed > 90)) return null;
-  if(axis === 'lon' && (parsed < -180 || parsed > 180)) return null;
-  return parsed;
-}
-
-function hasValidCoords(fix){
-  return Number.isFinite(fix?.lat) && Number.isFinite(fix?.lon) && fix.lat >= -90 && fix.lat <= 90 && fix.lon >= -180 && fix.lon <= 180;
+  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
 }
 
 function fmtDateTime(ts){
@@ -765,32 +764,76 @@ function getBucket(compKey){
   return fixBuckets[compKey];
 }
 
+/*
+ * FIX-1: buildMasterMaps — stores each master row under three key variants so
+ * that field logs using "50-60" always resolve to the correct master record
+ * regardless of whether the master sheet stores it as "50-60", "50 60", or "5060":
+ *
+ *   masterAdultMap[nid]      — whitespace-stripped uppercase   ("5060")  [primary]
+ *   masterAdultMapRaw[rid]   — whitespace-trimmed uppercase    ("50-60") [secondary]
+ *   masterAdultMapFlat[fid]  — all non-alphanumeric stripped   ("5060")  [tertiary]
+ *
+ * The flat variant handles the most common mismatch: a hyphen present in one
+ * sheet but absent (or encoded as a space) in the other.
+ */
 function buildMasterMaps(rows){
-  masterAdultRows = [];
-  masterHatchRows = [];
   masterAdultMap = {};
   masterHatchMap = {};
+  masterAdultMapRaw = {};
+  masterHatchMapRaw = {};
+  masterAdultMapFlat = {};
+  masterHatchMapFlat = {};
   rows.forEach(row=>{
-    const id = nid(radioIdValue(row));
+    const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
+    const id  = nid(rawVal);      // strips whitespace only
+    const rid = rawTrimId(rawVal); // trim + uppercase (preserves hyphens)
+    const fid = flatId(rawVal);   // strips ALL non-alphanumeric chars
     if(!id) return;
     if(isHatchCategory(row)){
-      masterHatchRows.push(row);
       masterHatchMap[id] = row;
+      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
     }else{
-      masterAdultRows.push(row);
       masterAdultMap[id] = row;
+      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
     }
   });
 }
 
+/*
+ * FIX-1: lookupMasterRow — three-tier fallback chain.
+ * Primary  : nid-normalised key  (strips whitespace)
+ * Secondary: raw-trimmed key     (preserves hyphens, catches spaces-vs-no-spaces)
+ * Tertiary : flatId key          (strips ALL non-alphanum — resolves "50-60" ↔ "5060")
+ *
+ * The tertiary flat lookup is the decisive fix for VHF animals like "50-60" and
+ * "51-61" that the master sheet stores with a different separator encoding.
+ */
+function lookupMasterRow(rawId, isHatchling){
+  const fid = flatId(rawId);
+  if(isHatchling){
+    return masterHatchMap[rawId]
+      || masterAdultMap[rawId]
+      || masterHatchMapRaw[rawId]
+      || masterAdultMapRaw[rawId]
+      || masterHatchMapFlat[fid]
+      || masterAdultMapFlat[fid]
+      || null;
+  }
+  return masterAdultMap[rawId]
+    || masterAdultMapRaw[rawId]
+    || masterAdultMapFlat[fid]
+    || null;
+}
+
 function ingestATS(rows){
   rows.forEach(row=>{
-    const id = nid(radioIdValue(row));
+    const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
     if(!id) return;
-    if(resolveEntityScope(id, row, 'A') === 'H') return;
-    const lat = parseCoordValue(gc(row,'Latitude','Lat'), 'lat');
-    const lon = parseCoordValue(gc(row,'Longitude','Lon','Long'), 'lon');
-    if(lat === null || lon === null) return;
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const ts = parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
     const bucket = getBucket(id + '|A');
     bucket.ATS.push({
@@ -807,18 +850,19 @@ function ingestATS(rows){
 
 function ingestFieldLog(rows){
   rows.forEach(row=>{
-    const id = nid(radioIdValue(row));
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
     if(!id) return;
-    if(resolveEntityScope(id, row, 'A') === 'H') return;
-    let lat = parseCoordValue(gc(row,'Latitude','Lat'), 'lat');
-    let lon = parseCoordValue(gc(row,'Longitude','Lon','Long'), 'lon');
+    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)] || masterHatchMapFlat[flatId(id)]) return;
+    if(isHatchCategory(row)) return;
+    let lat = parseFloat(gc(row,'Latitude','Lat'));
+    let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
     if((!Number.isFinite(lat) || !Number.isFinite(lon)) && pair && pair.includes(',')){
-      const parts = pair.split(',').map((item, index)=>parseCoordValue(item, index === 0 ? 'lat' : 'lon'));
+      const parts = pair.split(',').map(item=>parseFloat(item.trim()));
       lat = parts[0];
       lon = parts[1];
     }
-    if(lat === null || lon === null) return;
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const ts = parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
     const bucket = getBucket(id + '|A');
     bucket.FieldLog.push({
@@ -834,11 +878,11 @@ function ingestFieldLog(rows){
 
 function ingestPali(rows){
   rows.forEach(row=>{
-    const id = nid(radioIdValue(row));
+    const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
     if(!id) return;
-    const lat = parseCoordValue(gc(row,'Latitude','Lat'), 'lat');
-    const lon = parseCoordValue(gc(row,'Longitude','Lon','Long'), 'lon');
-    if(lat === null || lon === null) return;
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
     const ts = parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
     const bucket = getBucket(id + '|H');
     bucket.PaliFT.push({
@@ -879,20 +923,31 @@ function mergeEntities(){
     const latestPali = latestFrom(bucket.PaliFT || []);
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate');
+    const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
+
+    /*
+     * FIX-1: Resolve Category and T.L strictly from the master row when a match
+     * was found. If masterRow is empty (no match) the fallback placeholder is used.
+     * This ensures "Adult Female" from the master always wins over the default
+     * "Adult / Sub-adult" generated for unrecognised Field Log entries.
+     */
     const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTl = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+
     entities.push({
       compKey,
       rawId,
       id:rawId,
       isHatchling,
-      category:masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
+      /* FIX-1: masterCategory strictly overwrites the placeholder when present */
+      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      tl:masterTl || '-',
+      /* FIX-1: T.L explicitly resolved from master row */
+      tl: masterTL,
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
       collar,
+      /* FIX-2: parseTagDate now handles "26-Jan-25" month-name format */
       tagDate:parseTagDate(tagDateRaw),
       histories:{
         ATS:sortHistory(bucket.ATS || []),
@@ -913,6 +968,10 @@ function getZoneName(feature){
   return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
 }
 
+/*
+ * FIX-1: assignZones — strict 500 m distance threshold.
+ * Direct point-in-polygon match → assigned; nearest polygon > ZONE_SNAP_MAX_KM → "Outside Defined Zones".
+ */
 function assignZones(){
   if(!geojsonData || !geojsonData.features) return;
   zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
@@ -939,6 +998,7 @@ function assignZones(){
     }
     if(found === '-'){
       let best = Infinity;
+      let bestName = '-';
       for(const feature of zonePolygons){
         try{
           const outline = turf.polygonToLine(feature);
@@ -946,10 +1006,11 @@ function assignZones(){
           const distance = turf.distance(point, nearest, {units:'kilometers'});
           if(distance < best){
             best = distance;
-            found = getZoneName(feature);
+            bestName = getZoneName(feature);
           }
         }catch(error){}
       }
+      found = best <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
     }
     fix.zone = found;
   });
@@ -979,77 +1040,6 @@ function showZoneLayer(visible){
   }else if(map.hasLayer(zoneGeoLayer)){
     map.removeLayer(zoneGeoLayer);
   }
-}
-
-function activeRiverLine(){
-  return riverLineFeature || RIVER_LINE_FALLBACK;
-}
-
-function calcRiverDistance(prevFix, nextFix){
-  if(!hasValidCoords(prevFix) || !hasValidCoords(nextFix)) return null;
-  try{
-    const line = activeRiverLine();
-    const a = turf.nearestPointOnLine(line, turf.point([prevFix.lon,prevFix.lat]));
-    const b = turf.nearestPointOnLine(line, turf.point([nextFix.lon,nextFix.lat]));
-    const segment = turf.lineSlice(a, b, line);
-    return Math.round(turf.length(segment,{units:'meters'}));
-  }catch(error){
-    return null;
-  }
-}
-
-function getViewEntities(source){
-  if(!source) return [];
-  return entities.map(entity=>{
-    if(source === 'PaliFT'){
-      if(!entity.isHatchling || !entity.latestPali) return null;
-      const relevantFix = entity.latestPali;
-      const locationFix = entity.latestPali;
-      const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
-      return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-',daysSinceRelease:metricDays(entity.tagDate),daysSinceLastFix:metricDays(relevantFix?.ts || null)};
-    }
-    if(source === 'ATS'){
-      if(entity.isHatchling || !entity.latestATS) return null;
-      const relevantFix = entity.latestATS;
-      const locationFix = entity.latestATS;
-      const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
-      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-',daysSinceRelease:metricDays(entity.tagDate),daysSinceLastFix:metricDays(relevantFix?.ts || null)};
-    }
-    if(source === 'FieldLog'){
-      if(entity.isHatchling || !entity.latestVHF) return null;
-      const relevantFix = entity.latestVHF;
-      const locationFix = entity.latestVHF;
-      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-',daysSinceRelease:metricDays(entity.tagDate),daysSinceLastFix:metricDays(relevantFix?.ts || null)};
-    }
-    return null;
-  }).filter(Boolean);
-}
-
-function snapFixToRiver(fix){
-  if(!hasValidCoords(fix)){
-    return {lat:fix?.lat ?? null, lon:fix?.lon ?? null};
-  }
-  try{
-    const snapped = turf.nearestPointOnLine(activeRiverLine(), turf.point([fix.lon,fix.lat]));
-    const [lon, lat] = snapped.geometry.coordinates;
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error('Invalid snapped point');
-    return {lat, lon};
-  }catch(error){
-    return {lat:fix.lat, lon:fix.lon};
-  }
-}
-
-function getFilterSeedItems(source){
-  if(source) return getViewEntities(source);
-  return entities.map(entity=>({
-    id:entity.id,
-    category:entity.category || '-',
-    zone:entity.latestOverall?.zone || '-'
-  }));
-}
-
-function sourceLabel(source){
-  return SOURCE_LABELS[source] || source || '-';
 }
 
 function statusLabel(status, source){
@@ -1140,42 +1130,25 @@ function buildMSOptions(key, options, formatter, preserveSelection = false){
   const button = document.getElementById('msb-' + key);
   const list = document.getElementById('msi-' + key);
   const previous = preserveSelection ? new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value)) : new Set();
-  const normalizedOptions = options.map(option=>({
-    value:typeof option === 'object' && option !== null ? String(option.value ?? '') : String(option),
-    label:typeof option === 'object' && option !== null ? String(option.label ?? option.value ?? '') : String(formatter ? formatter(option) : option)
-  }));
-  const hasPreservedMatch = previous.size ? normalizedOptions.some(option=>previous.has(option.value)) : false;
   button.classList.remove('disabled');
   list.innerHTML = '';
-  if(!normalizedOptions.length){
+  if(!options.length){
     resetMultiSelect(key, key === 'status' ? 'Not applicable' : 'No options', key === 'status');
     return;
   }
-  normalizedOptions.forEach(option=>{
+  options.forEach(option=>{
     const label = document.createElement('label');
     label.className = 'ms-item';
     const input = document.createElement('input');
     input.type = 'checkbox';
-    input.value = option.value;
-    input.checked = hasPreservedMatch ? previous.has(option.value) : true;
+    input.value = option;
+    input.checked = previous.size ? previous.has(option) : true;
     input.addEventListener('change',()=>updateMSBtn(key));
     label.appendChild(input);
-    label.appendChild(document.createTextNode(' ' + option.label));
+    label.appendChild(document.createTextNode(' ' + (formatter ? formatter(option) : option)));
     list.appendChild(label);
   });
   updateMSBtn(key);
-}
-
-function buildZoneOptions(pool){
-  const counts = new Map();
-  pool.forEach(item=>{
-    const zone = item.zone || '-';
-    if(!zone || zone === '-') return;
-    counts.set(zone, (counts.get(zone) || 0) + 1);
-  });
-  return [...counts.entries()]
-    .sort((a,b)=>b[1] - a[1] || a[0].localeCompare(b[0], undefined, {numeric:true,sensitivity:'base'}))
-    .map(([value, count])=>({value, label:value + ' (' + count + ')'}));
 }
 
 function updateMSBtn(key){
@@ -1235,32 +1208,46 @@ document.addEventListener('click', event=>{
   }
 });
 
-function rebuildFilters(preserveSelection = true){
+/* FIX-5: rebuildFilters — cascading dropdown dependency based on active source pool. */
+function rebuildFilters(){
   const source = document.getElementById('sourceFilter').value;
-  const filterPool = getFilterSeedItems(source);
-  if(!filterPool.length){
-    ['rid','cat','zone'].forEach(key=>resetMultiSelect(key,'No options',false));
-    resetMultiSelect('status','Not applicable',true);
-    updateLegend(source);
-    updateStatusBlocks(source, []);
-    return;
+  const sourcePool = source ? getViewEntities(source) : null;
+  const poolForFilters = sourcePool || entities;
+
+  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
+    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMSOptions('rid', allIds);
+
+  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
+  buildMSOptions('cat', allCats);
+
+  const zoneCounts = {};
+  if(sourcePool){
+    sourcePool.forEach(e=>{
+      const z = e.zone||'-';
+      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
+    });
+  }else{
+    entities.forEach(e=>{
+      const z = e.latestOverall?.zone||'-';
+      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
+    });
   }
-  buildMSOptions('rid', [...new Set(filterPool.map(item=>item.id).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'})), null, preserveSelection);
-  buildMSOptions('cat', [...new Set(filterPool.map(item=>item.category || '-'))].sort(), null, preserveSelection);
-  buildMSOptions('zone', buildZoneOptions(filterPool), null, preserveSelection);
+  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMSOptions('zone', sortedZones, zone=>zone + ' (' + zoneCounts[zone] + ')');
+
   if(source && VIEW_META[source].statusEnabled){
-    buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source), preserveSelection);
+    buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source));
   }else{
     resetMultiSelect('status','Not applicable',true);
   }
-  updateStatusBlocks(source, source ? getViewEntities(source) : []);
-  updateLegend(source);
+
+  updateStatusBlocks(source||'', sourcePool||[]);
+  updateLegend(source||'');
 }
 
 function onSourceChange(){
   activeStatusKey = null;
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
   rebuildFilters();
   updateFieldUpdatesVisibility();
   updateCollarColumn();
@@ -1274,37 +1261,77 @@ function updateFieldUpdatesVisibility(){
 
 function updateCollarColumn(){
   const source = document.getElementById('sourceFilter').value;
-  const hideCollar = source ? VIEW_META[source]?.hideCollar : false;
-  document.getElementById('thCollar').style.display = hideCollar ? 'none' : '';
+  document.getElementById('thCollar').style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
   document.querySelectorAll('.collar-cell').forEach(cell=>{
-    cell.style.display = hideCollar ? 'none' : '';
+    cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
   });
 }
 
 function applyFilters(){
-  const source = document.getElementById('sourceFilter').value;
+  const source    = document.getElementById('sourceFilter').value;
+  const idFilter  = selectedSet('rid');
+  const catFilter = selectedSet('cat');
+  const zoneFilter= selectedSet('zone');
+
   if(!source){
-    displayedEntities = [];
-    displayRows = [];
-    activeStatusKey = null;
-    clearVisuals(true);
+    const hasFilter = idFilter || catFilter || zoneFilter;
+    if(!hasFilter){
+      displayedEntities = [];
+      displayRows = [];
+      activeStatusKey = null;
+      clearVisuals(true);
+      renderTable();
+      updateLegend('');
+      updateStatusBlocks('', []);
+      showZoneLayer(false);
+      return;
+    }
+    const seen = new Set();
+    const allEntities = [];
+    ['ATS','FieldLog','PaliFT'].forEach(src=>{
+      getViewEntities(src).forEach(entity=>{
+        if(!seen.has(entity.compKey)){
+          seen.add(entity.compKey);
+          allEntities.push(entity);
+        }
+      });
+    });
+    displayedEntities = allEntities.filter(entity=>{
+      if(idFilter  && !idFilter.has(entity.id))               return false;
+      if(catFilter && !catFilter.has(entity.category || '-')) return false;
+      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
+      return true;
+    });
+    displayedEntities.sort((a,b)=>{
+      const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
+      const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
+      return tb - ta;
+    });
+    showZoneLayer(displayedEntities.length > 0);
+    renderMarkers();
     renderTable();
-    updateLegend('');
-    updateStatusBlocks('', []);
-    showZoneLayer(false);
+    updateMapFoot();
+    if(zoneFilter && zoneFilter.size === 1 && geojsonData){
+      const zoneName = [...zoneFilter][0];
+      const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
+      if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
+    } else {
+      const pts = displayedEntities
+        .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+        .map(e=>[e.displayFix.lat, e.displayFix.lon]);
+      if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
+    }
     return;
   }
-  const idFilter = selectedSet('rid');
-  const catFilter = selectedSet('cat');
-  const zoneFilter = selectedSet('zone');
+
   const statusFilter = selectedSet('status');
   const pool = getViewEntities(source);
   updateStatusBlocks(source, pool);
   displayedEntities = pool.filter(entity=>{
-    if(idFilter && !idFilter.has(entity.id)) return false;
-    if(catFilter && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-')) return false;
-    if(statusFilter && !statusFilter.has(entity.status)) return false;
+    if(idFilter   && !idFilter.has(entity.id))               return false;
+    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
+    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
+    if(statusFilter&& !statusFilter.has(entity.status))      return false;
     return true;
   });
   displayedEntities.sort((a,b)=>{
@@ -1312,9 +1339,6 @@ function applyFilters(){
     const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
     return tb - ta;
   });
-  if(trackEntityKey && !displayedEntities.some(entity=>entity.compKey === trackEntityKey)){
-    trackEntityKey = null;
-  }
   showZoneLayer(displayedEntities.length > 0);
   renderMarkers();
   renderTable();
@@ -1330,20 +1354,11 @@ function applyFilters(){
   }
 }
 
-function clearTrack(){
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
-  renderMarkers();
-  renderTable();
-}
-
 function clearFilters(){
   document.getElementById('sourceFilter').value = '';
   activeStatusKey = null;
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
   document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
-  rebuildFilters(false);
+  rebuildFilters();
   updateFieldUpdatesVisibility();
   updateCollarColumn();
   displayRows = [];
@@ -1355,10 +1370,7 @@ function clearFilters(){
 
 function clearVisuals(resetViewport){
   markerLayer.clearLayers();
-  trackLayer.clearLayers();
-  historyMarkerMap = {};
   entityMarkerMap = {};
-  try{ oms.unspiderfy && oms.unspiderfy(); }catch(error){}
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(heatLayer){
     map.removeLayer(heatLayer);
@@ -1372,7 +1384,6 @@ function clearVisuals(resetViewport){
   kdeOn = false;
   document.getElementById('heatBtn').classList.remove('on');
   document.getElementById('kdeBtn').classList.remove('on');
-  document.getElementById('trackBadge').style.display = 'none';
   showZoneLayer(false);
   if(resetViewport) resetView();
 }
@@ -1389,201 +1400,105 @@ function markerIcon(entity, text){
   });
 }
 
+/*
+ * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
+ *         is absent or unparseable rather than silently omitting the row.
+ * FIX-2: tagDate is now correctly parsed (handles "26-Jan-25") so daysRelease
+ *         will display the real day-count instead of "N/A" for most animals.
+ * FIX-3: "Track" button removed. Popup actions are Focus + Table only.
+ */
 function popupHtml(entity){
   const display = entity.displayFix;
   const status = badgeHtml(entity.status, entity.viewSource);
-  const latestFix = entity.relevantFix ? fmtDateTime(entity.relevantFix.ts) : '-';
-  const latestLabel = entity.viewSource === 'ATS' ? 'Last ATS fix' : (entity.viewSource === 'FieldLog' ? 'Last VHF fix' : 'Last hatchling fix');
   const latestSat = entity.latestATS ? fmtDateTime(entity.latestATS.ts) : '-';
   const latestVhf = entity.latestVHF ? fmtDateTime(entity.latestVHF.ts) : '-';
+  const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
+  const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
+  const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
+  /* FIX-2: tagDate now parsed correctly — shows real count; "N/A" only as genuine fallback */
+  const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
   return '' +
     '<div>' +
       '<div class="pop-top">' +
         '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
         '<div>' +
           '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
-          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel(entity.viewSource)) + '</div>' +
+          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
         '</div>' +
       '</div>' +
       '<div class="pop-body">' +
-        '<div class="pop-row"><span class="pop-label">' + escapeHtml(latestLabel) + '</span><span class="pop-value">' + escapeHtml(latestFix || fmtDateTime(display?.ts)) + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">' + escapeHtml(fmtDateTime(display?.ts)) + '</span></div>' +
+        (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
+        (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
+        (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
         (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(formatDaysMetric(entity.daysSinceLastFix)) + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value">' + escapeHtml(formatDaysMetric(entity.daysSinceRelease)) + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">' + escapeHtml(entity.tl || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Total fixes</span><span class="pop-value">' + entity.trackHistory.length + '</span></div>' +
+        (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
         (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
         (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
       '</div>' +
       '<div class="pop-actions">' +
         '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
-        '<button class="pab" type="button" onclick="trackSingle(\'' + entity.compKey + '\')">Track</button>' +
         '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
       '</div>' +
     '</div>';
 }
 
-function fixKey(compKey, fix){
-  return compKey + '|' + (fix.ts ? fix.ts.getTime() : 'na') + '|' + fix.lat + '|' + fix.lon + '|' + fix.source;
-}
-
-function bringMarkerToFront(marker, zIndex = 12000){
-  if(!marker) return;
-  if(typeof marker.setZIndexOffset === 'function') marker.setZIndexOffset(zIndex);
-  if(typeof marker.bringToFront === 'function') marker.bringToFront();
-  if(marker._icon) marker._icon.style.zIndex = String(zIndex);
-}
-
-function focusMarker(marker, zoom = 16, spiderfy = false){
-  if(!marker) return;
-  map.closePopup();
-  bringMarkerToFront(marker, 12000);
-  map.flyTo(marker.getLatLng(), zoom, {duration:1});
-  setTimeout(()=>{
-    bringMarkerToFront(marker, 12001);
-    if(spiderfy){
-      try{ marker.fire('click'); }catch(error){}
+function getViewEntities(source){
+  if(!source) return [];
+  return entities.map(entity=>{
+    if(source === 'PaliFT'){
+      if(!entity.isHatchling) return null;
+      const relevantFix = entity.latestPali || null;
+      const locationFix = relevantFix || entity.latestOverall || null;
+      const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
+      return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-'};
     }
-    setTimeout(()=>marker.openPopup(), 80);
-  }, 700);
-}
-
-function buildRiverTrackCoords(snappedHistory){
-  if(snappedHistory.length < 2) return [];
-  const line = activeRiverLine();
-  const riverCoords = [];
-  for(let i = 0; i < snappedHistory.length - 1; i += 1){
-    try{
-      const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon,snappedHistory[i].snapped.lat]));
-      const end = turf.nearestPointOnLine(line, turf.point([snappedHistory[i + 1].snapped.lon,snappedHistory[i + 1].snapped.lat]));
-      const segment = turf.lineSlice(start, end, line);
-      const geometry = segment?.geometry || null;
-      const segmentCoords = geometry?.type === 'MultiLineString'
-        ? geometry.coordinates.flat()
-        : (geometry?.type === 'LineString' ? geometry.coordinates : []);
-      const coords = segmentCoords.map(coord=>[coord[1],coord[0]]);
-      if(!coords.length) throw new Error('Empty river segment');
-      if(i === 0) riverCoords.push(...coords);
-      else riverCoords.push(...coords.slice(1));
-    }catch(error){
-      if(i === 0) riverCoords.push([snappedHistory[i].snapped.lat,snappedHistory[i].snapped.lon]);
-      riverCoords.push([snappedHistory[i + 1].snapped.lat,snappedHistory[i + 1].snapped.lon]);
+    if(source === 'ATS'){
+      if(entity.isHatchling || !entity.latestATS) return null;
+      const relevantFix = entity.latestATS;
+      const locationFix = entity.latestATS;
+      const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
+      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
     }
-  }
-  return riverCoords.filter((coord, index, list)=>index === 0 || coord[0] !== list[index - 1][0] || coord[1] !== list[index - 1][1]);
+    if(source === 'FieldLog'){
+      if(entity.isHatchling || !entity.latestVHF) return null;
+      const relevantFix = entity.latestVHF;
+      const locationFix = entity.latestVHF;
+      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-'};
+    }
+    return null;
+  }).filter(Boolean);
 }
 
+/*
+ * FIX-3: renderMarkers — track entity block completely removed.
+ * All displayedEntities are rendered as standard markers; clicking opens the popup.
+ */
 function renderMarkers(){
   markerLayer.clearLayers();
-  trackLayer.clearLayers();
-  historyMarkerMap = {};
   entityMarkerMap = {};
-  try{ oms.unspiderfy && oms.unspiderfy(); }catch(error){}
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(!displayedEntities.length){
-    document.getElementById('trackBadge').style.display = 'none';
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
     if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    return;
-  }
-  const trackEntity = trackEntityKey ? displayedEntities.find(item=>item.compKey === trackEntityKey) : null;
-  let trackHistory = [];
-  let trackRiverCoords = [];
-  if(trackEntity){
-    trackHistory = trackEntity.trackHistory
-      .filter(item=>hasValidCoords(item))
-      .slice()
-      .sort((a,b)=>{
-        const ta = a.ts ? a.ts.getTime() : -Infinity;
-        const tb = b.ts ? b.ts.getTime() : -Infinity;
-        return ta - tb;
-      });
-    const snappedHistory = trackHistory.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
-    trackRiverCoords = buildRiverTrackCoords(snappedHistory);
-    if(trackRiverCoords.length > 1){
-      L.polyline(trackRiverCoords,{color:markerColor(trackEntity),weight:3,opacity:.9,dashArray:'8 12',interactive:false}).addTo(trackLayer);
-    }
-    snappedHistory.forEach((item, index)=>{
-      const {fix} = item;
-      const latest = index === snappedHistory.length - 1;
-      const color = markerColor(trackEntity);
-      const size = latest ? 34 : 10;
-      const fixMarker = L.marker([fix.lat,fix.lon],{
-        icon:latest ? markerIcon(trackEntity, trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id) : L.divIcon({
-          className:'',
-          html:'<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '"><circle cx="' + (size / 2) + '" cy="' + (size / 2) + '" r="' + (size / 2 - 1.5) + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/></svg>',
-          iconSize:[size,size],
-          iconAnchor:[size / 2,size / 2]
-        }),
-        zIndexOffset:latest ? 12000 : 0,
-        keyboard:false
-      });
-      const previous = index > 0 ? snappedHistory[index - 1].fix : null;
-      const riverDistance = previous ? calcRiverDistance(previous, fix) : null;
-      fixMarker.bindPopup(
-        '<div class="pop-body">' +
-          '<div class="pop-row"><span class="pop-label">Radio ID</span><span class="pop-value">' + escapeHtml(trackEntity.id) + '</span></div>' +
-          '<div class="pop-row"><span class="pop-label">Fix time</span><span class="pop-value">' + escapeHtml(fmtDateTime(fix.ts)) + '</span></div>' +
-          '<div class="pop-row"><span class="pop-label">Source</span><span class="pop-value">' + escapeHtml(sourceLabel(fix.source)) + '</span></div>' +
-          (riverDistance !== null ? '<div class="pop-row"><span class="pop-label">River dist from prev</span><span class="pop-value">' + riverDistance + ' m</span></div>' : '') +
-          '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(fix.zone || '-') + '</span></div>' +
-          (fix.place ? '<div class="pop-row"><span class="pop-label">Place</span><span class="pop-value">' + escapeHtml(fix.place) + '</span></div>' : '') +
-          (fix.activity ? '<div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">' + escapeHtml(fix.activity) + '</span></div>' : '') +
-        '</div>'
-      );
-      trackLayer.addLayer(fixMarker);
-      historyMarkerMap[fixKey(trackEntity.compKey, fix)] = fixMarker;
-    });
-    if(!trackHistory.length && hasValidCoords(trackEntity.displayFix)){
-      const fallbackMarker = L.marker([trackEntity.displayFix.lat,trackEntity.displayFix.lon],{
-        icon:markerIcon(trackEntity, trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id),
-        zIndexOffset:12000,
-        keyboard:false
-      });
-      fallbackMarker.bindPopup(popupHtml(trackEntity),{maxWidth:330});
-      trackLayer.addLayer(fallbackMarker);
-    }
-    document.getElementById('trackBadge').style.display = 'block';
-    document.getElementById('trackLabel').textContent = trackEntity.id + ' (' + trackHistory.length + ' fixes)';
-  }else{
-    document.getElementById('trackBadge').style.display = 'none';
-  }
-
-  if(trackEntity){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    heatmapOn = false;
-    kdeOn = false;
-    document.getElementById('heatBtn').classList.remove('on');
-    document.getElementById('kdeBtn').classList.remove('on');
-  }
-
-  if(trackEntity){
-    const points = (trackRiverCoords.length ? trackRiverCoords : trackHistory.map(fix=>[fix.lat,fix.lon]));
-    if(points.length){
-      if(points.length === 1) map.flyTo(points[0],16,{duration:1});
-      else map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
-    }else if(hasValidCoords(trackEntity.displayFix)){
-      map.flyTo([trackEntity.displayFix.lat,trackEntity.displayFix.lon],16,{duration:1});
-    }
-    if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
-      const marker = historyMarkerMap[pendingFocusFixKey];
-      pendingFocusFixKey = null;
-      focusMarker(marker, 16, false);
-    }
     return;
   }
 
   displayedEntities.forEach(entity=>{
     const fix = entity.displayFix;
-    if(!hasValidCoords(fix)) return;
-    const marker = L.marker([fix.lat,fix.lon],{icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),keyboard:false});
+    if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
+    const marker = L.marker([fix.lat,fix.lon],{
+      icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),
+      keyboard:false
+    });
     marker.bindPopup(popupHtml(entity),{maxWidth:330});
     marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
     markerLayer.addLayer(marker);
@@ -1595,36 +1510,22 @@ function renderMarkers(){
   else if(kdeOn) renderKDE();
   else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
 
-  const points = [];
-  displayedEntities.forEach(entity=>{
-    if(hasValidCoords(entity.displayFix)){
-      points.push([entity.displayFix.lat,entity.displayFix.lon]);
-    }
-  });
+  const points = displayedEntities
+    .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+    .map(e=>[e.displayFix.lat,e.displayFix.lon]);
   if(points.length){
     map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
-  }
-  if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
-    const marker = historyMarkerMap[pendingFocusFixKey];
-    pendingFocusFixKey = null;
-    focusMarker(marker, 16, false);
   }
 }
 
 function focusEntity(compKey){
   const marker = entityMarkerMap[compKey];
   if(!marker) return;
-  Object.values(entityMarkerMap).forEach(item=>bringMarkerToFront(item, 0));
-  focusMarker(marker, 16, true);
-}
-
-function trackSingle(compKey, focusFix = null){
-  if(!displayedEntities.find(entity=>entity.compKey === compKey)) return;
-  trackEntityKey = compKey;
-  pendingFocusFixKey = focusFix;
+  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
+  marker.setZIndexOffset(9000);
   map.closePopup();
-  renderMarkers();
-  renderTable();
+  map.flyTo(marker.getLatLng(),16,{duration:1});
+  setTimeout(()=>marker.openPopup(),700);
 }
 
 function focusTableRow(key){
@@ -1658,45 +1559,18 @@ function buildEntityRow(entity){
   };
 }
 
-function buildHistoryRows(entity){
-  if(!entity.trackHistory.length) return [buildEntityRow(entity)];
-  return entity.trackHistory.slice().sort((a,b)=>{
-    const ta = a.ts ? a.ts.getTime() : -Infinity;
-    const tb = b.ts ? b.ts.getTime() : -Infinity;
-    return tb - ta;
-  }).map(fix=>({
-    rowKey:fixKey(entity.compKey, fix),
-    type:'fix',
-    entity,
-    fix,
-    id:entity.id,
-    ts:fix.ts || null,
-    days:daysSince(fix.ts || null),
-    status:entity.status,
-    category:entity.category || '-',
-    sex:entity.sex || '-',
-    source:fix.source,
-    zone:fix.zone || '-',
-    collar:entity.collar || '-',
-    lat:Number.isFinite(fix.lat) ? fix.lat : null,
-    lon:Number.isFinite(fix.lon) ? fix.lon : null,
-    tagPlace:entity.tagPlace || '-',
-    tl:entity.tl || '-',
-    remarks:(fix.remarks || entity.remarks || '-')
-  }));
-}
-
+/*
+ * FIX-3: renderTable — one row per entity (latest fix). Clicking calls focusEntity().
+ */
 function renderTable(){
   const body = document.getElementById('tableBody');
   body.innerHTML = '';
   const source = document.getElementById('sourceFilter').value;
-  const target = trackEntityKey ? displayedEntities.find(entity=>entity.compKey === trackEntityKey) : (displayedEntities.length === 1 ? displayedEntities[0] : null);
-  if(target) displayRows = buildHistoryRows(target);
-  else displayRows = displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent = target ? (displayRows.length + ' fixes | ' + target.id) : (displayRows.length + ' records');
+  displayRows = displayedEntities.map(buildEntityRow);
+  document.getElementById('tableBadge').textContent = displayRows.length + ' records';
   updateCollarColumn();
-  if(!source){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source to display telemetry records.</td></tr>';
+  if(!source && !displayedEntities.length){
+    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
     return;
   }
   if(!displayRows.length){
@@ -1725,19 +1599,7 @@ function renderTable(){
     tr.addEventListener('click',()=>{
       document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
       tr.classList.add('sel');
-      if(row.type === 'entity'){
-        focusEntity(row.entity.compKey);
-      }else{
-        if(trackEntityKey !== row.entity.compKey){
-          trackSingle(row.entity.compKey, row.rowKey);
-        }else{
-          const marker = historyMarkerMap[row.rowKey];
-          if(marker){
-            Object.values(historyMarkerMap).forEach(item=>bringMarkerToFront(item, 0));
-            focusMarker(marker, 16, false);
-          }
-        }
-      }
+      focusEntity(row.entity.compKey);
     });
     body.appendChild(tr);
   });
@@ -1745,7 +1607,7 @@ function renderTable(){
 
 function updateMapFoot(){
   const source = document.getElementById('sourceFilter').value;
-  if(!source){
+  if(!source && !displayedEntities.length){
     document.getElementById('mapFootText').textContent = 'Select a source to begin.';
     document.getElementById('mapFootCount').textContent = '';
     return;
@@ -1767,7 +1629,7 @@ function getOverlayFixes(){
   const fixes = [];
   displayedEntities.forEach(entity=>{
     entity.trackHistory.forEach(fix=>{
-      if(hasValidCoords(fix)) fixes.push(fix);
+      if(Number.isFinite(fix.lat) && Number.isFinite(fix.lon)) fixes.push(fix);
     });
   });
   return fixes;
@@ -1775,14 +1637,8 @@ function getOverlayFixes(){
 
 function renderHeatmap(){
   const fixes = getOverlayFixes();
-  if(heatLayer){
-    map.removeLayer(heatLayer);
-    heatLayer = null;
-  }
-  if(kdeLayer){
-    map.removeLayer(kdeLayer);
-    kdeLayer = null;
-  }
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
   if(!fixes.length){
     heatmapOn = false;
     document.getElementById('heatBtn').classList.remove('on');
@@ -1799,14 +1655,8 @@ function renderHeatmap(){
 
 function renderKDE(){
   const fixes = getOverlayFixes();
-  if(kdeLayer){
-    map.removeLayer(kdeLayer);
-    kdeLayer = null;
-  }
-  if(heatLayer){
-    map.removeLayer(heatLayer);
-    heatLayer = null;
-  }
+  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
   if(fixes.length < 4){
     kdeOn = false;
     document.getElementById('kdeBtn').classList.remove('on');
@@ -1843,7 +1693,7 @@ function renderKDE(){
         gradient.addColorStop(.45,'rgba(239,68,68,.18)');
         gradient.addColorStop(1,'rgba(255,255,255,0)');
         ctx.fillStyle = gradient;
-        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth * 2,bandwidth * 2);
+        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth*2,bandwidth*2);
       });
     }
   });
@@ -1852,19 +1702,13 @@ function renderKDE(){
 }
 
 function toggleHeatmap(){
-  if(!displayedEntities.length){
-    toast('Apply a source filter before using the heatmap.');
-    return;
-  }
+  if(!displayedEntities.length){ toast('Apply a source filter before using the heatmap.'); return; }
   heatmapOn = !heatmapOn;
   if(heatmapOn) kdeOn = false;
   document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
   document.getElementById('kdeBtn').classList.remove('on');
   if(!heatmapOn){
-    if(heatLayer){
-      map.removeLayer(heatLayer);
-      heatLayer = null;
-    }
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
     if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
     return;
   }
@@ -1872,19 +1716,13 @@ function toggleHeatmap(){
 }
 
 function toggleKDE(){
-  if(!displayedEntities.length){
-    toast('Apply a source filter before using KDE.');
-    return;
-  }
+  if(!displayedEntities.length){ toast('Apply a source filter before using KDE.'); return; }
   kdeOn = !kdeOn;
   if(kdeOn) heatmapOn = false;
   document.getElementById('kdeBtn').classList.toggle('on', kdeOn);
   document.getElementById('heatBtn').classList.remove('on');
   if(!kdeOn){
-    if(kdeLayer){
-      map.removeLayer(kdeLayer);
-      kdeLayer = null;
-    }
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
     if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
     return;
   }
@@ -1892,10 +1730,7 @@ function toggleKDE(){
 }
 
 function exportCSV(){
-  if(!displayRows.length){
-    toast('No visible records to export.');
-    return;
-  }
+  if(!displayRows.length){ toast('No visible records to export.'); return; }
   const rows = [['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
   displayRows.forEach(row=>{
     rows.push([
@@ -1923,19 +1758,25 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
+/*
+ * FIX-2: loadUpdates — sorts descending (newest first) so the most recent entry
+ * appears at the top of both the latest block and the previous-updates list.
+ */
 function loadUpdates(rows){
   updatesRows = rows || [];
   const latestDate = document.getElementById('fuDate');
   const latestText = document.getElementById('fuText');
   const list = document.getElementById('fuList');
   list.innerHTML = '';
-  const sorted = updatesRows.filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text')).sort((a,b)=>{
-    const da = parsePaliDate(gc(a,'Date','date'));
-    const db = parsePaliDate(gc(b,'Date','date'));
-    const ta = da ? da.getTime() : -Infinity;
-    const tb = db ? db.getTime() : -Infinity;
-    return tb - ta;
-  });
+  const sorted = updatesRows
+    .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
+    .sort((a,b)=>{
+      const da = parsePaliDate(gc(a,'Date','date'));
+      const db = parsePaliDate(gc(b,'Date','date'));
+      const ta = da ? da.getTime() : -Infinity;
+      const tb = db ? db.getTime() : -Infinity;
+      return tb - ta; /* descending: newest first */
+    });
   if(!sorted.length){
     latestDate.textContent = 'No updates';
     latestText.textContent = '';
@@ -2026,20 +1867,19 @@ async function loadAllData(){
   const button = document.getElementById('refreshBtn');
   button.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
-  ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones','ld-river'].forEach(id=>{
+  ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones'].forEach(id=>{
     const el = document.getElementById(id);
-    el.classList.remove('ok','err');
+    if(el) el.classList.remove('ok','err');
   });
   loadingCopy('Fetching Google Sheets and GeoJSON layers...');
   try{
-    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows, riverData] = await Promise.all([
+    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
       fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
       fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
       fetchCSV(URLS.fl).then(data=>{ setLoadingState('ld-fl', true); return data; }).catch(()=>{ setLoadingState('ld-fl', false); return []; }),
       fetchCSV(URLS.pali).then(data=>{ setLoadingState('ld-pali', true); return data; }).catch(()=>{ setLoadingState('ld-pali', false); return []; }),
       fetchJSON(URLS.zones).then(data=>{ setLoadingState('ld-zones', true); return data; }).catch(()=>{ setLoadingState('ld-zones', false); return null; }),
-      fetchCSV(URLS.updates).catch(()=>[]),
-      fetchJSON(URLS.river).then(data=>{ setLoadingState('ld-river', true); return data; }).catch(()=>{ setLoadingState('ld-river', false); return null; })
+      fetchCSV(URLS.updates).catch(()=>[])
     ]);
     loadingCopy('Routing records through the master dictionary...');
     fixBuckets = {};
@@ -2048,11 +1888,6 @@ async function loadAllData(){
     ingestFieldLog(fieldRows);
     ingestPali(paliRows);
     geojsonData = zonesData;
-    if(riverData?.features?.length){
-      riverLineFeature = riverData.features.find(feature=>feature.geometry && (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString')) || null;
-    }else{
-      riverLineFeature = null;
-    }
     loadingCopy('Assigning zones and merging entities...');
     if(geojsonData) assignZones();
     mergeEntities();
@@ -2070,10 +1905,7 @@ async function loadAllData(){
     button.classList.remove('loading');
     const elapsed = performance.now() - SPLASH_START;
     const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
-    setTimeout(()=>{
-      document.getElementById('loading').classList.add('hide');
-      document.body.classList.remove('splash-active');
-    }, wait);
+    setTimeout(()=>document.getElementById('loading').classList.add('hide'), wait);
   }
 }
 
