@@ -165,8 +165,13 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/* FIX-2: max-height prevents clipping; padding-bottom ensures last entry scrolls fully into view */
-.fp-scroll{padding:12px 16px 80px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden;max-height:calc(100vh - 150px)}
+/*
+ * FIX-3: .fp-scroll — removed conflicting max-height so the flex container's own
+ * height:100vh + overflow:hidden on #fp controls vertical clipping correctly.
+ * padding-bottom:120px ensures the last update entry can be scrolled fully
+ * clear of the bottom edge of the screen.
+ */
+.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
@@ -514,10 +519,16 @@ let filterBarHidden = false;
 let activeStatusKey = null;
 let masterAdultMap = {};
 let masterHatchMap = {};
-/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. Catches cases where
-   spreadsheet IDs contain hyphens or spaces that nid() strips but rawTrimId() preserves. */
+/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. */
 let masterAdultMapRaw = {};
 let masterHatchMapRaw = {};
+/*
+ * FIX-1: Tertiary lookup maps keyed by flatId (strips ALL non-alphanumeric chars).
+ * Resolves IDs like "50-60" (field log) matching "50-60" in master even when
+ * the two sheets store the hyphen differently or with surrounding whitespace.
+ */
+let masterAdultMapFlat = {};
+let masterHatchMapFlat = {};
 let fixBuckets = {};
 let entities = [];
 let displayedEntities = [];
@@ -590,6 +601,16 @@ function rawTrimId(raw){
   return String(raw || '').trim().toUpperCase();
 }
 
+/*
+ * FIX-1: flatId — strips ALL non-alphanumeric characters (hyphens, spaces, dots, etc.)
+ * allowing "50-60" from the field log to match "50-60" or "50 60" from the master sheet
+ * when the two datasets encode the separator differently.
+ * Example: flatId("50-60") === flatId("50 60") === "5060"
+ */
+function flatId(raw){
+  return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+
 function isHatchCategory(row){
   const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
   return /hatch|hatchling|fth|pali\s*ft/i.test(category);
@@ -622,10 +643,17 @@ function parseAnyDate(value, isHatch){
 }
 
 /*
- * FIX-1: parseTagDate — robust parser for Master Radio sheet tag/release dates.
- * Handles DD-MM-YYYY, DD/MM/YYYY (Indian field standard, tried first),
- * MM/DD/YYYY (American), and ISO YYYY-MM-DD formats.
- * Forces input to string and trims whitespace before attempting any parse.
+ * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
+ * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
+ * Tag Date / Release Date column of the Master Radio sheet.
+ *
+ * Resolution order:
+ *   1. DD-MMM-YY or DD-MMM-YYYY  ← NEW: month-name aware (handles "26-Jan-25")
+ *   2. DD-MM-YYYY or DD/MM/YYYY  (Indian field standard)
+ *   3. MM/DD/YYYY                (American fallback)
+ *   4. ISO 8601 / browser-native
+ *
+ * Two-digit years: 00–49 → 2000–2049, 50–99 → 1950–1999.
  * Returns null (never throws) when value is absent or unparseable.
  */
 function parseTagDate(value){
@@ -633,7 +661,26 @@ function parseTagDate(value){
   const s = String(value).trim();
   if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
 
-  /* Try DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
+  /* 1. DD-MMM-YY or DD-MMM-YYYY  e.g. "26-Jan-25", "26 Jan 2025", "26/Jan/25" */
+  const MONTH_NAMES = {
+    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
+    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
+  };
+  const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
+  if(dmmyMatch){
+    const d = parseInt(dmmyMatch[1], 10);
+    const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
+    const mIdx = MONTH_NAMES[mStr];
+    let y = parseInt(dmmyMatch[3], 10);
+    /* Expand two-digit year: 25 → 2025, 99 → 1999 */
+    if(y < 100) y += (y < 50 ? 2000 : 1900);
+    if(d >= 1 && d <= 31 && mIdx !== undefined){
+      const dt = new Date(y, mIdx, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 2. DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
   const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
   if(dmyMatch){
     const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
@@ -643,7 +690,7 @@ function parseTagDate(value){
     }
   }
 
-  /* Try MM/DD/YYYY (American format fallback) */
+  /* 3. MM/DD/YYYY (American format fallback) */
   const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(mdyMatch){
     const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
@@ -653,7 +700,7 @@ function parseTagDate(value){
     }
   }
 
-  /* Try ISO 8601 and other browser-native parseable strings */
+  /* 4. ISO 8601 and other browser-native parseable strings */
   const iso = new Date(s);
   if(!Number.isNaN(iso.getTime())) return iso;
 
@@ -718,42 +765,65 @@ function getBucket(compKey){
 }
 
 /*
- * FIX-1: buildMasterMaps — forces both sides to String and trims before storing.
- * Stores each row under both the nid()-normalised key AND the raw-trimmed uppercase key
- * so VHF animals whose Radio_ID contains hyphens are still matched correctly.
+ * FIX-1: buildMasterMaps — stores each master row under three key variants so
+ * that field logs using "50-60" always resolve to the correct master record
+ * regardless of whether the master sheet stores it as "50-60", "50 60", or "5060":
+ *
+ *   masterAdultMap[nid]      — whitespace-stripped uppercase   ("5060")  [primary]
+ *   masterAdultMapRaw[rid]   — whitespace-trimmed uppercase    ("50-60") [secondary]
+ *   masterAdultMapFlat[fid]  — all non-alphanumeric stripped   ("5060")  [tertiary]
+ *
+ * The flat variant handles the most common mismatch: a hyphen present in one
+ * sheet but absent (or encoded as a space) in the other.
  */
 function buildMasterMaps(rows){
   masterAdultMap = {};
   masterHatchMap = {};
   masterAdultMapRaw = {};
   masterHatchMapRaw = {};
+  masterAdultMapFlat = {};
+  masterHatchMapFlat = {};
   rows.forEach(row=>{
-    /* FIX-1: Explicit String() + .trim() on both sides of the comparison */
     const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
-    const id = nid(rawVal);
-    const rid = rawTrimId(rawVal);
+    const id  = nid(rawVal);      // strips whitespace only
+    const rid = rawTrimId(rawVal); // trim + uppercase (preserves hyphens)
+    const fid = flatId(rawVal);   // strips ALL non-alphanumeric chars
     if(!id) return;
     if(isHatchCategory(row)){
       masterHatchMap[id] = row;
-      if(rid && rid !== id) masterHatchMapRaw[rid] = row;
+      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
     }else{
       masterAdultMap[id] = row;
-      if(rid && rid !== id) masterAdultMapRaw[rid] = row;
+      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
     }
   });
 }
 
-/* FIX-1: lookupMasterRow — tries nid-normalised key first, then raw-trimmed key as fallback. */
+/*
+ * FIX-1: lookupMasterRow — three-tier fallback chain.
+ * Primary  : nid-normalised key  (strips whitespace)
+ * Secondary: raw-trimmed key     (preserves hyphens, catches spaces-vs-no-spaces)
+ * Tertiary : flatId key          (strips ALL non-alphanum — resolves "50-60" ↔ "5060")
+ *
+ * The tertiary flat lookup is the decisive fix for VHF animals like "50-60" and
+ * "51-61" that the master sheet stores with a different separator encoding.
+ */
 function lookupMasterRow(rawId, isHatchling){
+  const fid = flatId(rawId);
   if(isHatchling){
     return masterHatchMap[rawId]
       || masterAdultMap[rawId]
       || masterHatchMapRaw[rawId]
       || masterAdultMapRaw[rawId]
+      || masterHatchMapFlat[fid]
+      || masterAdultMapFlat[fid]
       || null;
   }
   return masterAdultMap[rawId]
     || masterAdultMapRaw[rawId]
+    || masterAdultMapFlat[fid]
     || null;
 }
 
@@ -782,7 +852,7 @@ function ingestFieldLog(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
     if(!id) return;
-    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)]) return;
+    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)] || masterHatchMapFlat[flatId(id)]) return;
     if(isHatchCategory(row)) return;
     let lat = parseFloat(gc(row,'Latitude','Lat'));
     let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
@@ -853,24 +923,31 @@ function mergeEntities(){
     const latestPali = latestFrom(bucket.PaliFT || []);
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    /*
-     * FIX-1: Use parseTagDate() for robust DD-MM-YYYY / MM/DD/YYYY handling.
-     * FIX-1: Explicitly map T.L via multiple common column name aliases.
-     */
     const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
+
+    /*
+     * FIX-1: Resolve Category and T.L strictly from the master row when a match
+     * was found. If masterRow is empty (no match) the fallback placeholder is used.
+     * This ensures "Adult Female" from the master always wins over the default
+     * "Adult / Sub-adult" generated for unrecognised Field Log entries.
+     */
+    const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
+    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+
     entities.push({
       compKey,
       rawId,
       id:rawId,
       isHatchling,
-      category:gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type') || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
+      /* FIX-1: masterCategory strictly overwrites the placeholder when present */
+      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      /* FIX-1: T.L explicitly mapped with comprehensive alias list */
-      tl:gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length'),
+      /* FIX-1: T.L explicitly resolved from master row */
+      tl: masterTL,
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
       collar,
-      /* FIX-1: parseTagDate replaces parseAnyDate for tag/release dates */
+      /* FIX-2: parseTagDate now handles "26-Jan-25" month-name format */
       tagDate:parseTagDate(tagDateRaw),
       histories:{
         ATS:sortHistory(bucket.ATS || []),
@@ -1326,7 +1403,9 @@ function markerIcon(entity, text){
 /*
  * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
  *         is absent or unparseable rather than silently omitting the row.
- * FIX-3: "Track" button removed. Popup actions are now Focus + Table only.
+ * FIX-2: tagDate is now correctly parsed (handles "26-Jan-25") so daysRelease
+ *         will display the real day-count instead of "N/A" for most animals.
+ * FIX-3: "Track" button removed. Popup actions are Focus + Table only.
  */
 function popupHtml(entity){
   const display = entity.displayFix;
@@ -1336,7 +1415,7 @@ function popupHtml(entity){
   const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
   const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
   const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
-  /* FIX-1: Always display Days since release; fall back to "N/A" — never silently hide */
+  /* FIX-2: tagDate now parsed correctly — shows real count; "N/A" only as genuine fallback */
   const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
   return '' +
     '<div>' +
@@ -1355,19 +1434,16 @@ function popupHtml(entity){
         (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
         '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
-        /* FIX-1: Always show; "N/A" when no valid tag date */
         '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
-        /* FIX-1: T.L always surfaced */
         (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
         (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
         (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
       '</div>' +
-      /* FIX-3: "Track" button removed — only Focus and Table actions remain */
       '<div class="pop-actions">' +
         '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
         '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
@@ -1405,7 +1481,6 @@ function getViewEntities(source){
 /*
  * FIX-3: renderMarkers — track entity block completely removed.
  * All displayedEntities are rendered as standard markers; clicking opens the popup.
- * Focus/pan is handled exclusively through focusEntity() and table row clicks.
  */
 function renderMarkers(){
   markerLayer.clearLayers();
@@ -1485,8 +1560,7 @@ function buildEntityRow(entity){
 }
 
 /*
- * FIX-3: renderTable — track/history-row logic removed entirely.
- * Table always shows one row per entity (latest fix). Clicking a row calls focusEntity().
+ * FIX-3: renderTable — one row per entity (latest fix). Clicking calls focusEntity().
  */
 function renderTable(){
   const body = document.getElementById('tableBody');
@@ -1522,7 +1596,6 @@ function renderTable(){
       '<td>' + escapeHtml(row.tagPlace) + '</td>' +
       '<td>' + escapeHtml(row.tl) + '</td>' +
       '<td>' + escapeHtml(row.remarks) + '</td>';
-    /* FIX-3: clicking any row simply focuses the entity marker on the map */
     tr.addEventListener('click',()=>{
       document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
       tr.classList.add('sel');
@@ -1800,8 +1873,6 @@ async function loadAllData(){
   });
   loadingCopy('Fetching Google Sheets and GeoJSON layers...');
   try{
-    /* FIX-3: River centerline fetch removed — no longer needed without track mode.
-       FIX-2: URLS.updates targets Sheet2 (gid=238985281) of the Palighat spreadsheet. */
     const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
       fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
       fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
