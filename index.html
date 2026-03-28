@@ -155,26 +155,34 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
 
-/* SIDE PANEL FIX: Unified Scrolling Structure */
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
+/* SIDE PANEL IMPROVEMENTS: Exactly matching the clean "Claude" look */
+#fp{position:fixed;top:0;right:-400px;width:400px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
-.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.fp-hdr h3{font:700 .88rem var(--mono)}
-.fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
+
+.fp-hdr{padding:16px 20px;background:#2d5a45;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fp-hdr h3{font:700 .92rem var(--mono);display:flex;align-items:center;gap:10px}
+.fp-hdr h3::before{content:'📋';font-size:1.1rem}
+
+.fp-cl{border:none;background:none;color:rgba(255,255,255,.7);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
 
-/* NEW: Body container to hold everything in one scrollable box */
-.fp-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column}
-.fp-latest{padding:16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
-.fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
-.fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
-.fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
+.fp-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;background:#fff}
 
-.fp-scroll{padding:16px 16px 120px;flex:1}
-.fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.fu{padding:10px 0;border-bottom:1px solid var(--line)}
-.fu-date{font:700 .67rem var(--mono);color:var(--forest)}
-.fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
+.fp-latest{padding:20px;background:#f8fcf9;border-bottom:1px solid var(--line);flex-shrink:0}
+.fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
+.fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
+
+/* Unified formatting for both latest and previous updates */
+.update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
+.update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
+.update-content strong:first-child{margin-top:0}
+
+.fp-scroll{padding:20px;flex:1}
+.fp-scroll h4{font:700 .64rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+
+.fu{padding:20px 0;border-bottom:1px solid var(--line)}
+.fu:last-child{border-bottom:none;padding-bottom:120px}
+.fu-date{font:700 .75rem var(--mono);color:var(--forest);margin-bottom:8px}
 
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
 #resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -352,14 +360,14 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <div id="fpBg" onclick="closeFieldPanel()"></div>
 <aside id="fp">
   <div class="fp-hdr">
-    <h3>Pali FT Field Updates</h3>
+    <h3>Field Updates</h3>
     <button class="fp-cl" type="button" onclick="closeFieldPanel()">X</button>
   </div>
   <div class="fp-body">
     <div class="fp-latest">
       <div class="fp-kicker">Latest update</div>
       <div class="fp-date" id="fuDate">Loading...</div>
-      <div class="fp-copy" id="fuText"></div>
+      <div class="update-content" id="fuText"></div>
     </div>
     <div class="fp-scroll">
       <h4>Previous Updates</h4>
@@ -669,7 +677,6 @@ function parseTagDate(value){
   return null;
 }
 
-/* IMPROVED: Ensure daysSince returns null for invalid dates to trigger 'N/A' UI fallback */
 function daysSince(ts){
   if(!ts || Number.isNaN(ts.getTime())) return null;
   return Math.max(0, Math.floor((TODAY - ts) / 86400000));
@@ -866,7 +873,6 @@ function mergeEntities(){
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
     
-    /* IMPROVED: Ensure 'Tag Date/Release Date' is correctly pulled from master rows */
     const tagDateRaw = gc(masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
     const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
     const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
@@ -1319,7 +1325,6 @@ function popupHtml(entity){
   const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
   const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
   
-  /* IMPROVED: ternary checks entity.tagDate directly; null results in 'N/A' */
   const rdRaw = entity.tagDate ? daysSince(entity.tagDate) : null;
   const daysRelease = rdRaw !== null ? rdRaw + 'd' : 'N/A';
 
@@ -1654,6 +1659,27 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
+/* * IMPROVED: formatUpdateText properly handles headers like "Current Status" 
+ * by turning them into bold block elements, matching the "proper" style.
+ */
+function formatUpdateText(text) {
+  if(!text) return '';
+  const blocks = [
+    'Current Status', 
+    'Pali Release Site Aggregation', 
+    'Suspected Dropped Radios & Observations',
+    'Lost Radios & Predation',
+    'Already present:',
+    'Recently found at Pali release stretch:'
+  ];
+  let html = escapeHtml(text);
+  blocks.forEach(b => {
+    const regex = new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    html = html.replace(regex, '<strong>' + b + '</strong>');
+  });
+  return html;
+}
+
 function loadUpdates(rows){
   updatesRows = rows || [];
   const latestDate = document.getElementById('fuDate');
@@ -1671,16 +1697,16 @@ function loadUpdates(rows){
     });
   if(!sorted.length){
     latestDate.textContent = 'No updates';
-    latestText.textContent = '';
-    list.innerHTML = '<div class="fu"><div class="fu-text">No field updates available.</div></div>';
+    latestText.innerHTML = '';
+    list.innerHTML = '<div class="fu"><div class="update-content">No field updates available.</div></div>';
     return;
   }
   latestDate.textContent = fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
-  latestText.textContent = gc(sorted[0],'Update','update','Notes','Text');
+  latestText.innerHTML = formatUpdateText(gc(sorted[0],'Update','update','Notes','Text'));
   sorted.slice(1).forEach(row=>{
     const item = document.createElement('div');
     item.className = 'fu';
-    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="fu-text">' + escapeHtml(gc(row,'Update','update','Notes','Text')) + '</div>';
+    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="update-content">' + formatUpdateText(gc(row,'Update','update','Notes','Text')) + '</div>';
     list.appendChild(item);
   });
 }
