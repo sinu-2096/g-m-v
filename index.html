@@ -1,3 +1,6 @@
+Paste-ready version below. `6-Feb-25` resolves to February 6, 2025, so on March 28, 2026 it will show `415d`.
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,7 +27,7 @@
   --muted-2:#7d9489;
   --shadow:0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:118px;
+  --hdr:132px;
   --fbar:54px;
   --btm:250px;
   --radius:12px;
@@ -59,7 +62,7 @@ button{cursor:pointer}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28);overflow:visible}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
 .hdr-logos a:hover{opacity:1}
@@ -85,10 +88,10 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
+#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10060;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
+#fbar-inner{position:relative;z-index:10061;display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;overflow-y:visible}
+.fg{display:flex;align-items:center;gap:6px;flex-shrink:0;overflow:visible}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
 .fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
@@ -98,12 +101,12 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-.ms-wrap{position:relative;flex-shrink:0}
+.ms-wrap{position:relative;flex-shrink:0;z-index:10062;overflow:visible}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
+.ms-drop{display:none;position:absolute;top:100%;left:0;margin-top:6px;z-index:10063;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
 .ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
@@ -152,10 +155,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 
-#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
+#fpBg{display:none;position:fixed;inset:0;z-index:10040;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-/* FIX-2: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:10050;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 .fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .88rem var(--mono)}
@@ -165,14 +167,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/*
- * FIX-3: .fp-scroll — removed conflicting max-height so the flex container's own
- * height:100vh + overflow:hidden on #fp controls vertical clipping correctly.
- * padding-bottom:120px ensures the last update entry can be scrolled fully
- * clear of the bottom edge of the screen.
- */
-.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
+.fp-scroll{padding:12px 16px 100px !important;flex:1;min-height:0;max-height:calc(100vh - 150px);overflow-y:auto !important;overflow-x:hidden}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+#fuList{padding-bottom:100px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
 .fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
@@ -437,7 +434,7 @@ const STATUS_META = {
   s30:{label:'Silent 30+',color:'#b91c1c',bg:'#fee2e2',border:'#fecaca'},
   crit:{label:'Critical',color:'#7f1d1d',bg:'#fee2e2',border:'#fca5a5'},
   tmiss:{label:'Temp Missing',color:'#d97706',bg:'#fef9c3',border:'#fde68a'},
-  gone:{label:'Gone',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
+  gone:{label:'Gone > 30d',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
   dead:{label:'Dead',color:'#991b1b',bg:'#fee2e2',border:'#fecaca'},
   vhf:{label:'VHF',color:'#2f7a5a',bg:'#dcfce7',border:'#bbf7d0'},
   ndep:{label:'Not Deployed',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'}
@@ -646,22 +643,12 @@ function parseAnyDate(value, isHatch){
  * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
  * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
  * Tag Date / Release Date column of the Master Radio sheet.
- *
- * Resolution order:
- *   1. DD-MMM-YY or DD-MMM-YYYY  ← NEW: month-name aware (handles "26-Jan-25")
- *   2. DD-MM-YYYY or DD/MM/YYYY  (Indian field standard)
- *   3. MM/DD/YYYY                (American fallback)
- *   4. ISO 8601 / browser-native
- *
- * Two-digit years: 00–49 → 2000–2049, 50–99 → 1950–1999.
- * Returns null (never throws) when value is absent or unparseable.
  */
 function parseTagDate(value){
   if(!value) return null;
   const s = String(value).trim();
   if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
 
-  /* 1. DD-MMM-YY or DD-MMM-YYYY  e.g. "26-Jan-25", "26 Jan 2025", "26/Jan/25" */
   const MONTH_NAMES = {
     jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
     jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
@@ -672,7 +659,6 @@ function parseTagDate(value){
     const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
     const mIdx = MONTH_NAMES[mStr];
     let y = parseInt(dmmyMatch[3], 10);
-    /* Expand two-digit year: 25 → 2025, 99 → 1999 */
     if(y < 100) y += (y < 50 ? 2000 : 1900);
     if(d >= 1 && d <= 31 && mIdx !== undefined){
       const dt = new Date(y, mIdx, d);
@@ -680,7 +666,6 @@ function parseTagDate(value){
     }
   }
 
-  /* 2. DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
   const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
   if(dmyMatch){
     const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
@@ -690,7 +675,6 @@ function parseTagDate(value){
     }
   }
 
-  /* 3. MM/DD/YYYY (American format fallback) */
   const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(mdyMatch){
     const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
@@ -700,7 +684,6 @@ function parseTagDate(value){
     }
   }
 
-  /* 4. ISO 8601 and other browser-native parseable strings */
   const iso = new Date(s);
   if(!Number.isNaN(iso.getTime())) return iso;
 
@@ -709,7 +692,7 @@ function parseTagDate(value){
 
 function daysSince(ts){
   if(!ts || Number.isNaN(ts.getTime())) return 9999;
-  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
+  return Math.max(0, Math.floor((new Date() - ts) / 86400000));
 }
 
 function fmtDateTime(ts){
@@ -764,18 +747,6 @@ function getBucket(compKey){
   return fixBuckets[compKey];
 }
 
-/*
- * FIX-1: buildMasterMaps — stores each master row under three key variants so
- * that field logs using "50-60" always resolve to the correct master record
- * regardless of whether the master sheet stores it as "50-60", "50 60", or "5060":
- *
- *   masterAdultMap[nid]      — whitespace-stripped uppercase   ("5060")  [primary]
- *   masterAdultMapRaw[rid]   — whitespace-trimmed uppercase    ("50-60") [secondary]
- *   masterAdultMapFlat[fid]  — all non-alphanumeric stripped   ("5060")  [tertiary]
- *
- * The flat variant handles the most common mismatch: a hyphen present in one
- * sheet but absent (or encoded as a space) in the other.
- */
 function buildMasterMaps(rows){
   masterAdultMap = {};
   masterHatchMap = {};
@@ -785,31 +756,22 @@ function buildMasterMaps(rows){
   masterHatchMapFlat = {};
   rows.forEach(row=>{
     const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
-    const id  = nid(rawVal);      // strips whitespace only
-    const rid = rawTrimId(rawVal); // trim + uppercase (preserves hyphens)
-    const fid = flatId(rawVal);   // strips ALL non-alphanumeric chars
+    const id  = nid(rawVal);
+    const rid = rawTrimId(rawVal);
+    const fid = flatId(rawVal);
     if(!id) return;
     if(isHatchCategory(row)){
       masterHatchMap[id] = row;
-      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
+      if(rid && rid !== id) masterHatchMapRaw[rid] = row;
+      if(fid && fid !== id) masterHatchMapFlat[fid] = row;
     }else{
       masterAdultMap[id] = row;
-      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
+      if(rid && rid !== id) masterAdultMapRaw[rid] = row;
+      if(fid && fid !== id) masterAdultMapFlat[fid] = row;
     }
   });
 }
 
-/*
- * FIX-1: lookupMasterRow — three-tier fallback chain.
- * Primary  : nid-normalised key  (strips whitespace)
- * Secondary: raw-trimmed key     (preserves hyphens, catches spaces-vs-no-spaces)
- * Tertiary : flatId key          (strips ALL non-alphanum — resolves "50-60" ↔ "5060")
- *
- * The tertiary flat lookup is the decisive fix for VHF animals like "50-60" and
- * "51-61" that the master sheet stores with a different separator encoding.
- */
 function lookupMasterRow(rawId, isHatchling){
   const fid = flatId(rawId);
   if(isHatchling){
@@ -924,30 +886,20 @@ function mergeEntities(){
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
     const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
-
-    /*
-     * FIX-1: Resolve Category and T.L strictly from the master row when a match
-     * was found. If masterRow is empty (no match) the fallback placeholder is used.
-     * This ensures "Adult Female" from the master always wins over the default
-     * "Adult / Sub-adult" generated for unrecognised Field Log entries.
-     */
     const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+    const masterTL = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
 
     entities.push({
       compKey,
       rawId,
       id:rawId,
       isHatchling,
-      /* FIX-1: masterCategory strictly overwrites the placeholder when present */
-      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
+      category:masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      /* FIX-1: T.L explicitly resolved from master row */
-      tl: masterTL,
+      tl:masterTL,
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
       collar,
-      /* FIX-2: parseTagDate now handles "26-Jan-25" month-name format */
       tagDate:parseTagDate(tagDateRaw),
       histories:{
         ATS:sortHistory(bucket.ATS || []),
@@ -968,10 +920,6 @@ function getZoneName(feature){
   return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
 }
 
-/*
- * FIX-1: assignZones — strict 500 m distance threshold.
- * Direct point-in-polygon match → assigned; nearest polygon > ZONE_SNAP_MAX_KM → "Outside Defined Zones".
- */
 function assignZones(){
   if(!geojsonData || !geojsonData.features) return;
   zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
@@ -1208,7 +1156,6 @@ document.addEventListener('click', event=>{
   }
 });
 
-/* FIX-5: rebuildFilters — cascading dropdown dependency based on active source pool. */
 function rebuildFilters(){
   const source = document.getElementById('sourceFilter').value;
   const sourcePool = source ? getViewEntities(source) : null;
@@ -1297,9 +1244,9 @@ function applyFilters(){
       });
     });
     displayedEntities = allEntities.filter(entity=>{
-      if(idFilter  && !idFilter.has(entity.id))               return false;
+      if(idFilter  && !idFilter.has(entity.id)) return false;
       if(catFilter && !catFilter.has(entity.category || '-')) return false;
-      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
+      if(zoneFilter&& !zoneFilter.has(entity.zone || '-')) return false;
       return true;
     });
     displayedEntities.sort((a,b)=>{
@@ -1315,7 +1262,7 @@ function applyFilters(){
       const zoneName = [...zoneFilter][0];
       const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
       if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
-    } else {
+    }else{
       const pts = displayedEntities
         .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
         .map(e=>[e.displayFix.lat, e.displayFix.lon]);
@@ -1328,10 +1275,10 @@ function applyFilters(){
   const pool = getViewEntities(source);
   updateStatusBlocks(source, pool);
   displayedEntities = pool.filter(entity=>{
-    if(idFilter   && !idFilter.has(entity.id))               return false;
-    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
-    if(statusFilter&& !statusFilter.has(entity.status))      return false;
+    if(idFilter && !idFilter.has(entity.id)) return false;
+    if(catFilter && !catFilter.has(entity.category || '-')) return false;
+    if(zoneFilter && !zoneFilter.has(entity.zone || '-')) return false;
+    if(statusFilter && !statusFilter.has(entity.status)) return false;
     return true;
   });
   displayedEntities.sort((a,b)=>{
@@ -1400,13 +1347,6 @@ function markerIcon(entity, text){
   });
 }
 
-/*
- * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
- *         is absent or unparseable rather than silently omitting the row.
- * FIX-2: tagDate is now correctly parsed (handles "26-Jan-25") so daysRelease
- *         will display the real day-count instead of "N/A" for most animals.
- * FIX-3: "Track" button removed. Popup actions are Focus + Table only.
- */
 function popupHtml(entity){
   const display = entity.displayFix;
   const status = badgeHtml(entity.status, entity.viewSource);
@@ -1415,7 +1355,6 @@ function popupHtml(entity){
   const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
   const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
   const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
-  /* FIX-2: tagDate now parsed correctly — shows real count; "N/A" only as genuine fallback */
   const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
   return '' +
     '<div>' +
@@ -1478,10 +1417,6 @@ function getViewEntities(source){
   }).filter(Boolean);
 }
 
-/*
- * FIX-3: renderMarkers — track entity block completely removed.
- * All displayedEntities are rendered as standard markers; clicking opens the popup.
- */
 function renderMarkers(){
   markerLayer.clearLayers();
   entityMarkerMap = {};
@@ -1559,9 +1494,6 @@ function buildEntityRow(entity){
   };
 }
 
-/*
- * FIX-3: renderTable — one row per entity (latest fix). Clicking calls focusEntity().
- */
 function renderTable(){
   const body = document.getElementById('tableBody');
   body.innerHTML = '';
@@ -1758,10 +1690,6 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
-/*
- * FIX-2: loadUpdates — sorts descending (newest first) so the most recent entry
- * appears at the top of both the latest block and the previous-updates list.
- */
 function loadUpdates(rows){
   updatesRows = rows || [];
   const latestDate = document.getElementById('fuDate');
@@ -1775,7 +1703,7 @@ function loadUpdates(rows){
       const db = parsePaliDate(gc(b,'Date','date'));
       const ta = da ? da.getTime() : -Infinity;
       const tb = db ? db.getTime() : -Infinity;
-      return tb - ta; /* descending: newest first */
+      return tb - ta;
     });
   if(!sorted.length){
     latestDate.textContent = 'No updates';
@@ -1919,3 +1847,4 @@ window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
 </script>
 </body>
 </html>
+```
