@@ -128,7 +128,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
 .fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
 .fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
-#trackBadge{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;display:none;padding:8px 14px;border-radius:999px;background:rgba(23,63,49,.92);color:#fff;border:1px solid rgba(255,255,255,.16);font:700 .66rem var(--mono);letter-spacing:.05em;box-shadow:var(--shadow)}
 #legend{position:absolute;right:12px;bottom:12px;z-index:500;min-width:220px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid var(--line-2);box-shadow:var(--shadow);display:none}
 .legend-title{font:700 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .legend-row{display:flex;align-items:center;gap:8px;font:600 .62rem var(--mono);color:var(--text);margin-bottom:6px}
@@ -155,7 +154,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-/* FIX-4: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
+/* FIX-2: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
 #fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 .fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -166,8 +165,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/* FIX-4: padding-bottom:100px !important ensures the final entry is never clipped by the viewport edge */
-.fp-scroll{padding:12px 16px 100px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
+/* FIX-2: max-height prevents clipping; padding-bottom ensures last entry scrolls fully into view */
+.fp-scroll{padding:12px 16px 80px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden;max-height:calc(100vh - 150px)}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
@@ -215,7 +214,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <div class="loading-item" id="ld-fl">Field Log (VHF)</div>
       <div class="loading-item" id="ld-pali">Pali FT Hatchlings</div>
       <div class="loading-item" id="ld-zones">River Zones GeoJSON</div>
-      <div class="loading-item" id="ld-river">River Centerline GeoJSON</div>
     </div>
   </div>
 </div>
@@ -339,7 +337,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   <div class="map-fab">
     <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
   </div>
-  <div id="trackBadge">Track Mode - <span id="trackLabel"></span></div>
   <div id="legend"></div>
   <div id="mapFoot">
     <div class="map-foot-dot"></div>
@@ -370,7 +367,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   <div id="btmHdr">
     <div class="btm-title">Telemetry Records <span class="tbl-badge" id="tableBadge">0 records</span></div>
     <div class="btm-actions">
-      <button class="bc" id="trackClearBtn" type="button" onclick="clearTrack()">Clear Track</button>
       <button class="bc" id="btmToggleBtn" type="button" onclick="toggleBottom()">Hide</button>
     </div>
   </div>
@@ -413,12 +409,9 @@ const URLS = {
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
   fl:'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
   pali:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  // FIX-4: Updates are fetched from Sheet2 (gid=238985281) of the Palighat spreadsheet.
-  // If Field Updates stop loading, verify the correct gid by opening the Google Sheet
-  // and reading the gid parameter from the URL of the "Updates" / Sheet2 tab.
+  /* FIX-2: Field Updates target Sheet2 (gid=238985281) of the Palighat spreadsheet. */
   updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
-  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson',
-  river:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/river.geojson'
+  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
 };
 
 const MAP_CENTER = [25.84,76.56];
@@ -428,16 +421,10 @@ const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
 const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
 const NOT_DEPLOYED_COLLAR = '060336';
-// FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
-// before it is labelled "Outside Defined Zones" instead of snapping to the nearest.
+/* FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
+   before it is labelled "Outside Defined Zones" instead of snapping to the nearest. */
 const ZONE_SNAP_MAX_KM = 0.5;
 const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
-const RIVER_LINE_FALLBACK = turf.lineString([
-  [76.478,25.922],[76.492,25.910],[76.505,25.899],[76.517,25.889],[76.528,25.880],[76.537,25.872],
-  [76.545,25.864],[76.552,25.856],[76.558,25.847],[76.563,25.838],[76.568,25.829],[76.574,25.820],
-  [76.581,25.810],[76.590,25.800],[76.600,25.790],[76.612,25.779],[76.625,25.768],[76.638,25.757],
-  [76.651,25.746],[76.665,25.735]
-]);
 
 const STATUS_META = {
   active:{label:'Active',color:'#1565c0',bg:'#dbeafe',border:'#bfdbfe'},
@@ -516,7 +503,6 @@ const VIEW_META = {
 let map;
 let oms;
 let markerLayer;
-let trackLayer;
 let zoneGeoLayer = null;
 let heatLayer = null;
 let kdeLayer = null;
@@ -526,13 +512,10 @@ let bottomCollapsed = false;
 let bottomHeight = 250;
 let filterBarHidden = false;
 let activeStatusKey = null;
-let trackEntityKey = null;
-let pendingFocusFixKey = null;
 let masterAdultMap = {};
 let masterHatchMap = {};
-// FIX-2: Secondary lookup maps keyed by raw-trimmed uppercase ID (without nid() normalization).
-// This catches cases where spreadsheet IDs contain hyphens, slashes, or other separators
-// that nid() would strip but a simple .trim().toUpperCase() preserves.
+/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. Catches cases where
+   spreadsheet IDs contain hyphens or spaces that nid() strips but rawTrimId() preserves. */
 let masterAdultMapRaw = {};
 let masterHatchMapRaw = {};
 let fixBuckets = {};
@@ -542,16 +525,13 @@ let displayRows = [];
 let updatesRows = [];
 let zonePolygons = [];
 let geojsonData = null;
-let riverLineFeature = null;
 let entityMarkerMap = {};
-let historyMarkerMap = {};
 
 function initMap() {
   map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
-  trackLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
   oms.addListener('click', marker => marker.openPopup());
   map.on('click', () => {
@@ -605,8 +585,7 @@ function nid(raw){
   return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
 }
 
-// FIX-2: rawTrimId — preserves hyphens and other separators that nid() removes,
-// used as a secondary lookup key alongside the nid()-normalised key.
+/* FIX-1: rawTrimId — preserves hyphens and other separators that nid() removes. */
 function rawTrimId(raw){
   return String(raw || '').trim().toUpperCase();
 }
@@ -640,6 +619,45 @@ function parseATSDate(value){
 
 function parseAnyDate(value, isHatch){
   return isHatch ? (parsePaliDate(value) || parseFieldDate(value) || parseATSDate(value)) : (parseFieldDate(value) || parseATSDate(value) || parsePaliDate(value));
+}
+
+/*
+ * FIX-1: parseTagDate — robust parser for Master Radio sheet tag/release dates.
+ * Handles DD-MM-YYYY, DD/MM/YYYY (Indian field standard, tried first),
+ * MM/DD/YYYY (American), and ISO YYYY-MM-DD formats.
+ * Forces input to string and trims whitespace before attempting any parse.
+ * Returns null (never throws) when value is absent or unparseable.
+ */
+function parseTagDate(value){
+  if(!value) return null;
+  const s = String(value).trim();
+  if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
+
+  /* Try DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
+  const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if(dmyMatch){
+    const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
+    if(d >= 1 && d <= 31 && m >= 1 && m <= 12){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* Try MM/DD/YYYY (American format fallback) */
+  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(mdyMatch){
+    const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
+    if(m >= 1 && m <= 12 && d >= 1 && d <= 31){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* Try ISO 8601 and other browser-native parseable strings */
+  const iso = new Date(s);
+  if(!Number.isNaN(iso.getTime())) return iso;
+
+  return null;
 }
 
 function daysSince(ts){
@@ -699,16 +717,18 @@ function getBucket(compKey){
   return fixBuckets[compKey];
 }
 
-// FIX-2: buildMasterMaps — store each row under BOTH the nid()-normalised key AND the
-// raw-trimmed uppercase key. This ensures VHF animals whose Radio_ID contains hyphens or
-// spaces that survive nid() are still matched when the field log uses a slightly different
-// separator style. The .trim() call on the raw value is the "strict string matching" fix.
+/*
+ * FIX-1: buildMasterMaps — forces both sides to String and trims before storing.
+ * Stores each row under both the nid()-normalised key AND the raw-trimmed uppercase key
+ * so VHF animals whose Radio_ID contains hyphens are still matched correctly.
+ */
 function buildMasterMaps(rows){
   masterAdultMap = {};
   masterHatchMap = {};
   masterAdultMapRaw = {};
   masterHatchMapRaw = {};
   rows.forEach(row=>{
+    /* FIX-1: Explicit String() + .trim() on both sides of the comparison */
     const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
     const id = nid(rawVal);
     const rid = rawTrimId(rawVal);
@@ -723,9 +743,7 @@ function buildMasterMaps(rows){
   });
 }
 
-// FIX-2: lookupMasterRow — tries nid-normalised key first, then raw-trimmed key as fallback.
-// This guarantees VHF (and other) animals always get their Category, T.L, Sex, and Remarks
-// from the Master Radio sheet even when ID formatting differs slightly between sheets.
+/* FIX-1: lookupMasterRow — tries nid-normalised key first, then raw-trimmed key as fallback. */
 function lookupMasterRow(rawId, isHatchling){
   if(isHatchling){
     return masterHatchMap[rawId]
@@ -828,7 +846,6 @@ function mergeEntities(){
     const [rawId, scope] = compKey.split('|');
     const isHatchling = scope === 'H';
     const bucket = fixBuckets[compKey] || {ATS:[],FieldLog:[],PaliFT:[]};
-    // FIX-2: use lookupMasterRow() so VHF animals always resolve their master data
     const masterRow = lookupMasterRow(rawId, isHatchling) || {};
     const allHistory = sortHistory([...(bucket.ATS || []), ...(bucket.FieldLog || []), ...(bucket.PaliFT || [])]);
     const latestATS = latestFrom(bucket.ATS || []);
@@ -836,7 +853,10 @@ function mergeEntities(){
     const latestPali = latestFrom(bucket.PaliFT || []);
     const latestOverall = latestFrom(allHistory);
     const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    // FIX-2: Tag Date / Release Date — also try common VHF-sheet column aliases
+    /*
+     * FIX-1: Use parseTagDate() for robust DD-MM-YYYY / MM/DD/YYYY handling.
+     * FIX-1: Explicitly map T.L via multiple common column name aliases.
+     */
     const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
     entities.push({
       compKey,
@@ -845,11 +865,13 @@ function mergeEntities(){
       isHatchling,
       category:gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type') || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      tl:gc(masterRow,'T.L','TL','T.L (cm)','Total Length','TotalLength'),
+      /* FIX-1: T.L explicitly mapped with comprehensive alias list */
+      tl:gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length'),
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
       collar,
-      tagDate:parseAnyDate(tagDateRaw, isHatchling),
+      /* FIX-1: parseTagDate replaces parseAnyDate for tag/release dates */
+      tagDate:parseTagDate(tagDateRaw),
       histories:{
         ATS:sortHistory(bucket.ATS || []),
         FieldLog:sortHistory(bucket.FieldLog || []),
@@ -869,10 +891,10 @@ function getZoneName(feature){
   return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
 }
 
-// FIX-1: assignZones — strict 500 m distance threshold.
-// If a coordinate falls directly inside a polygon it is assigned to that zone.
-// If it does not, the nearest polygon is found; if it is > ZONE_SNAP_MAX_KM (0.5 km) away
-// the zone is set to "Outside Defined Zones" instead of snapping to a distant polygon.
+/*
+ * FIX-1: assignZones — strict 500 m distance threshold.
+ * Direct point-in-polygon match → assigned; nearest polygon > ZONE_SNAP_MAX_KM → "Outside Defined Zones".
+ */
 function assignZones(){
   if(!geojsonData || !geojsonData.features) return;
   zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
@@ -889,7 +911,6 @@ function assignZones(){
     }
     const point = turf.point([fix.lon,fix.lat]);
     let found = '-';
-    // Step 1: direct point-in-polygon test (no distance threshold needed)
     for(const feature of zonePolygons){
       try{
         if(turf.booleanPointInPolygon(point, feature)){
@@ -898,8 +919,6 @@ function assignZones(){
         }
       }catch(error){}
     }
-    // Step 2: if not inside any polygon, find nearest polygon edge
-    // FIX-1: only snap if within ZONE_SNAP_MAX_KM; otherwise label as outside
     if(found === '-'){
       let best = Infinity;
       let bestName = '-';
@@ -914,7 +933,6 @@ function assignZones(){
           }
         }catch(error){}
       }
-      // Only assign the nearest zone when it is within the acceptable snap radius
       found = best <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
     }
     fix.zone = found;
@@ -944,40 +962,6 @@ function showZoneLayer(visible){
     if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);
   }else if(map.hasLayer(zoneGeoLayer)){
     map.removeLayer(zoneGeoLayer);
-  }
-}
-
-function activeRiverLine(){
-  return riverLineFeature || RIVER_LINE_FALLBACK;
-}
-
-function calcRiverDistance(prevFix, nextFix){
-  try{
-    const line = activeRiverLine();
-    const a = turf.nearestPointOnLine(line, turf.point([prevFix.lon,prevFix.lat]));
-    const b = turf.nearestPointOnLine(line, turf.point([nextFix.lon,nextFix.lat]));
-    const segment = turf.lineSlice(a, b, line);
-    return Math.round(turf.length(segment,{units:'meters'}));
-  }catch(error){
-    return null;
-  }
-}
-
-function snapFixToRiver(fix){
-  if(!Number.isFinite(fix?.lat) || !Number.isFinite(fix?.lon)){
-    return {lat:fix?.lat ?? null, lon:fix?.lon ?? null};
-  }
-  try{
-    const originPt = turf.point([fix.lon, fix.lat]);
-    const snapped  = turf.nearestPointOnLine(activeRiverLine(), originPt);
-    const [sLon, sLat] = snapped.geometry.coordinates;
-    if(!Number.isFinite(sLat) || !Number.isFinite(sLon)) return {lat:fix.lat, lon:fix.lon};
-    if(Math.abs(sLat) < 0.001 && Math.abs(sLon) < 0.001) return {lat:fix.lat, lon:fix.lon};
-    const snapDist = turf.distance(originPt, turf.point([sLon, sLat]), {units:'kilometers'});
-    if(snapDist > 15) return {lat:fix.lat, lon:fix.lon};
-    return {lat:sLat, lon:sLon};
-  }catch(error){
-    return {lat:fix.lat, lon:fix.lon};
   }
 }
 
@@ -1147,15 +1131,10 @@ document.addEventListener('click', event=>{
   }
 });
 
-// FIX-5: rebuildFilters — cascading dropdown dependency.
-// When a Source is selected, the Radio ID, Category, and Zone dropdowns are populated
-// exclusively from entities belonging to that source's view pool, not the full entity list.
-// This prevents every collar in the database appearing in the Pali FT dropdown, for example.
+/* FIX-5: rebuildFilters — cascading dropdown dependency based on active source pool. */
 function rebuildFilters(){
   const source = document.getElementById('sourceFilter').value;
   const sourcePool = source ? getViewEntities(source) : null;
-
-  // FIX-5: use sourcePool when a source is chosen; fall back to full entity list otherwise
   const poolForFilters = sourcePool || entities;
 
   const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
@@ -1165,7 +1144,6 @@ function rebuildFilters(){
   const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
   buildMSOptions('cat', allCats);
 
-  // Zone counts are derived from the source pool (or all entities if no source is set)
   const zoneCounts = {};
   if(sourcePool){
     sourcePool.forEach(e=>{
@@ -1193,8 +1171,6 @@ function rebuildFilters(){
 
 function onSourceChange(){
   activeStatusKey = null;
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
   rebuildFilters();
   updateFieldUpdatesVisibility();
   updateCollarColumn();
@@ -1254,7 +1230,6 @@ function applyFilters(){
       const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
       return tb - ta;
     });
-    if(trackEntityKey && !displayedEntities.some(e=>e.compKey === trackEntityKey)) trackEntityKey = null;
     showZoneLayer(displayedEntities.length > 0);
     renderMarkers();
     renderTable();
@@ -1287,9 +1262,6 @@ function applyFilters(){
     const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
     return tb - ta;
   });
-  if(trackEntityKey && !displayedEntities.some(entity=>entity.compKey === trackEntityKey)){
-    trackEntityKey = null;
-  }
   showZoneLayer(displayedEntities.length > 0);
   renderMarkers();
   renderTable();
@@ -1305,18 +1277,9 @@ function applyFilters(){
   }
 }
 
-function clearTrack(){
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
-  renderMarkers();
-  renderTable();
-}
-
 function clearFilters(){
   document.getElementById('sourceFilter').value = '';
   activeStatusKey = null;
-  trackEntityKey = null;
-  pendingFocusFixKey = null;
   document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
   rebuildFilters();
   updateFieldUpdatesVisibility();
@@ -1330,8 +1293,6 @@ function clearFilters(){
 
 function clearVisuals(resetViewport){
   markerLayer.clearLayers();
-  trackLayer.clearLayers();
-  historyMarkerMap = {};
   entityMarkerMap = {};
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(heatLayer){
@@ -1346,7 +1307,6 @@ function clearVisuals(resetViewport){
   kdeOn = false;
   document.getElementById('heatBtn').classList.remove('on');
   document.getElementById('kdeBtn').classList.remove('on');
-  document.getElementById('trackBadge').style.display = 'none';
   showZoneLayer(false);
   if(resetViewport) resetView();
 }
@@ -1363,6 +1323,11 @@ function markerIcon(entity, text){
   });
 }
 
+/*
+ * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
+ *         is absent or unparseable rather than silently omitting the row.
+ * FIX-3: "Track" button removed. Popup actions are now Focus + Table only.
+ */
 function popupHtml(entity){
   const display = entity.displayFix;
   const status = badgeHtml(entity.status, entity.viewSource);
@@ -1371,8 +1336,8 @@ function popupHtml(entity){
   const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
   const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
   const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
-  // FIX-2: always calculate days since release; display prominently when tagDate is available
-  const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : null;
+  /* FIX-1: Always display Days since release; fall back to "N/A" — never silently hide */
+  const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
   return '' +
     '<div>' +
       '<div class="pop-top">' +
@@ -1390,37 +1355,24 @@ function popupHtml(entity){
         (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
         '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
-        // FIX-2: days since release shown prominently; hidden gracefully when tagDate is absent
-        (daysRelease !== null ? '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' : '') +
+        /* FIX-1: Always show; "N/A" when no valid tag date */
+        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Total fixes</span><span class="pop-value">' + entity.trackHistory.length + '</span></div>' +
+        /* FIX-1: T.L always surfaced */
+        (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
         (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
         (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
       '</div>' +
+      /* FIX-3: "Track" button removed — only Focus and Table actions remain */
       '<div class="pop-actions">' +
         '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
-        '<button class="pab" type="button" onclick="trackSingle(\'' + entity.compKey + '\')">Track</button>' +
         '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
       '</div>' +
     '</div>';
-}
-
-function fixKey(compKey, fix){
-  return compKey + '|' + (fix.ts ? fix.ts.getTime() : 'na') + '|' + fix.lat + '|' + fix.lon + '|' + fix.source;
-}
-
-function trackSingle(compKey, focusFix = null){
-  const entity = displayedEntities.find(e=>e.compKey === compKey);
-  if(!entity) return;
-  trackEntityKey = compKey;
-  pendingFocusFixKey = focusFix;
-  map.closePopup();
-  renderMarkers();
-  renderTable();
 }
 
 function getViewEntities(source){
@@ -1450,145 +1402,20 @@ function getViewEntities(source){
   }).filter(Boolean);
 }
 
+/*
+ * FIX-3: renderMarkers — track entity block completely removed.
+ * All displayedEntities are rendered as standard markers; clicking opens the popup.
+ * Focus/pan is handled exclusively through focusEntity() and table row clicks.
+ */
 function renderMarkers(){
   markerLayer.clearLayers();
-  trackLayer.clearLayers();
-  historyMarkerMap = {};
   entityMarkerMap = {};
   try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(!displayedEntities.length){
-    document.getElementById('trackBadge').style.display = 'none';
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
     if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
     return;
   }
-  const trackEntity = trackEntityKey ? displayedEntities.find(item=>item.compKey === trackEntityKey) : null;
-
-  if(trackEntity){
-    const history = trackEntity.trackHistory.filter(item=>
-      Number.isFinite(parseFloat(item.lat)) && Number.isFinite(parseFloat(item.lon))
-    );
-    history.forEach(item=>{ item.lat = parseFloat(item.lat); item.lon = parseFloat(item.lon); });
-    const snappedHistory = history.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
-
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    heatmapOn = false;
-    kdeOn = false;
-    document.getElementById('heatBtn').classList.remove('on');
-    document.getElementById('kdeBtn').classList.remove('on');
-
-    if(snappedHistory.length > 1){
-      const line = activeRiverLine();
-      const riverCoords = [];
-      for(let i = 0; i < snappedHistory.length - 1; i += 1){
-        try{
-          const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon, snappedHistory[i].snapped.lat]));
-          const end   = turf.nearestPointOnLine(line, turf.point([snappedHistory[i+1].snapped.lon, snappedHistory[i+1].snapped.lat]));
-          const segment = turf.lineSlice(start, end, line);
-          const coords = segment.geometry.coordinates.map(coord=>[coord[1],coord[0]]);
-          if(i === 0) riverCoords.push(...coords);
-          else riverCoords.push(...coords.slice(1));
-        }catch(error){
-          riverCoords.push([snappedHistory[i].snapped.lat,   snappedHistory[i].snapped.lon]);
-          if(i === snappedHistory.length - 2)
-            riverCoords.push([snappedHistory[i+1].snapped.lat, snappedHistory[i+1].snapped.lon]);
-        }
-      }
-      if(riverCoords.length > 1){
-        L.polyline(riverCoords,{
-          color:markerColor(trackEntity),
-          weight:3,
-          opacity:.9,
-          dashArray:'8 12',
-          interactive:false
-        }).addTo(trackLayer);
-      }
-    }
-
-    snappedHistory.forEach((item, index)=>{
-      const {fix, snapped} = item;
-      const pLat = Number.isFinite(snapped.lat) ? snapped.lat : fix.lat;
-      const pLon = Number.isFinite(snapped.lon) ? snapped.lon : fix.lon;
-      if(!Number.isFinite(pLat) || !Number.isFinite(pLon)) return;
-
-      const latest = index === snappedHistory.length - 1;
-      const color = markerColor(trackEntity);
-      const labelText = trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id;
-
-      // FIX-3: Latest (most recent) fix keeps the full branded DivIcon so the tracked animal
-      // remains clearly identifiable. Historical path points use small SVG circles.
-      const fixMarker = L.marker([pLat, pLon],{
-        icon: latest
-          ? markerIcon(trackEntity, labelText)
-          : (()=>{
-              const size = 8;
-              return L.divIcon({
-                className:'',
-                html:'<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" style="display:block"><circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + (size/2-1.5) + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/></svg>',
-                iconSize:[size,size],
-                iconAnchor:[size/2,size/2]
-              });
-            })(),
-        zIndexOffset:latest ? 9000 : 0,
-        keyboard:false,
-        interactive:true
-      });
-
-      const previous = index > 0 ? snappedHistory[index-1].fix : null;
-      const riverDistance = previous ? calcRiverDistance(previous, fix) : null;
-      fixMarker.bindPopup(
-        '<div class="pop-body">' +
-          '<div class="pop-row"><span class="pop-label">Radio ID</span><span class="pop-value">' + escapeHtml(trackEntity.id) + '</span></div>' +
-          '<div class="pop-row"><span class="pop-label">Fix time</span><span class="pop-value">' + escapeHtml(fmtDateTime(fix.ts)) + '</span></div>' +
-          '<div class="pop-row"><span class="pop-label">Source</span><span class="pop-value">' + escapeHtml(fix.source) + '</span></div>' +
-          (riverDistance !== null ? '<div class="pop-row"><span class="pop-label">River dist from prev</span><span class="pop-value">' + riverDistance + ' m</span></div>' : '') +
-          '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(fix.zone || '-') + '</span></div>' +
-          (fix.place ? '<div class="pop-row"><span class="pop-label">Place</span><span class="pop-value">' + escapeHtml(fix.place) + '</span></div>' : '') +
-          (fix.activity ? '<div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">' + escapeHtml(fix.activity) + '</span></div>' : '') +
-        '</div>'
-      );
-      // FIX-3: For the latest marker, set popupAnchor offset to match the branded DivIcon
-      if(latest) fixMarker.getPopup()?.options && (fixMarker.getPopup().options.offset = L.point(0,-16));
-      trackLayer.addLayer(fixMarker);
-      historyMarkerMap[fixKey(trackEntity.compKey, fix)] = fixMarker;
-    });
-
-    if(snappedHistory.length === 0 && trackEntity.displayFix && Number.isFinite(trackEntity.displayFix.lat)){
-      const fix = trackEntity.displayFix;
-      const fallback = L.marker([fix.lat,fix.lon],{
-        icon:markerIcon(trackEntity, trackEntity.id.length > 5 ? trackEntity.id.slice(0,5) : trackEntity.id),
-        keyboard:false,
-        zIndexOffset:9000
-      });
-      fallback.bindPopup(popupHtml(trackEntity),{maxWidth:330});
-      trackLayer.addLayer(fallback);
-    }
-
-    document.getElementById('trackBadge').style.display = 'block';
-    document.getElementById('trackLabel').textContent = trackEntity.id + ' (' + history.length + ' fixes)';
-
-    const points = snappedHistory
-      .map(item=>[item.snapped.lat, item.snapped.lon])
-      .filter(p=>Number.isFinite(p[0]) && Number.isFinite(p[1]));
-    if(!points.length && trackEntity.displayFix){
-      points.push([trackEntity.displayFix.lat,trackEntity.displayFix.lon]);
-    }
-    if(points.length){
-      map.fitBounds(L.latLngBounds(points),{padding:[52,52],maxZoom:16});
-    }
-
-    if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
-      const marker = historyMarkerMap[pendingFocusFixKey];
-      pendingFocusFixKey = null;
-      map.flyTo(marker.getLatLng(),16,{duration:1});
-      setTimeout(()=>marker.openPopup(),700);
-    }
-
-    return;
-  }
-
-  document.getElementById('trackBadge').style.display = 'none';
 
   displayedEntities.forEach(entity=>{
     const fix = entity.displayFix;
@@ -1613,13 +1440,6 @@ function renderMarkers(){
     .map(e=>[e.displayFix.lat,e.displayFix.lon]);
   if(points.length){
     map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
-  }
-
-  if(pendingFocusFixKey && historyMarkerMap[pendingFocusFixKey]){
-    const marker = historyMarkerMap[pendingFocusFixKey];
-    pendingFocusFixKey = null;
-    map.flyTo(marker.getLatLng(),16,{duration:1});
-    setTimeout(()=>marker.openPopup(),700);
   }
 }
 
@@ -1664,42 +1484,16 @@ function buildEntityRow(entity){
   };
 }
 
-function buildHistoryRows(entity){
-  if(!entity.trackHistory.length) return [buildEntityRow(entity)];
-  return entity.trackHistory.slice().sort((a,b)=>{
-    const ta = a.ts ? a.ts.getTime() : -Infinity;
-    const tb = b.ts ? b.ts.getTime() : -Infinity;
-    return tb - ta;
-  }).map(fix=>({
-    rowKey:fixKey(entity.compKey, fix),
-    type:'fix',
-    entity,
-    fix,
-    id:entity.id,
-    ts:fix.ts || null,
-    days:daysSince(fix.ts || null),
-    status:entity.status,
-    category:entity.category || '-',
-    sex:entity.sex || '-',
-    source:fix.source,
-    zone:fix.zone || '-',
-    collar:entity.collar || '-',
-    lat:Number.isFinite(fix.lat) ? fix.lat : null,
-    lon:Number.isFinite(fix.lon) ? fix.lon : null,
-    tagPlace:entity.tagPlace || '-',
-    tl:entity.tl || '-',
-    remarks:(fix.remarks || entity.remarks || '-')
-  }));
-}
-
+/*
+ * FIX-3: renderTable — track/history-row logic removed entirely.
+ * Table always shows one row per entity (latest fix). Clicking a row calls focusEntity().
+ */
 function renderTable(){
   const body = document.getElementById('tableBody');
   body.innerHTML = '';
   const source = document.getElementById('sourceFilter').value;
-  const target = trackEntityKey ? displayedEntities.find(entity=>entity.compKey === trackEntityKey) : (displayedEntities.length === 1 ? displayedEntities[0] : null);
-  if(target) displayRows = buildHistoryRows(target);
-  else displayRows = displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent = target ? (displayRows.length + ' fixes | ' + target.id) : (displayRows.length + ' records');
+  displayRows = displayedEntities.map(buildEntityRow);
+  document.getElementById('tableBadge').textContent = displayRows.length + ' records';
   updateCollarColumn();
   if(!source && !displayedEntities.length){
     body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
@@ -1728,24 +1522,11 @@ function renderTable(){
       '<td>' + escapeHtml(row.tagPlace) + '</td>' +
       '<td>' + escapeHtml(row.tl) + '</td>' +
       '<td>' + escapeHtml(row.remarks) + '</td>';
+    /* FIX-3: clicking any row simply focuses the entity marker on the map */
     tr.addEventListener('click',()=>{
       document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
       tr.classList.add('sel');
-      if(row.type === 'entity'){
-        focusEntity(row.entity.compKey);
-      }else{
-        if(trackEntityKey !== row.entity.compKey){
-          trackSingle(row.entity.compKey, row.rowKey);
-        }else{
-          const marker = historyMarkerMap[row.rowKey];
-          if(marker){
-            Object.values(historyMarkerMap).forEach(item=>item.setZIndexOffset(0));
-            marker.setZIndexOffset(9000);
-            map.flyTo(marker.getLatLng(),16,{duration:1});
-            setTimeout(()=>marker.openPopup(),700);
-          }
-        }
-      }
+      focusEntity(row.entity.compKey);
     });
     body.appendChild(tr);
   });
@@ -1904,19 +1685,25 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
+/*
+ * FIX-2: loadUpdates — sorts descending (newest first) so the most recent entry
+ * appears at the top of both the latest block and the previous-updates list.
+ */
 function loadUpdates(rows){
   updatesRows = rows || [];
   const latestDate = document.getElementById('fuDate');
   const latestText = document.getElementById('fuText');
   const list = document.getElementById('fuList');
   list.innerHTML = '';
-  const sorted = updatesRows.filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text')).sort((a,b)=>{
-    const da = parsePaliDate(gc(a,'Date','date'));
-    const db = parsePaliDate(gc(b,'Date','date'));
-    const ta = da ? da.getTime() : -Infinity;
-    const tb = db ? db.getTime() : -Infinity;
-    return tb - ta;
-  });
+  const sorted = updatesRows
+    .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
+    .sort((a,b)=>{
+      const da = parsePaliDate(gc(a,'Date','date'));
+      const db = parsePaliDate(gc(b,'Date','date'));
+      const ta = da ? da.getTime() : -Infinity;
+      const tb = db ? db.getTime() : -Infinity;
+      return tb - ta; /* descending: newest first */
+    });
   if(!sorted.length){
     latestDate.textContent = 'No updates';
     latestText.textContent = '';
@@ -2007,22 +1794,21 @@ async function loadAllData(){
   const button = document.getElementById('refreshBtn');
   button.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
-  ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones','ld-river'].forEach(id=>{
+  ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones'].forEach(id=>{
     const el = document.getElementById(id);
-    el.classList.remove('ok','err');
+    if(el) el.classList.remove('ok','err');
   });
   loadingCopy('Fetching Google Sheets and GeoJSON layers...');
   try{
-    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows, riverData] = await Promise.all([
+    /* FIX-3: River centerline fetch removed — no longer needed without track mode.
+       FIX-2: URLS.updates targets Sheet2 (gid=238985281) of the Palighat spreadsheet. */
+    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
       fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
       fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
       fetchCSV(URLS.fl).then(data=>{ setLoadingState('ld-fl', true); return data; }).catch(()=>{ setLoadingState('ld-fl', false); return []; }),
       fetchCSV(URLS.pali).then(data=>{ setLoadingState('ld-pali', true); return data; }).catch(()=>{ setLoadingState('ld-pali', false); return []; }),
       fetchJSON(URLS.zones).then(data=>{ setLoadingState('ld-zones', true); return data; }).catch(()=>{ setLoadingState('ld-zones', false); return null; }),
-      // FIX-4: Field Updates are fetched from URLS.updates which targets Sheet2 (gid=238985281)
-      // of the Palighat spreadsheet via a dedicated PapaParse call.
-      fetchCSV(URLS.updates).catch(()=>[]),
-      fetchJSON(URLS.river).then(data=>{ setLoadingState('ld-river', true); return data; }).catch(()=>{ setLoadingState('ld-river', false); return null; })
+      fetchCSV(URLS.updates).catch(()=>[])
     ]);
     loadingCopy('Routing records through the master dictionary...');
     fixBuckets = {};
@@ -2031,11 +1817,6 @@ async function loadAllData(){
     ingestFieldLog(fieldRows);
     ingestPali(paliRows);
     geojsonData = zonesData;
-    if(riverData?.features?.length){
-      riverLineFeature = riverData.features.find(feature=>feature.geometry && (feature.geometry.type === 'LineString' || feature.geometry.type === 'MultiLineString')) || null;
-    }else{
-      riverLineFeature = null;
-    }
     loadingCopy('Assigning zones and merging entities...');
     if(geojsonData) assignZones();
     mergeEntities();
