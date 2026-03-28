@@ -85,10 +85,8 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-/* fbar: overflow visible so absolute-positioned dropdowns are never clipped */
 #fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-/* overflow:visible here so absolute ms-drop children are not clipped; desktop tool so no horizontal scroll needed */
 #fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
 .fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
@@ -100,13 +98,11 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-/* FIX: ms-wrap is position:relative so ms-drop anchors beneath it */
 .ms-wrap{position:relative;flex-shrink:0}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
-/* FIX: ms-drop is position:absolute, anchored below its ms-wrap parent via top:100% left:0 */
 .ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
 .ms-drop.open{display:flex;flex-direction:column}
 .ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
@@ -159,7 +155,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{position:fixed;top:0;right:-360px;width:360px;height:100%;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column}
+/* FIX-3: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 .fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .88rem var(--mono)}
@@ -169,8 +166,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
 .fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
 .fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/* FIX: Field Updates scroll — padding-bottom ensures last entry is not clipped */
-.fp-scroll{padding:12px 16px 52px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
+/* FIX-3: padding-bottom:80px ensures the final entry is never clipped by the viewport edge */
+.fp-scroll{padding:12px 16px 80px;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden}
 .fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .fu{padding:10px 0;border-bottom:1px solid var(--line)}
 .fu-date{font:700 .67rem var(--mono);color:var(--forest)}
@@ -700,7 +697,6 @@ function ingestATS(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
     if(!id) return;
-    /* Strict float cast — never use raw string coords */
     const lat = parseFloat(gc(row,'Latitude','Lat'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
@@ -724,7 +720,6 @@ function ingestFieldLog(rows){
     if(!id) return;
     if(masterHatchMap[id]) return;
     if(isHatchCategory(row)) return;
-    /* Strict float cast */
     let lat = parseFloat(gc(row,'Latitude','Lat'));
     let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
@@ -751,7 +746,6 @@ function ingestPali(rows){
   rows.forEach(row=>{
     const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
     if(!id) return;
-    /* Strict float cast */
     const lat = parseFloat(gc(row,'Latitude','Lat'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
@@ -938,16 +932,33 @@ function getViewEntities(source){
   }).filter(Boolean);
 }
 
+/* ─── FIX-2: snapFixToRiver — strict coordinate validation ───────
+   Turf.js uses GeoJSON [lon, lat]; Leaflet uses [lat, lon].
+   These must NEVER be mixed. After snapping we validate the result:
+   • non-finite values → fall back to original
+   • zero-island artefact (lat≈0, lon≈0) → fall back
+   • snap distance > 15 km from source point → fall back
+   We NEVER return [0,0] or a hallucinated coordinate. */
 function snapFixToRiver(fix){
   if(!Number.isFinite(fix?.lat) || !Number.isFinite(fix?.lon)){
     return {lat:fix?.lat ?? null, lon:fix?.lon ?? null};
   }
   try{
-    /* Turf expects [lon, lat]; returns [lon, lat] in geometry.coordinates */
-    const snapped = turf.nearestPointOnLine(activeRiverLine(), turf.point([fix.lon,fix.lat]));
-    const [lon, lat] = snapped.geometry.coordinates;
-    return {lat, lon};
+    /* Turf expects [lon, lat] — strictly enforced here */
+    const originPt = turf.point([fix.lon, fix.lat]);
+    const snapped  = turf.nearestPointOnLine(activeRiverLine(), originPt);
+    /* GeoJSON geometry.coordinates is [lon, lat] */
+    const [sLon, sLat] = snapped.geometry.coordinates;
+    /* Reject non-finite snapped values */
+    if(!Number.isFinite(sLat) || !Number.isFinite(sLon)) return {lat:fix.lat, lon:fix.lon};
+    /* Reject zero-island artefacts */
+    if(Math.abs(sLat) < 0.001 && Math.abs(sLon) < 0.001) return {lat:fix.lat, lon:fix.lon};
+    /* Reject snap if it teleports the point more than 15 km — indicates bad river geometry */
+    const snapDist = turf.distance(originPt, turf.point([sLon, sLat]), {units:'kilometers'});
+    if(snapDist > 15) return {lat:fix.lat, lon:fix.lon};
+    return {lat:sLat, lon:sLon};
   }catch(error){
+    /* On any Turf error, return the original validated coordinate — never invent a point */
     return {lat:fix.lat, lon:fix.lon};
   }
 }
@@ -1084,8 +1095,6 @@ function updateMSBtn(key){
   }
 }
 
-/* FIX: toggleMS — dropdown anchors via CSS (position:absolute on .ms-drop).
-   No viewport rect calculation needed; the parent .ms-wrap is position:relative. */
 function toggleMS(key, event){
   if(event) event.stopPropagation();
   const button = document.getElementById('msb-' + key);
@@ -1120,27 +1129,17 @@ document.addEventListener('click', event=>{
   }
 });
 
-/* FIX: rebuildFilters — Radio ID, Category and Zone are always populated from
-   all loaded entities after data load, regardless of source selection.
-   Zone options show "(count)" and are sorted by count descending.
-   Status filter only activates when a source with status support is chosen. */
 function rebuildFilters(){
   const source = document.getElementById('sourceFilter').value;
-
-  /* Always compute a full pool for independent filter population */
   const sourcePool = source ? getViewEntities(source) : null;
 
-  /* Radio ID: always from all entities */
   const allIds = [...new Set(entities.map(e=>e.id))].sort((a,b)=>
     String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMSOptions('rid', allIds);
 
-  /* Category: always from all entities */
   const allCats = [...new Set(entities.map(e=>e.category||'-'))].sort();
   buildMSOptions('cat', allCats);
 
-  /* Zone: count entities per zone; use source pool if selected, else all latestOverall zones.
-     Sort zones descending by count, format as "Zone Name (N)". */
   const zoneCounts = {};
   if(sourcePool){
     sourcePool.forEach(e=>{
@@ -1156,7 +1155,6 @@ function rebuildFilters(){
   const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
   buildMSOptions('zone', sortedZones, zone=>zone + ' (' + zoneCounts[zone] + ')');
 
-  /* Status: only active for sources that support it */
   if(source && VIEW_META[source].statusEnabled){
     buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source));
   }else{
@@ -1190,30 +1188,81 @@ function updateCollarColumn(){
   });
 }
 
+/* ─── FIX-1: applyFilters — source no longer a mandatory prerequisite ───
+   When Source is unset but other filters (ID / Category / Zone) are active,
+   we query all three source views, de-duplicate by compKey (ATS → FieldLog →
+   PaliFT priority), and auto-zoom to the resulting marker bounds.
+   Status filter is only available when a source is explicitly chosen. */
 function applyFilters(){
-  const source = document.getElementById('sourceFilter').value;
+  const source    = document.getElementById('sourceFilter').value;
+  const idFilter  = selectedSet('rid');
+  const catFilter = selectedSet('cat');
+  const zoneFilter= selectedSet('zone');
+
   if(!source){
-    displayedEntities = [];
-    displayRows = [];
-    activeStatusKey = null;
-    clearVisuals(true);
+    /* No source selected: fall through to cross-source mode only when a filter is set */
+    const hasFilter = idFilter || catFilter || zoneFilter;
+    if(!hasFilter){
+      displayedEntities = [];
+      displayRows = [];
+      activeStatusKey = null;
+      clearVisuals(true);
+      renderTable();
+      updateLegend('');
+      updateStatusBlocks('', []);
+      showZoneLayer(false);
+      return;
+    }
+    /* Gather from all three sources; de-duplicate by compKey, prefer ATS → FieldLog → PaliFT */
+    const seen = new Set();
+    const allEntities = [];
+    ['ATS','FieldLog','PaliFT'].forEach(src=>{
+      getViewEntities(src).forEach(entity=>{
+        if(!seen.has(entity.compKey)){
+          seen.add(entity.compKey);
+          allEntities.push(entity);
+        }
+      });
+    });
+    displayedEntities = allEntities.filter(entity=>{
+      if(idFilter  && !idFilter.has(entity.id))               return false;
+      if(catFilter && !catFilter.has(entity.category || '-')) return false;
+      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
+      return true;
+    });
+    displayedEntities.sort((a,b)=>{
+      const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
+      const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
+      return tb - ta;
+    });
+    if(trackEntityKey && !displayedEntities.some(e=>e.compKey === trackEntityKey)) trackEntityKey = null;
+    showZoneLayer(displayedEntities.length > 0);
+    renderMarkers();
     renderTable();
-    updateLegend('');
-    updateStatusBlocks('', []);
-    showZoneLayer(false);
+    updateMapFoot();
+    /* Auto-zoom: prefer zone polygon boundary, else fit to visible markers */
+    if(zoneFilter && zoneFilter.size === 1 && geojsonData){
+      const zoneName = [...zoneFilter][0];
+      const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
+      if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
+    } else {
+      const pts = displayedEntities
+        .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+        .map(e=>[e.displayFix.lat, e.displayFix.lon]);
+      if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
+    }
     return;
   }
-  const idFilter = selectedSet('rid');
-  const catFilter = selectedSet('cat');
-  const zoneFilter = selectedSet('zone');
+
+  /* ── Single-source mode (original behaviour, unchanged) ── */
   const statusFilter = selectedSet('status');
   const pool = getViewEntities(source);
   updateStatusBlocks(source, pool);
   displayedEntities = pool.filter(entity=>{
-    if(idFilter && !idFilter.has(entity.id)) return false;
-    if(catFilter && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-')) return false;
-    if(statusFilter && !statusFilter.has(entity.status)) return false;
+    if(idFilter   && !idFilter.has(entity.id))               return false;
+    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
+    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
+    if(statusFilter&& !statusFilter.has(entity.status))      return false;
     return true;
   });
   displayedEntities.sort((a,b)=>{
@@ -1297,8 +1346,6 @@ function markerIcon(entity, text){
   });
 }
 
-/* FIX: popupHtml — cross-reference SAT↔VHF dates for both ATS and FieldLog views,
-   plus Days since last fix and Days since release (from Master Radio tag date). */
 function popupHtml(entity){
   const display = entity.displayFix;
   const status = badgeHtml(entity.status, entity.viewSource);
@@ -1322,10 +1369,8 @@ function popupHtml(entity){
         (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
-        /* Cross-reference: ATS view shows last VHF; FieldLog view shows last SAT */
         (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
         (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        /* Elapsed time metrics */
         '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
         (entity.tagDate ? '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value">' + escapeHtml(daysRelease) + '</span></div>' : '') +
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
@@ -1349,10 +1394,6 @@ function fixKey(compKey, fix){
   return compKey + '|' + (fix.ts ? fix.ts.getTime() : 'na') + '|' + fix.lat + '|' + fix.lon + '|' + fix.source;
 }
 
-/* FIX: trackSingle — strictly iterates entity.trackHistory which contains ONLY
-   real coordinate rows parsed from the active source sheet.
-   No interpolation, no [0,0] fallbacks. Turf uses [lon,lat]; Leaflet uses [lat,lon].
-   River-snapped path via turf.lineSlice between consecutive real fixes only. */
 function trackSingle(compKey, focusFix = null){
   const entity = displayedEntities.find(e=>e.compKey === compKey);
   if(!entity) return;
@@ -1378,12 +1419,10 @@ function renderMarkers(){
   const trackEntity = trackEntityKey ? displayedEntities.find(item=>item.compKey === trackEntityKey) : null;
 
   if(trackEntity){
-    /* Track mode: ONLY real historical coordinates from entity.trackHistory.
-       Guard: filter strictly to finite lat/lon pairs — no invented points ever. */
+    /* Track mode — only real historical coordinates; strictly filter invalid rows */
     const history = trackEntity.trackHistory.filter(item=>
       Number.isFinite(parseFloat(item.lat)) && Number.isFinite(parseFloat(item.lon))
     );
-    /* Ensure coordinates are actual numbers after the guard */
     history.forEach(item=>{ item.lat = parseFloat(item.lat); item.lon = parseFloat(item.lon); });
     const snappedHistory = history.map(fix=>({fix, snapped:snapFixToRiver(fix)}));
 
@@ -1395,22 +1434,19 @@ function renderMarkers(){
     document.getElementById('kdeBtn').classList.remove('on');
 
     if(snappedHistory.length > 1){
-      /* River-snapped path: Turf takes [lon,lat] — strictly enforced here.
-         Leaflet polyline takes [lat,lon] — converted from segment.geometry.coordinates. */
+      /* River-snapped polyline — Turf [lon,lat]; Leaflet [lat,lon] — never mixed */
       const line = activeRiverLine();
       const riverCoords = [];
       for(let i = 0; i < snappedHistory.length - 1; i += 1){
         try{
-          /* [lon, lat] for Turf */
           const start = turf.nearestPointOnLine(line, turf.point([snappedHistory[i].snapped.lon, snappedHistory[i].snapped.lat]));
           const end   = turf.nearestPointOnLine(line, turf.point([snappedHistory[i+1].snapped.lon, snappedHistory[i+1].snapped.lat]));
           const segment = turf.lineSlice(start, end, line);
-          /* geometry.coordinates is [lon,lat] → flip to [lat,lon] for Leaflet */
+          /* geometry.coordinates → [lon,lat] → flip to [lat,lon] for Leaflet */
           const coords = segment.geometry.coordinates.map(coord=>[coord[1],coord[0]]);
           if(i === 0) riverCoords.push(...coords);
           else riverCoords.push(...coords.slice(1));
         }catch(error){
-          /* Fallback straight segment between these two snapped points (no invented coords) */
           riverCoords.push([snappedHistory[i].snapped.lat,   snappedHistory[i].snapped.lon]);
           if(i === snappedHistory.length - 2)
             riverCoords.push([snappedHistory[i+1].snapped.lat, snappedHistory[i+1].snapped.lon]);
@@ -1422,17 +1458,23 @@ function renderMarkers(){
           weight:3,
           opacity:.9,
           dashArray:'8 12',
-          interactive:false   /* prevents Leaflet adding a focus outline on the path */
+          interactive:false
         }).addTo(trackLayer);
       }
     }
 
     snappedHistory.forEach((item, index)=>{
       const {fix, snapped} = item;
+      /* FIX-2: strict guard — prefer snapped if valid, else use original fix coord.
+         NEVER place a marker at [0,0] or any non-finite coordinate. */
+      const pLat = Number.isFinite(snapped.lat) ? snapped.lat : fix.lat;
+      const pLon = Number.isFinite(snapped.lon) ? snapped.lon : fix.lon;
+      if(!Number.isFinite(pLat) || !Number.isFinite(pLon)) return; /* skip corrupted fix rows */
+
       const latest = index === snappedHistory.length - 1;
       const size = latest ? 14 : 8;
       const color = markerColor(trackEntity);
-      const fixMarker = L.marker([snapped.lat, snapped.lon],{
+      const fixMarker = L.marker([pLat, pLon],{
         icon:L.divIcon({
           className:'',
           html:'<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" style="display:block"><circle cx="' + (size/2) + '" cy="' + (size/2) + '" r="' + (size/2-1.5) + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/></svg>',
@@ -1460,7 +1502,6 @@ function renderMarkers(){
       historyMarkerMap[fixKey(trackEntity.compKey, fix)] = fixMarker;
     });
 
-    /* Only if zero valid history coords, show the latest-fix dot — no invented coords */
     if(snappedHistory.length === 0 && trackEntity.displayFix && Number.isFinite(trackEntity.displayFix.lat)){
       const fix = trackEntity.displayFix;
       const fallback = L.marker([fix.lat,fix.lon],{
@@ -1476,7 +1517,7 @@ function renderMarkers(){
     document.getElementById('trackLabel').textContent = trackEntity.id + ' (' + history.length + ' fixes)';
 
     const points = snappedHistory
-      .map(item=>[item.snapped.lat,item.snapped.lon])
+      .map(item=>[item.snapped.lat, item.snapped.lon])
       .filter(p=>Number.isFinite(p[0]) && Number.isFinite(p[1]));
     if(!points.length && trackEntity.displayFix){
       points.push([trackEntity.displayFix.lat,trackEntity.displayFix.lon]);
@@ -1492,7 +1533,6 @@ function renderMarkers(){
       setTimeout(()=>marker.openPopup(),700);
     }
 
-    /* Critical: return here so no non-tracked markers are ever added */
     return;
   }
 
@@ -1610,8 +1650,8 @@ function renderTable(){
   else displayRows = displayedEntities.map(buildEntityRow);
   document.getElementById('tableBadge').textContent = target ? (displayRows.length + ' fixes | ' + target.id) : (displayRows.length + ' records');
   updateCollarColumn();
-  if(!source){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source to display telemetry records.</td></tr>';
+  if(!source && !displayedEntities.length){
+    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
     return;
   }
   if(!displayRows.length){
@@ -1662,7 +1702,7 @@ function renderTable(){
 
 function updateMapFoot(){
   const source = document.getElementById('sourceFilter').value;
-  if(!source){
+  if(!source && !displayedEntities.length){
     document.getElementById('mapFootText').textContent = 'Select a source to begin.';
     document.getElementById('mapFootCount').textContent = '';
     return;
@@ -1947,7 +1987,6 @@ async function loadAllData(){
     if(geojsonData) assignZones();
     mergeEntities();
     loadUpdates(updateRows);
-    /* Populate all filters from all loaded data — independent of source selection */
     rebuildFilters();
     updateFieldUpdatesVisibility();
     updateCollarColumn();
