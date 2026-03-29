@@ -155,6 +155,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
 
+/* SIDE PANEL IMPROVEMENTS: Exactly matching the clean "Claude" look */
 #fp{position:fixed;top:0;right:-400px;width:400px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 
@@ -171,6 +172,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
 .fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
 
+/* Unified formatting for both latest and previous updates */
 .update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
 .update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
 .update-content strong:first-child{margin-top:0}
@@ -615,9 +617,21 @@ function parseFieldDate(value){
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/* ── FIX: parsePaliDate now also handles ISO (YYYY-MM-DD) and dot-separated
+   (DD.MM.YYYY) formats, which Google Sheets may export for actual date cells. ── */
 function parsePaliDate(value){
   if(!value) return null;
-  const match = String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  const s = String(value).trim();
+
+  // ISO format: YYYY-MM-DD or YYYY/MM/DD
+  const isoMatch = s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
+  if(isoMatch){
+    const date = new Date(+isoMatch[1], +isoMatch[2]-1, +isoMatch[3]);
+    if(!Number.isNaN(date.getTime())) return date;
+  }
+
+  // DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY (with optional time)
+  const match = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if(!match) return null;
   const date = new Date(+match[3], +match[2]-1, +match[1], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
   return Number.isNaN(date.getTime()) ? null : date;
@@ -757,22 +771,21 @@ function buildMasterMaps(rows){
   });
 }
 
-/* ─────────────── IMPROVED GLOBAL LOOKUP ─────────────── */
 function lookupMasterRow(rawId, isHatchling){
-  const id = nid(rawId);
-  const rid = rawTrimId(rawId);
   const fid = flatId(rawId);
-  
-  // Try to find exact match in BOTH maps regardless of isHatchling hint.
-  // This ensures details are found even if signal category mismatches master record.
-  let row = masterHatchMap[id] || masterAdultMap[id];
-  if(row) return row;
-  
-  row = masterHatchMapRaw[rid] || masterAdultMapRaw[rid];
-  if(row) return row;
-  
-  row = masterHatchMapFlat[fid] || masterAdultMapFlat[fid];
-  return row || null;
+  if(isHatchling){
+    return masterHatchMap[rawId]
+      || masterAdultMap[rawId]
+      || masterHatchMapRaw[rawId]
+      || masterAdultMapRaw[rawId]
+      || masterHatchMapFlat[fid]
+      || masterAdultMapFlat[fid]
+      || null;
+  }
+  return masterAdultMap[rawId]
+    || masterAdultMapRaw[rawId]
+    || masterAdultMapFlat[fid]
+    || null;
 }
 
 function ingestATS(rows){
@@ -1127,6 +1140,14 @@ function msSelectAll(key){
 function msClearAll(key){
   document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = false; });
   updateMSBtn(key);
+}
+
+function selectedSet(key){
+  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
+  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
+  const checked = all.filter(item=>item.checked).map(item=>item.value);
+  if(checked.length === 0 || checked.length === all.length) return null;
+  return new Set(checked);
 }
 
 document.addEventListener('click', event=>{
@@ -1601,7 +1622,7 @@ function toggleHeatmap(){
   document.getElementById('kdeBtn').classList.remove('on');
   if(!heatmapOn){
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+    if(!map.hasLayer(markerLayer)) map.addTo(map);
     return;
   }
   renderHeatmap();
@@ -1650,6 +1671,9 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
+/* * IMPROVED: formatUpdateText properly handles headers like "Current Status" 
+ * by turning them into bold block elements, matching the "proper" style.
+ */
 function formatUpdateText(text) {
   if(!text) return '';
   const blocks = [
@@ -1677,8 +1701,8 @@ function loadUpdates(rows){
   const sorted = updatesRows
     .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
     .sort((a,b)=>{
-      const da = parseTagDate(gc(a,'Date','date'));
-      const db = parseTagDate(gc(b,'Date','date'));
+      const da = parsePaliDate(gc(a,'Date','date'));
+      const db = parsePaliDate(gc(b,'Date','date'));
       const ta = da ? da.getTime() : -Infinity;
       const tb = db ? db.getTime() : -Infinity;
       return tb - ta;
@@ -1689,12 +1713,12 @@ function loadUpdates(rows){
     list.innerHTML = '<div class="fu"><div class="update-content">No field updates available.</div></div>';
     return;
   }
-  latestDate.textContent = fmtDateOnly(parseTagDate(gc(sorted[0],'Date','date')));
+  latestDate.textContent = fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
   latestText.innerHTML = formatUpdateText(gc(sorted[0],'Update','update','Notes','Text'));
   sorted.slice(1).forEach(row=>{
     const item = document.createElement('div');
     item.className = 'fu';
-    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parseTagDate(gc(row,'Date','date')))) + '</div><div class="update-content">' + formatUpdateText(gc(row,'Update','update','Notes','Text')) + '</div>';
+    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="update-content">' + formatUpdateText(gc(row,'Update','update','Notes','Text')) + '</div>';
     list.appendChild(item);
   });
 }
