@@ -757,21 +757,22 @@ function buildMasterMaps(rows){
   });
 }
 
+/* ─────────────── IMPROVED GLOBAL LOOKUP ─────────────── */
 function lookupMasterRow(rawId, isHatchling){
+  const id = nid(rawId);
+  const rid = rawTrimId(rawId);
   const fid = flatId(rawId);
-  if(isHatchling){
-    return masterHatchMap[rawId]
-      || masterAdultMap[rawId]
-      || masterHatchMapRaw[rawId]
-      || masterAdultMapRaw[rawId]
-      || masterHatchMapFlat[fid]
-      || masterAdultMapFlat[fid]
-      || null;
-  }
-  return masterAdultMap[rawId]
-    || masterAdultMapRaw[rawId]
-    || masterAdultMapFlat[fid]
-    || null;
+  
+  // Try to find exact match in BOTH maps regardless of isHatchling hint.
+  // This ensures details are found even if signal category mismatches master record.
+  let row = masterHatchMap[id] || masterAdultMap[id];
+  if(row) return row;
+  
+  row = masterHatchMapRaw[rid] || masterAdultMapRaw[rid];
+  if(row) return row;
+  
+  row = masterHatchMapFlat[fid] || masterAdultMapFlat[fid];
+  return row || null;
 }
 
 function ingestATS(rows){
@@ -1190,14 +1191,6 @@ function updateCollarColumn(){
   document.querySelectorAll('.collar-cell').forEach(cell=>{
     cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
   });
-}
-
-function selectedSet(key){
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
-  const checked = all.filter(item=>item.checked).map(item=>item.value);
-  if(checked.length === 0 || checked.length === all.length) return null;
-  return new Set(checked);
 }
 
 function applyFilters(){
