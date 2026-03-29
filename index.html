@@ -155,7 +155,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
 
-/* SIDE PANEL IMPROVEMENTS: Exactly matching the clean "Claude" look */
 #fp{position:fixed;top:0;right:-400px;width:400px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
 
@@ -172,7 +171,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
 .fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
 
-/* Unified formatting for both latest and previous updates */
 .update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
 .update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
 .update-content strong:first-child{margin-top:0}
@@ -617,21 +615,9 @@ function parseFieldDate(value){
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/* ── FIX: parsePaliDate now also handles ISO (YYYY-MM-DD) and dot-separated
-   (DD.MM.YYYY) formats, which Google Sheets may export for actual date cells. ── */
 function parsePaliDate(value){
   if(!value) return null;
-  const s = String(value).trim();
-
-  // ISO format: YYYY-MM-DD or YYYY/MM/DD
-  const isoMatch = s.match(/^(\d{4})[\/\-](\d{2})[\/\-](\d{2})/);
-  if(isoMatch){
-    const date = new Date(+isoMatch[1], +isoMatch[2]-1, +isoMatch[3]);
-    if(!Number.isNaN(date.getTime())) return date;
-  }
-
-  // DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY (with optional time)
-  const match = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  const match = String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if(!match) return null;
   const date = new Date(+match[3], +match[2]-1, +match[1], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
   return Number.isNaN(date.getTime()) ? null : date;
@@ -652,6 +638,8 @@ function parseTagDate(value){
     jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
     jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
   };
+
+  // D Month(word) YYYY  e.g. "15 Mar 2025" or "15-March-2025"
   const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
   if(dmmyMatch){
     const d = parseInt(dmmyMatch[1], 10);
@@ -665,6 +653,32 @@ function parseTagDate(value){
     }
   }
 
+  // Month(word) D YYYY  e.g. "Mar 15 2025" or "March 15, 2025"
+  const mddyMatch = s.match(/^([A-Za-z]{3,})[\s\-\/](\d{1,2})[,\s\-\/]+(\d{4})$/i);
+  if(mddyMatch){
+    const mStr = mddyMatch[1].toLowerCase().slice(0, 3);
+    const mIdx = MONTH_NAMES[mStr];
+    const d = parseInt(mddyMatch[2], 10);
+    const y = parseInt(mddyMatch[3], 10);
+    if(mIdx !== undefined && d >= 1 && d <= 31){
+      const dt = new Date(y, mIdx, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  // Month(word) YYYY only  e.g. "Mar 2025" or "March 2025"
+  const myMatch = s.match(/^([A-Za-z]{3,})[\s\-\/]+(\d{4})$/i);
+  if(myMatch){
+    const mStr = myMatch[1].toLowerCase().slice(0, 3);
+    const mIdx = MONTH_NAMES[mStr];
+    const y = parseInt(myMatch[2], 10);
+    if(mIdx !== undefined){
+      const dt = new Date(y, mIdx, 1);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  // D/M/YYYY  e.g. "15/03/2025"
   const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
   if(dmyMatch){
     const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
@@ -674,6 +688,7 @@ function parseTagDate(value){
     }
   }
 
+  // M/D/YYYY  e.g. "03/15/2025"
   const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
   if(mdyMatch){
     const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
@@ -683,6 +698,7 @@ function parseTagDate(value){
     }
   }
 
+  // ISO / any other format that JS Date can handle
   const iso = new Date(s);
   if(!Number.isNaN(iso.getTime())) return iso;
 
@@ -771,20 +787,28 @@ function buildMasterMaps(rows){
   });
 }
 
+/* ─── FIX 1: Only use the flat-ID fallback when the rawId itself is "messy"
+   (contains non-alphanumeric chars). A clean numeric ID like "24" must never
+   be matched to a different animal whose special-char ID (e.g. "2-4") happens
+   to produce the same flat representation. ─── */
 function lookupMasterRow(rawId, isHatchling){
   const fid = flatId(rawId);
+  // Only fall back to the flat map if the rawId itself has characters that
+  // were stripped (i.e. rawId !== fid), preventing false-positive collisions
+  // for clean IDs like "24" matching "2-4", "2.4", etc.
+  const useFlatFallback = fid !== rawId;
   if(isHatchling){
     return masterHatchMap[rawId]
       || masterAdultMap[rawId]
       || masterHatchMapRaw[rawId]
       || masterAdultMapRaw[rawId]
-      || masterHatchMapFlat[fid]
-      || masterAdultMapFlat[fid]
+      || (useFlatFallback ? masterHatchMapFlat[fid] : null)
+      || (useFlatFallback ? masterAdultMapFlat[fid] : null)
       || null;
   }
   return masterAdultMap[rawId]
     || masterAdultMapRaw[rawId]
-    || masterAdultMapFlat[fid]
+    || (useFlatFallback ? masterAdultMapFlat[fid] : null)
     || null;
 }
 
@@ -1142,14 +1166,6 @@ function msClearAll(key){
   updateMSBtn(key);
 }
 
-function selectedSet(key){
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
-  const checked = all.filter(item=>item.checked).map(item=>item.value);
-  if(checked.length === 0 || checked.length === all.length) return null;
-  return new Set(checked);
-}
-
 document.addEventListener('click', event=>{
   if(!event.target.closest('.ms-wrap')){
     document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
@@ -1212,6 +1228,14 @@ function updateCollarColumn(){
   document.querySelectorAll('.collar-cell').forEach(cell=>{
     cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
   });
+}
+
+function selectedSet(key){
+  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
+  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
+  const checked = all.filter(item=>item.checked).map(item=>item.value);
+  if(checked.length === 0 || checked.length === all.length) return null;
+  return new Set(checked);
 }
 
 function applyFilters(){
@@ -1622,7 +1646,7 @@ function toggleHeatmap(){
   document.getElementById('kdeBtn').classList.remove('on');
   if(!heatmapOn){
     if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(!map.hasLayer(markerLayer)) map.addTo(map);
+    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
     return;
   }
   renderHeatmap();
@@ -1671,9 +1695,6 @@ function exportCSV(){
   URL.revokeObjectURL(link.href);
 }
 
-/* * IMPROVED: formatUpdateText properly handles headers like "Current Status" 
- * by turning them into bold block elements, matching the "proper" style.
- */
 function formatUpdateText(text) {
   if(!text) return '';
   const blocks = [
@@ -1692,33 +1713,75 @@ function formatUpdateText(text) {
   return html;
 }
 
+/* ─── FIX 2: Broaden the date column search and improve date parsing so the
+   latest-update date is shown correctly regardless of column naming in the
+   updates sheet (e.g. "Date", "Update Date", "Timestamp", "Posted", etc.)
+   and regardless of common date string formats. ─── */
+function getUpdateDate(row){
+  // Try every plausible column name the updates sheet might use
+  const raw = gc(row,
+    'Date','date',
+    'Update Date','UpdateDate','update date','updatedate',
+    'Timestamp','timestamp',
+    'Posted','posted',
+    'When','when',
+    'Field Date','FieldDate','field date',
+    'Log Date','LogDate','log date'
+  );
+  return parseTagDate(raw);
+}
+
 function loadUpdates(rows){
   updatesRows = rows || [];
   const latestDate = document.getElementById('fuDate');
   const latestText = document.getElementById('fuText');
   const list = document.getElementById('fuList');
   list.innerHTML = '';
+
   const sorted = updatesRows
-    .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
-    .sort((a,b)=>{
-      const da = parsePaliDate(gc(a,'Date','date'));
-      const db = parsePaliDate(gc(b,'Date','date'));
+    .filter(row => {
+      const hasDate = !!getUpdateDate(row);
+      const hasText = !!(gc(row,'Update','update','Notes','Text','notes','text','Content','content'));
+      return hasDate || hasText;
+    })
+    .sort((a, b) => {
+      const da = getUpdateDate(a);
+      const db = getUpdateDate(b);
       const ta = da ? da.getTime() : -Infinity;
       const tb = db ? db.getTime() : -Infinity;
       return tb - ta;
     });
+
   if(!sorted.length){
     latestDate.textContent = 'No updates';
     latestText.innerHTML = '';
     list.innerHTML = '<div class="fu"><div class="update-content">No field updates available.</div></div>';
     return;
   }
-  latestDate.textContent = fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
-  latestText.innerHTML = formatUpdateText(gc(sorted[0],'Update','update','Notes','Text'));
-  sorted.slice(1).forEach(row=>{
+
+  const latestRowDate = getUpdateDate(sorted[0]);
+  // Show the date if we parsed one; fall back to the raw cell value so
+  // something is always visible even if the format is unexpected.
+  latestDate.textContent = latestRowDate
+    ? fmtDateOnly(latestRowDate)
+    : (gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date') || 'Unknown date');
+
+  latestText.innerHTML = formatUpdateText(
+    gc(sorted[0],'Update','update','Notes','Text','notes','text','Content','content')
+  );
+
+  sorted.slice(1).forEach(row => {
+    const rowDate = getUpdateDate(row);
+    const dateLabel = rowDate
+      ? fmtDateOnly(rowDate)
+      : (gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date') || 'Unknown date');
     const item = document.createElement('div');
     item.className = 'fu';
-    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="update-content">' + formatUpdateText(gc(row,'Update','update','Notes','Text')) + '</div>';
+    item.innerHTML =
+      '<div class="fu-date">' + escapeHtml(dateLabel) + '</div>' +
+      '<div class="update-content">' + formatUpdateText(
+        gc(row,'Update','update','Notes','Text','notes','text','Content','content')
+      ) + '</div>';
     list.appendChild(item);
   });
 }
