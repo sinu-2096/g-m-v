@@ -787,15 +787,8 @@ function buildMasterMaps(rows){
   });
 }
 
-/* ─── FIX 1: Only use the flat-ID fallback when the rawId itself is "messy"
-   (contains non-alphanumeric chars). A clean numeric ID like "24" must never
-   be matched to a different animal whose special-char ID (e.g. "2-4") happens
-   to produce the same flat representation. ─── */
 function lookupMasterRow(rawId, isHatchling){
   const fid = flatId(rawId);
-  // Only fall back to the flat map if the rawId itself has characters that
-  // were stripped (i.e. rawId !== fid), preventing false-positive collisions
-  // for clean IDs like "24" matching "2-4", "2.4", etc.
   const useFlatFallback = fid !== rawId;
   if(isHatchling){
     return masterHatchMap[rawId]
@@ -1268,7 +1261,7 @@ function applyFilters(){
       });
     });
     displayedEntities = allEntities.filter(entity=>{
-      if(idFilter  && !idFilter.has(entity.id))               return false;
+      if(idFilter  && !idFilter.has(entity.id))                return false;
       if(catFilter && !catFilter.has(entity.category || '-')) return false;
       if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
       return true;
@@ -1363,6 +1356,8 @@ function popupHtml(entity){
   
   const rdRaw = entity.tagDate ? daysSince(entity.tagDate) : null;
   const daysRelease = rdRaw !== null ? rdRaw + 'd' : 'N/A';
+  
+  const showCollar = entity.collar && !['-', 'na', 'n/a', 'null', ''].includes(String(entity.collar).trim().toLowerCase());
 
   return '' +
     '<div>' +
@@ -1383,6 +1378,7 @@ function popupHtml(entity){
         '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
+        (showCollar ? '<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
         '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
         '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
         (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
@@ -1713,12 +1709,7 @@ function formatUpdateText(text) {
   return html;
 }
 
-/* ─── FIX 2: Broaden the date column search and improve date parsing so the
-   latest-update date is shown correctly regardless of column naming in the
-   updates sheet (e.g. "Date", "Update Date", "Timestamp", "Posted", etc.)
-   and regardless of common date string formats. ─── */
 function getUpdateDate(row){
-  // Try every plausible column name the updates sheet might use
   const raw = gc(row,
     'Date','date',
     'Update Date','UpdateDate','update date','updatedate',
@@ -1760,8 +1751,6 @@ function loadUpdates(rows){
   }
 
   const latestRowDate = getUpdateDate(sorted[0]);
-  // Show the date if we parsed one; fall back to the raw cell value so
-  // something is always visible even if the format is unexpected.
   latestDate.textContent = latestRowDate
     ? fmtDateOnly(latestRowDate)
     : (gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date') || 'Unknown date');
