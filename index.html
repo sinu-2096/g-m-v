@@ -8,6 +8,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<!-- ═══════════════════════════════════════════════════════════
+     BASE STYLES (desktop-first, unchanged from original)
+     ═══════════════════════════════════════════════════════════ -->
 <style>
 :root{
   --forest:#173f31;
@@ -38,7 +42,10 @@ button{cursor:pointer}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:#bfd0c2;border-radius:999px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
+/* ─── Loading Screen ─── */
 #loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
 #loading.hide{opacity:0;visibility:hidden;pointer-events:none}
 .loading-bg{position:absolute;inset:0;background:url('background.gif') center/cover no-repeat}
@@ -55,10 +62,12 @@ button{cursor:pointer}
 .loading-item.ok{color:#b7f0c6;background:rgba(31,94,54,.34)}
 .loading-item.err{color:#fecaca;background:rgba(127,29,29,.26)}
 
+/* ─── Toast ─── */
 #toast{position:fixed;left:50%;bottom:calc(var(--btm) + 14px);transform:translateX(-50%) translateY(10px);z-index:9500;padding:8px 16px;border-radius:999px;border:1px solid rgba(153,27,27,.25);background:rgba(255,244,244,.96);color:#991b1b;font:.68rem var(--mono);letter-spacing:.05em;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
+/* ─── Header ─── */
 #hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
@@ -70,6 +79,7 @@ button{cursor:pointer}
 .hdr-title{font:700 .94rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
+/* Status blocks */
 #statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0;width:100%}
 .sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease}
 .sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
@@ -77,6 +87,7 @@ button{cursor:pointer}
 .sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
 
+/* Header actions */
 .hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
 .syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
@@ -85,6 +96,12 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
+/* Mobile-only header elements (hidden on desktop) */
+.hdr-mobile-row{display:none}
+#mobileMenuBtn{display:none}
+#mobileStatsBtn{display:none}
+
+/* ─── Filter Bar (desktop) ─── */
 #fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
 #fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
@@ -98,6 +115,7 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
+/* ─── Multi-select dropdowns ─── */
 .ms-wrap{position:relative;flex-shrink:0}
 .ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
@@ -114,6 +132,7 @@ button{cursor:pointer}
 .ms-item:hover{background:#f0f7f1}
 .ms-item input{accent-color:var(--forest-3)}
 
+/* ─── Map ─── */
 #map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
 #map{width:100%;height:100%}
 .leaflet-control-attribution{display:none}
@@ -139,6 +158,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #mapFootCount{margin-left:auto;font:600 .62rem var(--mono);color:var(--muted-2)}
 .zone-label{border:1px solid var(--line-2)!important;border-radius:999px!important;background:rgba(255,255,255,.94)!important;color:var(--forest)!important;font:700 .58rem var(--mono)!important;padding:3px 8px!important}
 
+/* ─── Popups ─── */
 .pop-top{padding:14px 14px 12px 14px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);border-bottom:2px solid rgba(126,207,155,.45);display:flex;align-items:center;gap:12px}
 .pop-id-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.72);color:#fff;font:700 .8rem var(--mono)}
 .pop-id{font:700 .9rem var(--mono);color:#fff}
@@ -152,40 +172,34 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 
+/* ─── Field Updates Panel ─── */
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-
 #fp{position:fixed;top:0;right:-400px;width:400px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
-
 .fp-hdr{padding:16px 20px;background:#2d5a45;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .fp-hdr h3{font:700 .92rem var(--mono);display:flex;align-items:center;gap:10px}
 .fp-hdr h3::before{content:'📋';font-size:1.1rem}
-
 .fp-cl{border:none;background:none;color:rgba(255,255,255,.7);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
-
 .fp-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;background:#fff}
-
 .fp-latest{padding:20px;background:#f8fcf9;border-bottom:1px solid var(--line);flex-shrink:0}
 .fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
 .fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
-
 .update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
 .update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
 .update-content strong:first-child{margin-top:0}
-
 .fp-scroll{padding:20px;flex:1}
 .fp-scroll h4{font:700 .64rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-
 .fu{padding:20px 0;border-bottom:1px solid var(--line)}
 .fu:last-child{border-bottom:none;padding-bottom:120px}
 .fu-date{font:700 .75rem var(--mono);color:var(--forest);margin-bottom:8px}
 
+/* ─── Bottom Panel ─── */
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
 #resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
-#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:122px;flex-shrink:0}
+#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
 .btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
 .btm-actions{display:flex;align-items:center;gap:6px}
@@ -200,12 +214,156 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .dtbl tbody tr.sel{background:#dff1e5}
 .no-data td{padding:20px 12px;text-align:center;color:var(--muted-2);font:600 .7rem var(--mono)}
 
-@media (max-width:1360px){
+/* Desktop-only adjustments */
+@media(max-width:1360px){
   .hdr-title{font-size:.84rem}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE FILTER DRAWER (bottom-sheet pattern)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Drawer backdrop */
+#drawerBg{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:10030;
+  background:rgba(12,24,18,.52);
+  backdrop-filter:blur(2px);
+  animation:fadeIn .2s ease;
+}
+#drawerBg.open{display:block}
+
+/* Mobile filter drawer */
+#mobileDrawer{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:10040;
+  background:#fff;
+  border-radius:20px 20px 0 0;
+  border-top:2px solid var(--lime);
+  box-shadow:0 -18px 48px rgba(12,24,18,.22);
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.32,1,.46,1);
+  will-change:transform;
+}
+#mobileDrawer.open{transform:translateY(0)}
+
+.drawer-handle{
+  width:44px;height:5px;
+  border-radius:999px;
+  background:#c4d4c8;
+  margin:12px auto 4px;
+  flex-shrink:0;
+}
+.drawer-hdr{
+  padding:4px 16px 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--line);
+  flex-shrink:0;
+}
+.drawer-title{
+  font:700 .78rem var(--mono);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--forest);
+}
+.drawer-close{
+  width:32px;height:32px;
+  border-radius:50%;
+  border:1px solid var(--line-2);
+  background:var(--panel-2);
+  color:var(--muted);
+  font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.drawer-body{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  /* extra bottom padding so last item clears iOS home bar */
+  padding-bottom:calc(env(safe-area-inset-bottom) + 16px);
+}
+.drawer-row{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.drawer-label{
+  font:700 .56rem var(--mono);
+  letter-spacing:.12em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.drawer-footer{
+  display:flex;
+  gap:10px;
+  padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);
+  border-top:1px solid var(--line);
+  background:#fff;
+  flex-shrink:0;
+}
+.drawer-footer .fbtn{
+  flex:1;
+  height:48px;
+  border-radius:12px;
+  justify-content:center;
+  font-size:.72rem;
+}
+
+/* Mobile-friendly multi-select inside drawer */
+#mobileDrawer .ms-btn{
+  width:100%;
+  min-width:0;
+  height:44px;
+  border-radius:12px;
+  font-size:.72rem;
+}
+#mobileDrawer .fsel{
+  width:100%;
+  min-width:0;
+  height:44px;
+  border-radius:12px;
+  font-size:.72rem;
+}
+#mobileDrawer .ms-drop{
+  position:static;
+  max-height:220px;
+  border-radius:12px;
+  margin-top:4px;
+  box-shadow:var(--shadow);
+  display:none;
+}
+#mobileDrawer .ms-drop.open{display:flex}
+#mobileDrawer .ms-item{padding:10px 12px;min-height:44px}
+#mobileDrawer .ms-hbtn{height:36px;padding:0 12px}
+
+/* Overlay toggles for heatmap/kde in drawer */
+.drawer-toggles{
+  display:flex;
+  gap:8px;
+}
+.drawer-toggles .fbtn{
+  flex:1;
+  height:44px;
+  justify-content:center;
+  border-radius:12px;
 }
 </style>
 </head>
+
 <body>
+
+<!-- ─── Loading Screen ─── -->
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
@@ -227,8 +385,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
 </div>
+
+<!-- ─── Toast ─── -->
 <div id="toast"></div>
 
+<!-- ─── Header ─── -->
 <header id="hdr">
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
@@ -243,12 +404,15 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="hdr-title">Gharial Ecology Project - Unified Telemetry Dashboard</div>
     <div class="hdr-sub">Desktop telemetry monitor | ATS + VHF + hatchling routing</div>
   </div>
+
+  <!-- Desktop-only status blocks (row 2) -->
   <div id="statusBlocks">
     <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock1" type="button" onclick="toggleStatusBlock(1)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock2" type="button" onclick="toggleStatusBlock(2)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock3" type="button" onclick="toggleStatusBlock(3)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
   </div>
+
   <div class="syncbox">
     <strong>Last Sync</strong>
     <span id="syncTime">-</span>
@@ -257,9 +421,12 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">R</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
     <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()" style="display:none">Field Updates</button>
+    <!-- Mobile-only hamburger (shown via media query) -->
+    <button class="hbtn" id="mobileMenuBtn" type="button" onclick="openMobileDrawer()" aria-label="Open filters" style="display:none">☰ Filters</button>
   </div>
 </header>
 
+<!-- ─── Desktop Filter Bar ─── -->
 <div id="fbar">
   <div id="fbar-inner">
     <div class="fg">
@@ -275,11 +442,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Radio ID</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-rid">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">None</button>
             <span class="ms-count" id="msc-rid"></span>
           </div>
           <div class="ms-items" id="msi-rid"></div>
@@ -290,11 +457,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Category</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-cat">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">None</button>
             <span class="ms-count" id="msc-cat"></span>
           </div>
           <div class="ms-items" id="msi-cat"></div>
@@ -305,11 +472,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Zone</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-zone">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">None</button>
             <span class="ms-count" id="msc-zone"></span>
           </div>
           <div class="ms-items" id="msi-zone"></div>
@@ -320,11 +487,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Status</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-status">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">None</button>
             <span class="ms-count" id="msc-status"></span>
           </div>
           <div class="ms-items" id="msi-status"></div>
@@ -342,6 +509,130 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
+<!-- ─── Mobile Filter Drawer ─── -->
+<div id="drawerBg" onclick="closeMobileDrawer()"></div>
+<div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
+  <div class="drawer-handle"></div>
+  <div class="drawer-hdr">
+    <span class="drawer-title">🔍 Filters &amp; Tools</span>
+    <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- Source -->
+    <div class="drawer-row">
+      <span class="drawer-label">Data Source</span>
+      <select class="fsel" id="mobileSourceFilter" onchange="onMobileSourceChange()">
+        <option value="">Select Source</option>
+        <option value="ATS">ATS Satellite</option>
+        <option value="FieldLog">Field Log (VHF)</option>
+        <option value="PaliFT">Pali FT (Hatchlings)</option>
+      </select>
+    </div>
+
+    <!-- Radio ID -->
+    <div class="drawer-row">
+      <span class="drawer-label">Radio ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-rid" type="button" onclick="toggleMobMS('rid',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-rid">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('rid')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('rid')">None</button>
+            <span class="ms-count" id="mob-msc-rid"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-rid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="drawer-row">
+      <span class="drawer-label">Category</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-cat" type="button" onclick="toggleMobMS('cat',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-cat">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('cat')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('cat')">None</button>
+            <span class="ms-count" id="mob-msc-cat"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-cat"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Zone -->
+    <div class="drawer-row">
+      <span class="drawer-label">Zone</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-zone" type="button" onclick="toggleMobMS('zone',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-zone">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('zone')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('zone')">None</button>
+            <span class="ms-count" id="mob-msc-zone"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-zone"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="drawer-row">
+      <span class="drawer-label">Status</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-status" type="button" onclick="toggleMobMS('status',event)">
+          <span class="ms-lbl">Not applicable</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-status">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('status')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('status')">None</button>
+            <span class="ms-count" id="mob-msc-status"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overlays -->
+    <div class="drawer-row">
+      <span class="drawer-label">Map Overlays</span>
+      <div class="drawer-toggles">
+        <button class="fbtn" id="mob-heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
+        <button class="fbtn" id="mob-kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+      </div>
+    </div>
+
+    <!-- Export -->
+    <div class="drawer-row">
+      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px" type="button" onclick="exportCSV();closeMobileDrawer()">
+        ↓ Export CSV
+      </button>
+    </div>
+
+    <!-- Field Updates (shown when PaliFT source active) -->
+    <div class="drawer-row" id="mob-fieldUpdatesRow" style="display:none">
+      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px;background:#eef8f1;color:var(--forest-2);border-color:#8ab99a" type="button" onclick="toggleFieldPanel();closeMobileDrawer()">
+        📋 Field Updates
+      </button>
+    </div>
+
+  </div>
+  <div class="drawer-footer">
+    <button class="fbtn clear" type="button" onclick="mobileClearFilters()">Clear All</button>
+    <button class="fbtn apply" type="button" onclick="mobileApplyFilters()">Apply Filters</button>
+  </div>
+</div>
+
+<!-- ─── Map Container ─── -->
 <div id="map-wrap">
   <div id="map"></div>
   <div class="map-fab">
@@ -355,11 +646,12 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
+<!-- ─── Field Updates Panel ─── -->
 <div id="fpBg" onclick="closeFieldPanel()"></div>
 <aside id="fp">
   <div class="fp-hdr">
     <h3>Field Updates</h3>
-    <button class="fp-cl" type="button" onclick="closeFieldPanel()">X</button>
+    <button class="fp-cl" type="button" onclick="closeFieldPanel()">✕</button>
   </div>
   <div class="fp-body">
     <div class="fp-latest">
@@ -374,6 +666,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </aside>
 
+<!-- ─── Bottom Panel ─── -->
 <div id="btm">
   <div id="resizeBar"></div>
   <div id="btmHdr">
@@ -409,13 +702,172 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════════════════
+     RESPONSIVE STYLES
+     ═══════════════════════════════════════════════════════════ -->
+<style>
+/* ── Tablet tweaks (768–1024px) ── */
+@media(max-width:1024px){
+  :root{--hdr:100px}
+  #statusBlocks{grid-template-columns:repeat(2,1fr)}
+  .hdr-sub{display:none}
+  .hdr-title{font-size:.8rem}
+  .syncbox{display:none}
+}
+
+/* ── Mobile (≤767px) — full responsive rewrite ── */
+@media(max-width:767px){
+  /* ── CSS variables ── */
+  :root{
+    --hdr:60px;
+    --fbar:0px;
+    --btm:52px;   /* collapsed by default on mobile */
+  }
+
+  /* ── Header: single-row compact ── */
+  #hdr{
+    height:var(--hdr);
+    grid-template-columns:auto auto 1fr auto;
+    grid-template-rows:1fr;
+    row-gap:0;
+    column-gap:8px;
+    padding:8px 12px;
+    align-items:center;
+  }
+  .hdr-logos{gap:6px}
+  .hdr-logos img{height:32px;max-width:72px}
+  .hdr-divider{height:24px}
+  .hdr-title{font-size:.72rem;white-space:normal;line-height:1.2}
+  .hdr-sub{display:none}
+  .hdr-brand{grid-row:1;grid-column:3}
+
+  /* hide desktop-only header elements */
+  #statusBlocks{display:none}
+  .syncbox{display:none}
+
+  /* header actions: grid-row 1, last column */
+  .hdr-actions{
+    grid-row:1;
+    grid-column:4;
+    gap:6px;
+  }
+  /* hide desktop filter toggle; show hamburger */
+  #filterToggleBtn{display:none}
+  #fieldUpdatesBtn{display:none}
+  #mobileMenuBtn{display:inline-flex !important}
+
+  /* refresh button: icon-only on mobile */
+  #refreshBtn{min-width:0;padding:0 10px}
+
+  /* ensure all header buttons meet 44px touch target */
+  .hbtn{height:44px;min-width:44px}
+
+  /* ── Filter bar: hidden on mobile (drawer instead) ── */
+  #fbar{display:none !important}
+
+  /* ── Map: fills space between header and bottom bar ── */
+  #map-wrap{
+    top:var(--hdr);
+    bottom:var(--btm);
+    left:0;right:0;
+  }
+
+  /* map foot: compact */
+  #mapFoot{padding:4px 10px}
+  #mapFootText{font-size:.58rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* map FAB: slightly larger for touch */
+  .fab{width:40px;height:40px}
+
+  /* legend: smaller on mobile, position left */
+  #legend{
+    right:auto;
+    left:8px;
+    bottom:8px;
+    min-width:160px;
+    padding:10px 12px;
+  }
+  .legend-title{font-size:.52rem}
+  .legend-row{font-size:.58rem}
+
+  /* popup: full width on mobile */
+  .leaflet-popup-content-wrapper{
+    max-width:calc(100vw - 32px);
+  }
+  .pop-body{padding:10px 12px}
+  .pop-row{flex-direction:column;gap:2px}
+  .pop-value{text-align:left}
+
+  /* ── Bottom panel: peek mode by default, swipe up to expand ── */
+  #btm{
+    height:var(--btm);
+    transition:height .25s ease;
+  }
+  #resizeBar{display:none}   /* touch drag not great on mobile; use toggle instead */
+  #btmHdr{
+    height:52px;
+    padding:0 12px;
+  }
+  .btm-title{font-size:.66rem}
+  #btmScroll{
+    /* horizontal scroll on mobile to preserve all 14 columns */
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  .dtbl{
+    /* minimum table width so columns don't crush */
+    min-width:820px;
+  }
+  .dtbl th,.dtbl td{
+    padding:7px 8px;
+    font-size:.6rem;
+  }
+  /* touch-friendly table rows */
+  .dtbl tbody tr{min-height:44px}
+
+  /* bottom panel expanded state (JS adds class) */
+  #btm.mobile-expanded{
+    height:55vh;
+  }
+  /* expand button label adapts in JS */
+
+  /* bottom panel actions */
+  .btm-actions{gap:4px}
+  .bc{height:36px;padding:0 10px;font-size:.6rem}
+
+  /* ── Toast: above bottom bar ── */
+  #toast{bottom:calc(var(--btm) + 8px)}
+
+  /* ── Field Updates panel: full-screen on mobile ── */
+  #fp{width:100%;right:-100%}
+  #fp.open{right:0}
+
+  /* ── Loading card: compact on mobile ── */
+  .loading-logos img{height:56px}
+  .loading-logos .loading-divider{height:44px}
+  .loading-list{grid-template-columns:1fr}
+  .loading-card{padding:24px 18px;gap:12px}
+}
+
+/* ── Very small screens (≤380px) ── */
+@media(max-width:380px){
+  .hdr-logos img{height:26px;max-width:56px}
+  .hdr-title{font-size:.64rem}
+  #mobileMenuBtn .menu-text{display:none}  /* icon only */
+}
+</style>
+
+<!-- ─── Leaflet + dependencies ─── -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
 <script>
-/* ─────────────── STRICT DATA SOURCE URLS ─────────────── */
+/* ═══════════════════════════════════════════════
+   CONSTANTS & STATE
+   ═══════════════════════════════════════════════ */
 const URLS = {
   master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
@@ -448,14 +900,7 @@ const STATUS_META = {
 };
 
 const VIEW_META = {
-  '':{
-    blocks:EMPTY_STATUS,
-    legend:[],
-    statusKeys:[],
-    showFieldUpdates:false,
-    hideCollar:false,
-    statusEnabled:false
-  },
+  '':{blocks:EMPTY_STATUS,legend:[],statusKeys:[],showFieldUpdates:false,hideCollar:false,statusEnabled:false},
   ATS:{
     blocks:[
       {key:'active',label:'Active <= 7d'},
@@ -481,9 +926,7 @@ const VIEW_META = {
       {key:null,label:'Not applicable'},
       {key:null,label:'Not applicable'}
     ],
-    legend:[
-      {label:'Merged adult latest positions',color:'#2f7a5a'}
-    ],
+    legend:[{label:'Merged adult latest positions',color:'#2f7a5a'}],
     statusKeys:[],
     showFieldUpdates:false,
     hideCollar:true,
@@ -536,569 +979,184 @@ let zonePolygons = [];
 let geojsonData = null;
 let entityMarkerMap = {};
 
-function initMap() {
-  map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
+/* ═══════════════════════════════════════════════
+   MOBILE DETECTION
+   ═══════════════════════════════════════════════ */
+function isMobile(){
+  return window.innerWidth <= 767;
+}
+
+/* ═══════════════════════════════════════════════
+   MAP INIT
+   ═══════════════════════════════════════════════ */
+function initMap(){
+  map = L.map('map',{
+    zoomControl:false,
+    attributionControl:false,
+    tap:true,           // enable Leaflet mobile tap
+    tapTolerance:15,    // generous tap tolerance for touch
+    bounceAtZoomLimits:false
+  }).setView(MAP_CENTER,MAP_ZOOM);
+
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
   oms.addListener('click', marker => marker.openPopup());
-  map.on('click', () => {
-    document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur());
+  map.on('click',()=>{
+    document.querySelectorAll('.leaflet-interactive').forEach(el=>el.blur());
   });
 }
 
-function fetchCSV(url){
-  return new Promise((resolve,reject)=>{
-    Papa.parse(url + '&_t=' + Date.now(),{
-      download:true,
-      header:true,
-      skipEmptyLines:true,
-      complete:results=>resolve(results.data || []),
-      error:reject
-    });
-  });
+/* ═══════════════════════════════════════════════
+   MOBILE DRAWER
+   ═══════════════════════════════════════════════ */
+let drawerOpen = false;
+
+function openMobileDrawer(){
+  drawerOpen = true;
+  document.getElementById('mobileDrawer').classList.add('open');
+  document.getElementById('drawerBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // sync mobile filter state from desktop
+  syncMobileFiltersFromDesktop();
 }
 
-function fetchJSON(url){
-  return fetch(url + '?_t=' + Date.now()).then(r=>r.json());
+function closeMobileDrawer(){
+  drawerOpen = false;
+  document.getElementById('mobileDrawer').classList.remove('open');
+  document.getElementById('drawerBg').classList.remove('open');
+  document.body.style.overflow = '';
+  setTimeout(()=>map.invalidateSize(),320);
 }
 
-function setLoadingState(id, ok){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.classList.remove('ok','err');
-  el.classList.add(ok ? 'ok' : 'err');
+/* Sync the mobile source dropdown to match desktop (and vice-versa) */
+function syncMobileFiltersFromDesktop(){
+  const desktopVal = document.getElementById('sourceFilter').value;
+  const mobSel = document.getElementById('mobileSourceFilter');
+  if(mobSel.value !== desktopVal) mobSel.value = desktopVal;
 }
 
-function loadingCopy(text){
-  document.getElementById('loadingCopy').textContent = text;
-}
-
-function gc(row, ...keys){
-  const rowKeys = Object.keys(row || {});
-  for(const key of keys){
-    const normal = String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-    for(const rowKey of rowKeys){
-      const probe = String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-      if(probe === normal){
-        const value = String(row[rowKey] || '').trim();
-        if(value && !['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
-      }
-    }
-  }
-  return '';
-}
-
-function nid(raw){
-  return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
-}
-
-function rawTrimId(raw){
-  return String(raw || '').trim().toUpperCase();
-}
-
-function flatId(raw){
-  return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
-}
-
-function isHatchCategory(row){
-  const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
-  return /hatch|hatchling|fth|pali\s*ft/i.test(category);
-}
-
-function parseFieldDate(value){
-  if(!value) return null;
-  const match = String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date = new Date(+match[3], +match[1]-1, +match[2], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parsePaliDate(value){
-  if(!value) return null;
-  const match = String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date = new Date(+match[3], +match[2]-1, +match[1], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parseATSDate(value){
-  if(!value) return null;
-  const date = new Date(String(value).trim());
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parseTagDate(value){
-  if(!value) return null;
-  const s = String(value).trim();
-  if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
-
-  const MONTH_NAMES = {
-    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
-    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
-  };
-
-  // D Month(word) YYYY  e.g. "15 Mar 2025" or "15-March-2025"
-  const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
-  if(dmmyMatch){
-    const d = parseInt(dmmyMatch[1], 10);
-    const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
-    const mIdx = MONTH_NAMES[mStr];
-    let y = parseInt(dmmyMatch[3], 10);
-    if(y < 100) y += (y < 50 ? 2000 : 1900);
-    if(d >= 1 && d <= 31 && mIdx !== undefined){
-      const dt = new Date(y, mIdx, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  // Month(word) D YYYY  e.g. "Mar 15 2025" or "March 15, 2025"
-  const mddyMatch = s.match(/^([A-Za-z]{3,})[\s\-\/](\d{1,2})[,\s\-\/]+(\d{4})$/i);
-  if(mddyMatch){
-    const mStr = mddyMatch[1].toLowerCase().slice(0, 3);
-    const mIdx = MONTH_NAMES[mStr];
-    const d = parseInt(mddyMatch[2], 10);
-    const y = parseInt(mddyMatch[3], 10);
-    if(mIdx !== undefined && d >= 1 && d <= 31){
-      const dt = new Date(y, mIdx, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  // Month(word) YYYY only  e.g. "Mar 2025" or "March 2025"
-  const myMatch = s.match(/^([A-Za-z]{3,})[\s\-\/]+(\d{4})$/i);
-  if(myMatch){
-    const mStr = myMatch[1].toLowerCase().slice(0, 3);
-    const mIdx = MONTH_NAMES[mStr];
-    const y = parseInt(myMatch[2], 10);
-    if(mIdx !== undefined){
-      const dt = new Date(y, mIdx, 1);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  // D/M/YYYY  e.g. "15/03/2025"
-  const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
-  if(dmyMatch){
-    const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
-    if(d >= 1 && d <= 31 && m >= 1 && m <= 12){
-      const dt = new Date(y, m - 1, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  // M/D/YYYY  e.g. "03/15/2025"
-  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(mdyMatch){
-    const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
-    if(m >= 1 && m <= 12 && d >= 1 && d <= 31){
-      const dt = new Date(y, m - 1, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  // ISO / any other format that JS Date can handle
-  const iso = new Date(s);
-  if(!Number.isNaN(iso.getTime())) return iso;
-
-  return null;
-}
-
-function daysSince(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return null;
-  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
-}
-
-function fmtDateTime(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return '-';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-}
-
-function fmtDateOnly(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return '-';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
-}
-
-function escapeHtml(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
-}
-
-function toast(message, ok = false){
-  const el = document.getElementById('toast');
-  el.textContent = message;
-  el.className = ok ? 'on ok' : 'on';
-  clearTimeout(el._timer);
-  el._timer = setTimeout(()=>{ el.className = ''; }, 3600);
-}
-
-function adultStatus(days, collar){
-  if(collar === NOT_DEPLOYED_COLLAR) return 'ndep';
-  if(days <= 7) return 'active';
-  if(days <= 30) return 's7';
-  if(days < 45) return 's30';
-  return 'crit';
-}
-
-function hatchStatus(id, days){
-  if(DEAD_IDS.has(String(id))) return 'dead';
-  if(days <= 10) return 'active';
-  if(days <= 30) return 'tmiss';
-  return 'gone';
-}
-
-function markerColor(entity){
-  if(entity.viewSource === 'FieldLog') return STATUS_META.vhf.color;
-  return (STATUS_META[entity.status] || STATUS_META.vhf).color;
-}
-
-function getBucket(compKey){
-  if(!fixBuckets[compKey]) fixBuckets[compKey] = {ATS:[],FieldLog:[],PaliFT:[]};
-  return fixBuckets[compKey];
-}
-
-function buildMasterMaps(rows){
-  masterAdultMap = {};
-  masterHatchMap = {};
-  masterAdultMapRaw = {};
-  masterHatchMapRaw = {};
-  masterAdultMapFlat = {};
-  masterHatchMapFlat = {};
-  rows.forEach(row=>{
-    const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
-    const id  = nid(rawVal);
-    const rid = rawTrimId(rawVal);
-    const fid = flatId(rawVal);
-    if(!id) return;
-    if(isHatchCategory(row)){
-      masterHatchMap[id] = row;
-      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
-    }else{
-      masterAdultMap[id] = row;
-      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
-    }
-  });
-}
-
-function lookupMasterRow(rawId, isHatchling){
-  const fid = flatId(rawId);
-  const useFlatFallback = fid !== rawId;
-  if(isHatchling){
-    return masterHatchMap[rawId]
-      || masterAdultMap[rawId]
-      || masterHatchMapRaw[rawId]
-      || masterAdultMapRaw[rawId]
-      || (useFlatFallback ? masterHatchMapFlat[fid] : null)
-      || (useFlatFallback ? masterAdultMapFlat[fid] : null)
-      || null;
-  }
-  return masterAdultMap[rawId]
-    || masterAdultMapRaw[rawId]
-    || (useFlatFallback ? masterAdultMapFlat[fid] : null)
-    || null;
-}
-
-function ingestATS(rows){
-  rows.forEach(row=>{
-    const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
-    if(!id) return;
-    const lat = parseFloat(gc(row,'Latitude','Lat'));
-    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    const ts = parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
-    const bucket = getBucket(id + '|A');
-    bucket.ATS.push({
-      lat, lon, ts, source:'ATS', rawId:id,
-      collar:gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial'),
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','Behavior','Behaviour'),
-      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
-      remarks:gc(row,'Remarks','Notes'),
-      zone:'-'
-    });
-  });
-}
-
-function ingestFieldLog(rows){
-  rows.forEach(row=>{
-    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
-    if(!id) return;
-    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)] || masterHatchMapFlat[flatId(id)]) return;
-    if(isHatchCategory(row)) return;
-    let lat = parseFloat(gc(row,'Latitude','Lat'));
-    let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
-    const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
-    if((!Number.isFinite(lat) || !Number.isFinite(lon)) && pair && pair.includes(',')){
-      const parts = pair.split(',').map(item=>parseFloat(item.trim()));
-      lat = parts[0];
-      lon = parts[1];
-    }
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    const ts = parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
-    const bucket = getBucket(id + '|A');
-    bucket.FieldLog.push({
-      lat, lon, ts, source:'FieldLog', rawId:id,
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','Behavior','Behaviour'),
-      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
-      remarks:gc(row,'Remarks','Notes'),
-      zone:'-'
-    });
-  });
-}
-
-function ingestPali(rows){
-  rows.forEach(row=>{
-    const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
-    if(!id) return;
-    const lat = parseFloat(gc(row,'Latitude','Lat'));
-    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-    const ts = parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
-    const bucket = getBucket(id + '|H');
-    bucket.PaliFT.push({
-      lat, lon, ts, source:'PaliFT', rawId:id,
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','activity'),
-      signal:gc(row,'Signal','signal'),
-      remarks:gc(row,'Remarks','Notes','remarks'),
-      zone:'-'
-    });
-  });
-}
-
-function sortHistory(list){
-  return list.slice().sort((a,b)=>{
-    const ta = a.ts ? a.ts.getTime() : -Infinity;
-    const tb = b.ts ? b.ts.getTime() : -Infinity;
-    return ta - tb;
-  });
-}
-
-function latestFrom(list){
-  return sortHistory(list).slice(-1)[0] || null;
-}
-
-function mergeEntities(){
-  const keys = new Set(Object.keys(fixBuckets));
-  Object.keys(masterHatchMap).forEach(id=>keys.add(id + '|H'));
-  entities = [];
-  keys.forEach(compKey=>{
-    const [rawId, scope] = compKey.split('|');
-    const isHatchling = scope === 'H';
-    const bucket = fixBuckets[compKey] || {ATS:[],FieldLog:[],PaliFT:[]};
-    const masterRow = lookupMasterRow(rawId, isHatchling) || {};
-    const allHistory = sortHistory([...(bucket.ATS || []), ...(bucket.FieldLog || []), ...(bucket.PaliFT || [])]);
-    const latestATS = latestFrom(bucket.ATS || []);
-    const latestVHF = latestFrom(bucket.FieldLog || []);
-    const latestPali = latestFrom(bucket.PaliFT || []);
-    const latestOverall = latestFrom(allHistory);
-    const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    
-    const tagDateRaw = gc(masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
-    const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
-
-    entities.push({
-      compKey,
-      rawId,
-      id:rawId,
-      isHatchling,
-      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
-      sex:gc(masterRow,'Sex','Gender','M/F'),
-      tl: masterTL,
-      tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
-      remarks:gc(masterRow,'Remarks','Notes','Comments'),
-      collar,
-      tagDate:parseTagDate(tagDateRaw),
-      histories:{
-        ATS:sortHistory(bucket.ATS || []),
-        FieldLog:sortHistory(bucket.FieldLog || []),
-        PaliFT:sortHistory(bucket.PaliFT || [])
-      },
-      allHistory,
-      latestATS,
-      latestVHF,
-      latestPali,
-      latestOverall
-    });
-  });
-  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
-}
-
-function getZoneName(feature){
-  return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
-}
-
-function assignZones(){
-  if(!geojsonData || !geojsonData.features) return;
-  zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
-  const allFixes = [];
-  Object.values(fixBuckets).forEach(bucket=>{
-    ['ATS','FieldLog','PaliFT'].forEach(source=>{
-      (bucket[source] || []).forEach(fix=>allFixes.push(fix));
-    });
-  });
-  allFixes.forEach(fix=>{
-    if(!Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)){
-      fix.zone = '-';
-      return;
-    }
-    const point = turf.point([fix.lon,fix.lat]);
-    let found = '-';
-    for(const feature of zonePolygons){
-      try{
-        if(turf.booleanPointInPolygon(point, feature)){
-          found = getZoneName(feature);
-          break;
-        }
-      }catch(error){}
-    }
-    if(found === '-'){
-      let best = Infinity;
-      let bestName = '-';
-      for(const feature of zonePolygons){
-        try{
-          const outline = turf.polygonToLine(feature);
-          const nearest = turf.nearestPointOnLine(outline, point);
-          const distance = turf.distance(point, nearest, {units:'kilometers'});
-          if(distance < best){
-            best = distance;
-            bestName = getZoneName(feature);
-          }
-        }catch(error){}
-      }
-      found = best <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
-    }
-    fix.zone = found;
-  });
-}
-
-function ensureZoneLayer(){
-  if(zoneGeoLayer || !geojsonData) return;
-  zoneGeoLayer = L.geoJSON(geojsonData,{
-    style:{
-      color:'rgba(23,63,49,.45)',
-      weight:1.5,
-      dashArray:'4 8',
-      fillColor:'rgba(23,63,49,.04)',
-      fillOpacity:.7
-    },
-    onEachFeature(feature, layer){
-      layer.bindTooltip(getZoneName(feature),{className:'zone-label',direction:'center'});
-    }
-  });
-}
-
-function showZoneLayer(visible){
-  ensureZoneLayer();
-  if(!zoneGeoLayer) return;
-  if(visible){
-    if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);
-  }else if(map.hasLayer(zoneGeoLayer)){
-    map.removeLayer(zoneGeoLayer);
-  }
-}
-
-function statusLabel(status, source){
-  if(status === 'active' && source === 'PaliFT') return 'Active <= 10d';
-  if(status === 'active' && source === 'ATS') return 'Active <= 7d';
-  if(status === 's7') return 'Silent > 7d';
-  if(status === 's30') return 'Silent > 30d';
-  if(status === 'crit') return 'Critical >= 45d';
-  if(status === 'tmiss') return 'Temp Missing';
-  if(status === 'gone') return 'Gone > 30d';
-  if(status === 'dead') return 'Dead';
-  if(status === 'ndep') return 'Not Deployed';
-  if(status === 'vhf') return 'VHF';
-  return '-';
-}
-
-function badgeHtml(status, source){
-  const meta = STATUS_META[status] || STATUS_META.vhf;
-  return '<span class="sbadge" style="background:' + meta.bg + ';color:' + meta.color + ';border-color:' + meta.border + '">' + escapeHtml(statusLabel(status, source)) + '</span>';
-}
-
-function blockCounts(source, pool){
-  const defs = VIEW_META[source]?.blocks || EMPTY_STATUS;
-  return defs.map(def=>{
-    if(!def.key) return {label:def.label,count:'-'};
-    const count = pool.filter(item=>item.status === def.key).length;
-    return {key:def.key,label:def.label,count};
-  });
-}
-
-function updateStatusBlocks(source, pool){
-  const counts = blockCounts(source, pool || []);
-  counts.forEach((block, index)=>{
-    const el = document.getElementById('statusBlock' + index);
-    const label = el.querySelector('.sblock-label');
-    const count = el.querySelector('.sblock-count');
-    el.className = 'sblock';
-    el.dataset.status = block.key || '';
-    if(block.key){
-      el.classList.add('clickable');
-      if(activeStatusKey === block.key) el.classList.add('on');
-    }else{
-      el.classList.add('muted');
-    }
-    label.textContent = block.label;
-    count.textContent = block.count;
-  });
-}
-
-function toggleStatusBlock(index){
-  const source = document.getElementById('sourceFilter').value;
-  const defs = VIEW_META[source]?.blocks || [];
-  const def = defs[index];
-  if(!def || !def.key) return;
-  activeStatusKey = activeStatusKey === def.key ? null : def.key;
-  const options = document.querySelectorAll('#msi-status input[type=checkbox]');
-  options.forEach(option=>{
-    option.checked = activeStatusKey ? option.value === activeStatusKey : true;
-  });
-  updateMSBtn('status');
+function onMobileSourceChange(){
+  // mirror to desktop source select
+  const val = document.getElementById('mobileSourceFilter').value;
+  document.getElementById('sourceFilter').value = val;
+  activeStatusKey = null;
+  rebuildFilters();
+  rebuildMobileFilters();
+  updateFieldUpdatesVisibility();
+  updateCollarColumn();
   applyFilters();
 }
 
-function updateLegend(source){
-  const legend = document.getElementById('legend');
-  const rows = VIEW_META[source]?.legend || [];
-  if(!source || !rows.length){
-    legend.style.display = 'none';
-    legend.innerHTML = '';
+function mobileApplyFilters(){
+  // copy mobile MS selections to desktop MS before applying
+  ['rid','cat','zone','status'].forEach(key=>{
+    const mobChecked = new Set(
+      [...document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]:checked')].map(i=>i.value)
+    );
+    document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(inp=>{
+      inp.checked = mobChecked.has(inp.value);
+    });
+    updateMSBtn(key);
+  });
+  applyFilters();
+  closeMobileDrawer();
+}
+
+function mobileClearFilters(){
+  document.getElementById('mobileSourceFilter').value = '';
+  document.getElementById('sourceFilter').value = '';
+  activeStatusKey = null;
+  rebuildFilters();
+  rebuildMobileFilters();
+  updateFieldUpdatesVisibility();
+  updateCollarColumn();
+  displayRows = [];
+  displayedEntities = [];
+  clearVisuals(true);
+  renderTable();
+  updateMapFoot();
+  closeMobileDrawer();
+}
+
+/* Mobile multi-select helpers */
+function toggleMobMS(key, event){
+  if(event) event.stopPropagation();
+  const btn = document.getElementById('mob-msb-' + key);
+  if(btn.classList.contains('disabled')) return;
+  const drop = document.getElementById('mob-msd-' + key);
+  const isOpen = drop.classList.contains('open');
+  document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
+  if(!isOpen) drop.classList.add('open');
+}
+
+function mobMsSelectAll(key){
+  document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]').forEach(i=>{i.checked=true;});
+  updateMobMSBtn(key);
+}
+
+function mobMsClearAll(key){
+  document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]').forEach(i=>{i.checked=false;});
+  updateMobMSBtn(key);
+}
+
+function updateMobMSBtn(key){
+  const btn = document.getElementById('mob-msb-' + key);
+  if(!btn || btn.classList.contains('disabled')) return;
+  const all = [...document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]')];
+  const checked = all.filter(i=>i.checked);
+  const counter = document.getElementById('mob-msc-' + key);
+  if(counter) counter.textContent = checked.length + '/' + all.length;
+  if(!all.length){
+    btn.querySelector('.ms-lbl').textContent = key === 'status' ? 'Not applicable' : 'No options';
     return;
   }
-  legend.style.display = '';
-  legend.innerHTML = '<div class="legend-title">Legend</div>' + rows.map(row=>'<div class="legend-row"><span class="legend-dot" style="background:' + row.color + '"></span>' + escapeHtml(row.label) + '</div>').join('');
+  if(checked.length === 0){ btn.querySelector('.ms-lbl').textContent='None selected'; btn.classList.add('active'); }
+  else if(checked.length === all.length){ btn.querySelector('.ms-lbl').textContent='All'; btn.classList.remove('active'); }
+  else{ btn.querySelector('.ms-lbl').textContent=checked.length+' selected'; btn.classList.add('active'); }
 }
 
-function resetMultiSelect(key, message, disabled){
-  const button = document.getElementById('msb-' + key);
-  const list = document.getElementById('msi-' + key);
-  const counter = document.getElementById('msc-' + key);
-  button.classList.toggle('disabled', !!disabled);
-  button.classList.remove('active');
-  button.querySelector('.ms-lbl').textContent = message;
-  list.innerHTML = '<div class="ms-empty">' + escapeHtml(message) + '</div>';
-  counter.textContent = disabled ? '' : '0/0';
+/* Rebuild mobile MS dropdowns (mirrors desktop state) */
+function rebuildMobileFilters(){
+  const source = document.getElementById('sourceFilter').value;
+  const sourcePool = source ? getViewEntities(source) : null;
+  const poolForFilters = sourcePool || entities;
+
+  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
+    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMobMSOptions('rid', allIds);
+
+  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
+  buildMobMSOptions('cat', allCats);
+
+  const zoneCounts = {};
+  poolForFilters.forEach(e=>{
+    const z = e.latestOverall?.zone || e.zone || '-';
+    if(z && z !== '-') zoneCounts[z] = (zoneCounts[z]||0)+1;
+  });
+  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMobMSOptions('zone', sortedZones, zone=>zone+' ('+zoneCounts[zone]+')');
+
+  if(source && VIEW_META[source].statusEnabled){
+    buildMobMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key,source));
+  } else {
+    resetMobMultiSelect('status','Not applicable',true);
+  }
+
+  // Field updates row visibility in drawer
+  const fuRow = document.getElementById('mob-fieldUpdatesRow');
+  if(fuRow) fuRow.style.display = VIEW_META[source]?.showFieldUpdates ? '' : 'none';
 }
 
-function buildMSOptions(key, options, formatter, preserveSelection = false){
-  const button = document.getElementById('msb-' + key);
-  const list = document.getElementById('msi-' + key);
-  const previous = preserveSelection ? new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value)) : new Set();
-  button.classList.remove('disabled');
+function buildMobMSOptions(key, options, formatter){
+  const btn = document.getElementById('mob-msb-' + key);
+  const list = document.getElementById('mob-msi-' + key);
+  if(!btn || !list) return;
+  btn.classList.remove('disabled');
   list.innerHTML = '';
   if(!options.length){
-    resetMultiSelect(key, key === 'status' ? 'Not applicable' : 'No options', key === 'status');
+    resetMobMultiSelect(key, key==='status' ? 'Not applicable' : 'No options', key==='status');
     return;
   }
   options.forEach(option=>{
@@ -1107,430 +1165,779 @@ function buildMSOptions(key, options, formatter, preserveSelection = false){
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.value = option;
-    input.checked = previous.size ? previous.has(option) : true;
-    input.addEventListener('change',()=>updateMSBtn(key));
+    input.checked = true;
+    input.addEventListener('change',()=>updateMobMSBtn(key));
     label.appendChild(input);
-    label.appendChild(document.createTextNode(' ' + (formatter ? formatter(option) : option)));
+    label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
+    list.appendChild(label);
+  });
+  updateMobMSBtn(key);
+}
+
+function resetMobMultiSelect(key, message, disabled){
+  const btn = document.getElementById('mob-msb-' + key);
+  const list = document.getElementById('mob-msi-' + key);
+  const counter = document.getElementById('mob-msc-' + key);
+  if(!btn) return;
+  btn.classList.toggle('disabled', !!disabled);
+  btn.classList.remove('active');
+  btn.querySelector('.ms-lbl').textContent = message;
+  if(list) list.innerHTML = '<div class="ms-empty">'+escapeHtml(message)+'</div>';
+  if(counter) counter.textContent = disabled ? '' : '0/0';
+}
+
+/* Close mobile MS drops when tapping outside */
+document.addEventListener('click',event=>{
+  if(!event.target.closest('#mobileDrawer .ms-wrap')){
+    document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
+  }
+});
+
+/* ─── Mobile bottom panel toggle ─── */
+function initMobileBottomPanel(){
+  if(!isMobile()) return;
+  const btm = document.getElementById('btm');
+  const btn = document.getElementById('btmToggleBtn');
+  // start collapsed on mobile
+  bottomCollapsed = true;
+  btm.style.height = '52px';
+  document.getElementById('map-wrap').style.bottom = '52px';
+  btn.textContent = 'Show';
+}
+
+/* ═══════════════════════════════════════════════
+   DATA FETCH
+   ═══════════════════════════════════════════════ */
+function fetchCSV(url){
+  return new Promise((resolve,reject)=>{
+    Papa.parse(url+'&_t='+Date.now(),{
+      download:true,header:true,skipEmptyLines:true,
+      complete:results=>resolve(results.data||[]),
+      error:reject
+    });
+  });
+}
+
+function fetchJSON(url){
+  return fetch(url+'?_t='+Date.now()).then(r=>r.json());
+}
+
+function setLoadingState(id,ok){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('ok','err');
+  el.classList.add(ok?'ok':'err');
+}
+
+function loadingCopy(text){
+  document.getElementById('loadingCopy').textContent=text;
+}
+
+/* ═══════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════ */
+function gc(row,...keys){
+  const rowKeys=Object.keys(row||{});
+  for(const key of keys){
+    const normal=String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+    for(const rowKey of rowKeys){
+      const probe=String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+      if(probe===normal){
+        const value=String(row[rowKey]||'').trim();
+        if(value&&!['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
+      }
+    }
+  }
+  return '';
+}
+
+function nid(raw){return String(raw||'').trim().toUpperCase().replace(/\s+/g,'');}
+function rawTrimId(raw){return String(raw||'').trim().toUpperCase();}
+function flatId(raw){return String(raw||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');}
+
+function isHatchCategory(row){
+  const category=gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
+  return /hatch|hatchling|fth|pali\s*ft/i.test(category);
+}
+
+function parseFieldDate(value){
+  if(!value) return null;
+  const match=String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!match) return null;
+  const date=new Date(+match[3],+match[1]-1,+match[2],+(match[4]||0),+(match[5]||0),+(match[6]||0));
+  return Number.isNaN(date.getTime())?null:date;
+}
+
+function parsePaliDate(value){
+  if(!value) return null;
+  const match=String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!match) return null;
+  const date=new Date(+match[3],+match[2]-1,+match[1],+(match[4]||0),+(match[5]||0),+(match[6]||0));
+  return Number.isNaN(date.getTime())?null:date;
+}
+
+function parseATSDate(value){
+  if(!value) return null;
+  const date=new Date(String(value).trim());
+  return Number.isNaN(date.getTime())?null:date;
+}
+
+function parseTagDate(value){
+  if(!value) return null;
+  const s=String(value).trim();
+  if(!s||['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
+  const MONTH_NAMES={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const dmmyMatch=s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
+  if(dmmyMatch){
+    const d=parseInt(dmmyMatch[1],10),mStr=dmmyMatch[2].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr];
+    let y=parseInt(dmmyMatch[3],10);if(y<100)y+=(y<50?2000:1900);
+    if(d>=1&&d<=31&&mIdx!==undefined){const dt=new Date(y,mIdx,d);if(!Number.isNaN(dt.getTime()))return dt;}
+  }
+  const mddyMatch=s.match(/^([A-Za-z]{3,})[\s\-\/](\d{1,2})[,\s\-\/]+(\d{4})$/i);
+  if(mddyMatch){
+    const mStr=mddyMatch[1].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr],d=parseInt(mddyMatch[2],10),y=parseInt(mddyMatch[3],10);
+    if(mIdx!==undefined&&d>=1&&d<=31){const dt=new Date(y,mIdx,d);if(!Number.isNaN(dt.getTime()))return dt;}
+  }
+  const myMatch=s.match(/^([A-Za-z]{3,})[\s\-\/]+(\d{4})$/i);
+  if(myMatch){
+    const mStr=myMatch[1].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr],y=parseInt(myMatch[2],10);
+    if(mIdx!==undefined){const dt=new Date(y,mIdx,1);if(!Number.isNaN(dt.getTime()))return dt;}
+  }
+  const dmyMatch=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if(dmyMatch){
+    const d=+dmyMatch[1],m=+dmyMatch[2],y=+dmyMatch[3];
+    if(d>=1&&d<=31&&m>=1&&m<=12){const dt=new Date(y,m-1,d);if(!Number.isNaN(dt.getTime()))return dt;}
+  }
+  const iso=new Date(s);
+  if(!Number.isNaN(iso.getTime())) return iso;
+  return null;
+}
+
+function daysSince(ts){
+  if(!ts||Number.isNaN(ts.getTime())) return null;
+  return Math.max(0,Math.floor((TODAY-ts)/86400000));
+}
+function fmtDateTime(ts){
+  if(!ts||Number.isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+function fmtDateOnly(ts){
+  if(!ts||Number.isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+}
+function escapeHtml(value){
+  return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function toast(message,ok=false){
+  const el=document.getElementById('toast');
+  el.textContent=message;
+  el.className=ok?'on ok':'on';
+  clearTimeout(el._timer);
+  el._timer=setTimeout(()=>{el.className='';},3600);
+}
+function adultStatus(days,collar){
+  if(collar===NOT_DEPLOYED_COLLAR) return 'ndep';
+  if(days<=7) return 'active';
+  if(days<=30) return 's7';
+  if(days<45) return 's30';
+  return 'crit';
+}
+function hatchStatus(id,days){
+  if(DEAD_IDS.has(String(id))) return 'dead';
+  if(days<=10) return 'active';
+  if(days<=30) return 'tmiss';
+  return 'gone';
+}
+function markerColor(entity){
+  if(entity.viewSource==='FieldLog') return STATUS_META.vhf.color;
+  return (STATUS_META[entity.status]||STATUS_META.vhf).color;
+}
+
+/* ═══════════════════════════════════════════════
+   DATA INGESTION
+   ═══════════════════════════════════════════════ */
+function getBucket(compKey){
+  if(!fixBuckets[compKey]) fixBuckets[compKey]={ATS:[],FieldLog:[],PaliFT:[]};
+  return fixBuckets[compKey];
+}
+
+function buildMasterMaps(rows){
+  masterAdultMap={};masterHatchMap={};masterAdultMapRaw={};masterHatchMapRaw={};masterAdultMapFlat={};masterHatchMapFlat={};
+  rows.forEach(row=>{
+    const rawVal=String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID')||'').trim().toUpperCase();
+    const id=nid(rawVal),rid=rawTrimId(rawVal),fid=flatId(rawVal);
+    if(!id) return;
+    if(isHatchCategory(row)){
+      masterHatchMap[id]=row;
+      if(rid&&rid!==id) masterHatchMapRaw[rid]=row;
+      if(fid&&fid!==id) masterHatchMapFlat[fid]=row;
+    }else{
+      masterAdultMap[id]=row;
+      if(rid&&rid!==id) masterAdultMapRaw[rid]=row;
+      if(fid&&fid!==id) masterAdultMapFlat[fid]=row;
+    }
+  });
+}
+
+function lookupMasterRow(rawId,isHatchling){
+  const fid=flatId(rawId),useFlatFallback=fid!==rawId;
+  if(isHatchling){
+    return masterHatchMap[rawId]||masterAdultMap[rawId]||masterHatchMapRaw[rawId]||masterAdultMapRaw[rawId]
+      ||(useFlatFallback?masterHatchMapFlat[fid]:null)||(useFlatFallback?masterAdultMapFlat[fid]:null)||null;
+  }
+  return masterAdultMap[rawId]||masterAdultMapRaw[rawId]||(useFlatFallback?masterAdultMapFlat[fid]:null)||null;
+}
+
+function ingestATS(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'RadioID','Radio_ID','Radio ID'));
+    if(!id) return;
+    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
+    const ts=parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
+    const bucket=getBucket(id+'|A');
+    bucket.ATS.push({lat,lon,ts,source:'ATS',rawId:id,collar:gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial'),place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','Behavior','Behaviour'),signal:gc(row,'Signal','Signal Strength','SignalStrength'),remarks:gc(row,'Remarks','Notes'),zone:'-'});
+  });
+}
+
+function ingestFieldLog(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
+    if(!id) return;
+    if(masterHatchMap[id]||masterHatchMapRaw[rawTrimId(id)]||masterHatchMapFlat[flatId(id)]) return;
+    if(isHatchCategory(row)) return;
+    let lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
+    const pair=gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
+    if((!Number.isFinite(lat)||!Number.isFinite(lon))&&pair&&pair.includes(',')){
+      const parts=pair.split(',').map(item=>parseFloat(item.trim()));
+      lat=parts[0];lon=parts[1];
+    }
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
+    const ts=parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
+    const bucket=getBucket(id+'|A');
+    bucket.FieldLog.push({lat,lon,ts,source:'FieldLog',rawId:id,place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','Behavior','Behaviour'),signal:gc(row,'Signal','Signal Strength','SignalStrength'),remarks:gc(row,'Remarks','Notes'),zone:'-'});
+  });
+}
+
+function ingestPali(rows){
+  rows.forEach(row=>{
+    const id=nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
+    if(!id) return;
+    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
+    const ts=parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
+    const bucket=getBucket(id+'|H');
+    bucket.PaliFT.push({lat,lon,ts,source:'PaliFT',rawId:id,place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','activity'),signal:gc(row,'Signal','signal'),remarks:gc(row,'Remarks','Notes','remarks'),zone:'-'});
+  });
+}
+
+function sortHistory(list){
+  return list.slice().sort((a,b)=>{
+    const ta=a.ts?a.ts.getTime():-Infinity,tb=b.ts?b.ts.getTime():-Infinity;
+    return ta-tb;
+  });
+}
+function latestFrom(list){return sortHistory(list).slice(-1)[0]||null;}
+
+function mergeEntities(){
+  const keys=new Set(Object.keys(fixBuckets));
+  Object.keys(masterHatchMap).forEach(id=>keys.add(id+'|H'));
+  entities=[];
+  keys.forEach(compKey=>{
+    const [rawId,scope]=compKey.split('|'),isHatchling=scope==='H';
+    const bucket=fixBuckets[compKey]||{ATS:[],FieldLog:[],PaliFT:[]};
+    const masterRow=lookupMasterRow(rawId,isHatchling)||{};
+    const allHistory=sortHistory([...(bucket.ATS||[]),...(bucket.FieldLog||[]),...(bucket.PaliFT||[])]);
+    const latestATS=latestFrom(bucket.ATS||[]),latestVHF=latestFrom(bucket.FieldLog||[]),latestPali=latestFrom(bucket.PaliFT||[]),latestOverall=latestFrom(allHistory);
+    const collar=(latestATS&&latestATS.collar)||gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
+    const tagDateRaw=gc(masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
+    const masterCategory=gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
+    const masterTL=gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+    entities.push({
+      compKey,rawId,id:rawId,isHatchling,
+      category:masterCategory||(isHatchling?'Pali FTH 2025':'Adult / Sub-adult'),
+      sex:gc(masterRow,'Sex','Gender','M/F'),tl:masterTL,
+      tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
+      remarks:gc(masterRow,'Remarks','Notes','Comments'),
+      collar,tagDate:parseTagDate(tagDateRaw),
+      histories:{ATS:sortHistory(bucket.ATS||[]),FieldLog:sortHistory(bucket.FieldLog||[]),PaliFT:sortHistory(bucket.PaliFT||[])},
+      allHistory,latestATS,latestVHF,latestPali,latestOverall
+    });
+  });
+  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
+}
+
+/* ═══════════════════════════════════════════════
+   ZONE ASSIGNMENT
+   ═══════════════════════════════════════════════ */
+function getZoneName(feature){
+  return feature?.properties?.name||feature?.properties?.Name||feature?.properties?.ZONE||feature?.properties?.zone||feature?.properties?.STRETCH||feature?.properties?.stretch||'-';
+}
+
+function assignZones(){
+  if(!geojsonData||!geojsonData.features) return;
+  zonePolygons=geojsonData.features.filter(f=>f.geometry&&(f.geometry.type==='Polygon'||f.geometry.type==='MultiPolygon'));
+  const allFixes=[];
+  Object.values(fixBuckets).forEach(bucket=>{
+    ['ATS','FieldLog','PaliFT'].forEach(src=>{(bucket[src]||[]).forEach(fix=>allFixes.push(fix));});
+  });
+  allFixes.forEach(fix=>{
+    if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)){fix.zone='-';return;}
+    const point=turf.point([fix.lon,fix.lat]);
+    let found='-';
+    for(const feature of zonePolygons){
+      try{if(turf.booleanPointInPolygon(point,feature)){found=getZoneName(feature);break;}}catch(e){}
+    }
+    if(found==='-'){
+      let best=Infinity,bestName='-';
+      for(const feature of zonePolygons){
+        try{
+          const outline=turf.polygonToLine(feature),nearest=turf.nearestPointOnLine(outline,point),distance=turf.distance(point,nearest,{units:'kilometers'});
+          if(distance<best){best=distance;bestName=getZoneName(feature);}
+        }catch(e){}
+      }
+      found=best<=ZONE_SNAP_MAX_KM?bestName:'Outside Defined Zones';
+    }
+    fix.zone=found;
+  });
+}
+
+function ensureZoneLayer(){
+  if(zoneGeoLayer||!geojsonData) return;
+  zoneGeoLayer=L.geoJSON(geojsonData,{
+    style:{color:'rgba(23,63,49,.45)',weight:1.5,dashArray:'4 8',fillColor:'rgba(23,63,49,.04)',fillOpacity:.7},
+    onEachFeature(feature,layer){layer.bindTooltip(getZoneName(feature),{className:'zone-label',direction:'center'});}
+  });
+}
+
+function showZoneLayer(visible){
+  ensureZoneLayer();
+  if(!zoneGeoLayer) return;
+  if(visible){if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);}
+  else if(map.hasLayer(zoneGeoLayer)) map.removeLayer(zoneGeoLayer);
+}
+
+/* ═══════════════════════════════════════════════
+   STATUS & LEGEND
+   ═══════════════════════════════════════════════ */
+function statusLabel(status,source){
+  if(status==='active'&&source==='PaliFT') return 'Active <= 10d';
+  if(status==='active'&&source==='ATS') return 'Active <= 7d';
+  if(status==='s7') return 'Silent > 7d';
+  if(status==='s30') return 'Silent > 30d';
+  if(status==='crit') return 'Critical >= 45d';
+  if(status==='tmiss') return 'Temp Missing';
+  if(status==='gone') return 'Gone > 30d';
+  if(status==='dead') return 'Dead';
+  if(status==='ndep') return 'Not Deployed';
+  if(status==='vhf') return 'VHF';
+  return '-';
+}
+
+function badgeHtml(status,source){
+  const meta=STATUS_META[status]||STATUS_META.vhf;
+  return '<span class="sbadge" style="background:'+meta.bg+';color:'+meta.color+';border-color:'+meta.border+'">'+escapeHtml(statusLabel(status,source))+'</span>';
+}
+
+function blockCounts(source,pool){
+  const defs=VIEW_META[source]?.blocks||EMPTY_STATUS;
+  return defs.map(def=>{
+    if(!def.key) return {label:def.label,count:'-'};
+    return {key:def.key,label:def.label,count:pool.filter(item=>item.status===def.key).length};
+  });
+}
+
+function updateStatusBlocks(source,pool){
+  const counts=blockCounts(source,pool||[]);
+  counts.forEach((block,index)=>{
+    const el=document.getElementById('statusBlock'+index);
+    const label=el.querySelector('.sblock-label'),count=el.querySelector('.sblock-count');
+    el.className='sblock';
+    el.dataset.status=block.key||'';
+    if(block.key){el.classList.add('clickable');if(activeStatusKey===block.key)el.classList.add('on');}
+    else el.classList.add('muted');
+    label.textContent=block.label;
+    count.textContent=block.count;
+  });
+}
+
+function toggleStatusBlock(index){
+  const source=document.getElementById('sourceFilter').value;
+  const defs=VIEW_META[source]?.blocks||[];
+  const def=defs[index];
+  if(!def||!def.key) return;
+  activeStatusKey=activeStatusKey===def.key?null:def.key;
+  const options=document.querySelectorAll('#msi-status input[type=checkbox]');
+  options.forEach(option=>{option.checked=activeStatusKey?option.value===activeStatusKey:true;});
+  updateMSBtn('status');
+  applyFilters();
+}
+
+function updateLegend(source){
+  const legend=document.getElementById('legend');
+  const rows=VIEW_META[source]?.legend||[];
+  if(!source||!rows.length){legend.style.display='none';legend.innerHTML='';return;}
+  legend.style.display='';
+  legend.innerHTML='<div class="legend-title">Legend</div>'+rows.map(row=>'<div class="legend-row"><span class="legend-dot" style="background:'+row.color+'"></span>'+escapeHtml(row.label)+'</div>').join('');
+}
+
+/* ═══════════════════════════════════════════════
+   DESKTOP MULTISELECT
+   ═══════════════════════════════════════════════ */
+function resetMultiSelect(key,message,disabled){
+  const btn=document.getElementById('msb-'+key),list=document.getElementById('msi-'+key),counter=document.getElementById('msc-'+key);
+  btn.classList.toggle('disabled',!!disabled);btn.classList.remove('active');
+  btn.querySelector('.ms-lbl').textContent=message;
+  list.innerHTML='<div class="ms-empty">'+escapeHtml(message)+'</div>';
+  counter.textContent=disabled?'':'0/0';
+}
+
+function buildMSOptions(key,options,formatter,preserveSelection=false){
+  const btn=document.getElementById('msb-'+key),list=document.getElementById('msi-'+key);
+  const previous=preserveSelection?new Set([...document.querySelectorAll('#msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value)):new Set();
+  btn.classList.remove('disabled');
+  list.innerHTML='';
+  if(!options.length){resetMultiSelect(key,key==='status'?'Not applicable':'No options',key==='status');return;}
+  options.forEach(option=>{
+    const label=document.createElement('label');label.className='ms-item';
+    const input=document.createElement('input');input.type='checkbox';input.value=option;
+    input.checked=previous.size?previous.has(option):true;
+    input.addEventListener('change',()=>updateMSBtn(key));
+    label.appendChild(input);label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
     list.appendChild(label);
   });
   updateMSBtn(key);
 }
 
 function updateMSBtn(key){
-  const button = document.getElementById('msb-' + key);
-  if(button.classList.contains('disabled')) return;
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  const checked = all.filter(item=>item.checked);
-  const counter = document.getElementById('msc-' + key);
-  counter.textContent = checked.length + '/' + all.length;
-  if(!all.length){
-    button.querySelector('.ms-lbl').textContent = key === 'status' ? 'Not applicable' : 'No options';
-    return;
-  }
-  if(checked.length === 0){
-    button.querySelector('.ms-lbl').textContent = 'None selected';
-    button.classList.add('active');
-  }else if(checked.length === all.length){
-    button.querySelector('.ms-lbl').textContent = 'All';
-    button.classList.remove('active');
-  }else{
-    button.querySelector('.ms-lbl').textContent = checked.length + ' selected';
-    button.classList.add('active');
-  }
+  const btn=document.getElementById('msb-'+key);
+  if(btn.classList.contains('disabled')) return;
+  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')],checked=all.filter(i=>i.checked);
+  const counter=document.getElementById('msc-'+key);
+  counter.textContent=checked.length+'/'+all.length;
+  if(!all.length){btn.querySelector('.ms-lbl').textContent=key==='status'?'Not applicable':'No options';return;}
+  if(checked.length===0){btn.querySelector('.ms-lbl').textContent='None selected';btn.classList.add('active');}
+  else if(checked.length===all.length){btn.querySelector('.ms-lbl').textContent='All';btn.classList.remove('active');}
+  else{btn.querySelector('.ms-lbl').textContent=checked.length+' selected';btn.classList.add('active');}
 }
 
-function toggleMS(key, event){
+function toggleMS(key,event){
   if(event) event.stopPropagation();
-  const button = document.getElementById('msb-' + key);
-  if(button.classList.contains('disabled')) return;
-  const drop = document.getElementById('msd-' + key);
-  const isOpen = drop.classList.contains('open');
-  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
+  const btn=document.getElementById('msb-'+key);
+  if(btn.classList.contains('disabled')) return;
+  const drop=document.getElementById('msd-'+key),isOpen=drop.classList.contains('open');
+  document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
   if(!isOpen) drop.classList.add('open');
 }
 
-function msSelectAll(key){
-  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = true; });
-  updateMSBtn(key);
-}
+function msSelectAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMSBtn(key);}
+function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMSBtn(key);}
 
-function msClearAll(key){
-  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = false; });
-  updateMSBtn(key);
-}
-
-document.addEventListener('click', event=>{
-  if(!event.target.closest('.ms-wrap')){
-    document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
+document.addEventListener('click',event=>{
+  if(!event.target.closest('#fbar .ms-wrap')){
+    document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
   }
 });
 
+/* ═══════════════════════════════════════════════
+   FILTER REBUILD & APPLICATION
+   ═══════════════════════════════════════════════ */
 function rebuildFilters(){
-  const source = document.getElementById('sourceFilter').value;
-  const sourcePool = source ? getViewEntities(source) : null;
-  const poolForFilters = sourcePool || entities;
+  const source=document.getElementById('sourceFilter').value;
+  const sourcePool=source?getViewEntities(source):null;
+  const poolForFilters=sourcePool||entities;
 
-  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
-    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
-  buildMSOptions('rid', allIds);
-
-  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
-  buildMSOptions('cat', allCats);
-
-  const zoneCounts = {};
-  if(sourcePool){
-    sourcePool.forEach(e=>{
-      const z = e.zone||'-';
-      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
-    });
-  }else{
-    entities.forEach(e=>{
-      const z = e.latestOverall?.zone||'-';
-      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
-    });
-  }
-  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
-  buildMSOptions('zone', sortedZones, zone=>zone + ' (' + zoneCounts[zone] + ')');
-
-  if(source && VIEW_META[source].statusEnabled){
-    buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source));
-  }else{
-    resetMultiSelect('status','Not applicable',true);
-  }
-
-  updateStatusBlocks(source||'', sourcePool||[]);
+  const allIds=[...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMSOptions('rid',allIds);
+  const allCats=[...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
+  buildMSOptions('cat',allCats);
+  const zoneCounts={};
+  if(sourcePool){sourcePool.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
+  else{entities.forEach(e=>{const z=e.latestOverall?.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
+  const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMSOptions('zone',sortedZones,zone=>zone+' ('+zoneCounts[zone]+')');
+  if(source&&VIEW_META[source].statusEnabled){buildMSOptions('status',VIEW_META[source].statusKeys,key=>statusLabel(key,source));}
+  else{resetMultiSelect('status','Not applicable',true);}
+  updateStatusBlocks(source||'',sourcePool||[]);
   updateLegend(source||'');
 }
 
 function onSourceChange(){
-  activeStatusKey = null;
+  activeStatusKey=null;
   rebuildFilters();
+  // also sync mobile drawer if open
+  if(isMobile()){
+    document.getElementById('mobileSourceFilter').value=document.getElementById('sourceFilter').value;
+    rebuildMobileFilters();
+  }
   updateFieldUpdatesVisibility();
   updateCollarColumn();
   applyFilters();
 }
 
 function updateFieldUpdatesVisibility(){
-  const source = document.getElementById('sourceFilter').value;
-  document.getElementById('fieldUpdatesBtn').style.display = VIEW_META[source]?.showFieldUpdates ? '' : 'none';
+  const source=document.getElementById('sourceFilter').value;
+  document.getElementById('fieldUpdatesBtn').style.display=VIEW_META[source]?.showFieldUpdates?'':'none';
 }
 
 function updateCollarColumn(){
-  const source = document.getElementById('sourceFilter').value;
-  document.getElementById('thCollar').style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
-  document.querySelectorAll('.collar-cell').forEach(cell=>{
-    cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
-  });
+  const source=document.getElementById('sourceFilter').value;
+  document.getElementById('thCollar').style.display=VIEW_META[source]?.hideCollar?'none':'';
+  document.querySelectorAll('.collar-cell').forEach(cell=>{cell.style.display=VIEW_META[source]?.hideCollar?'none':'';});
 }
 
 function selectedSet(key){
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
-  const checked = all.filter(item=>item.checked).map(item=>item.value);
-  if(checked.length === 0 || checked.length === all.length) return null;
+  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
+  if(!all.length||document.getElementById('msb-'+key).classList.contains('disabled')) return null;
+  const checked=all.filter(i=>i.checked).map(i=>i.value);
+  if(checked.length===0||checked.length===all.length) return null;
   return new Set(checked);
 }
 
 function applyFilters(){
-  const source    = document.getElementById('sourceFilter').value;
-  const idFilter  = selectedSet('rid');
-  const catFilter = selectedSet('cat');
-  const zoneFilter= selectedSet('zone');
-
+  const source=document.getElementById('sourceFilter').value;
+  const idFilter=selectedSet('rid'),catFilter=selectedSet('cat'),zoneFilter=selectedSet('zone');
   if(!source){
-    const hasFilter = idFilter || catFilter || zoneFilter;
+    const hasFilter=idFilter||catFilter||zoneFilter;
     if(!hasFilter){
-      displayedEntities = [];
-      displayRows = [];
-      activeStatusKey = null;
-      clearVisuals(true);
-      renderTable();
-      updateLegend('');
-      updateStatusBlocks('', []);
-      showZoneLayer(false);
-      return;
+      displayedEntities=[];displayRows=[];activeStatusKey=null;
+      clearVisuals(true);renderTable();updateLegend('');updateStatusBlocks('',[]); showZoneLayer(false);return;
     }
-    const seen = new Set();
-    const allEntities = [];
+    const seen=new Set(),allEntities=[];
     ['ATS','FieldLog','PaliFT'].forEach(src=>{
-      getViewEntities(src).forEach(entity=>{
-        if(!seen.has(entity.compKey)){
-          seen.add(entity.compKey);
-          allEntities.push(entity);
-        }
-      });
+      getViewEntities(src).forEach(entity=>{if(!seen.has(entity.compKey)){seen.add(entity.compKey);allEntities.push(entity);}});
     });
-    displayedEntities = allEntities.filter(entity=>{
-      if(idFilter  && !idFilter.has(entity.id))                return false;
-      if(catFilter && !catFilter.has(entity.category || '-')) return false;
-      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
+    displayedEntities=allEntities.filter(entity=>{
+      if(idFilter&&!idFilter.has(entity.id)) return false;
+      if(catFilter&&!catFilter.has(entity.category||'-')) return false;
+      if(zoneFilter&&!zoneFilter.has(entity.zone||'-')) return false;
       return true;
     });
     displayedEntities.sort((a,b)=>{
-      const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
-      const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
-      return tb - ta;
+      const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity,tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
+      return tb-ta;
     });
-    showZoneLayer(displayedEntities.length > 0);
-    renderMarkers();
-    renderTable();
-    updateMapFoot();
-    return;
+    showZoneLayer(displayedEntities.length>0);renderMarkers();renderTable();updateMapFoot();return;
   }
-
-  const statusFilter = selectedSet('status');
-  const pool = getViewEntities(source);
-  updateStatusBlocks(source, pool);
-  displayedEntities = pool.filter(entity=>{
-    if(idFilter   && !idFilter.has(entity.id))               return false;
-    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
-    if(statusFilter&& !statusFilter.has(entity.status))      return false;
+  const statusFilter=selectedSet('status'),pool=getViewEntities(source);
+  updateStatusBlocks(source,pool);
+  displayedEntities=pool.filter(entity=>{
+    if(idFilter&&!idFilter.has(entity.id)) return false;
+    if(catFilter&&!catFilter.has(entity.category||'-')) return false;
+    if(zoneFilter&&!zoneFilter.has(entity.zone||'-')) return false;
+    if(statusFilter&&!statusFilter.has(entity.status)) return false;
     return true;
   });
   displayedEntities.sort((a,b)=>{
-    const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
-    const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
-    return tb - ta;
+    const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity,tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
+    return tb-ta;
   });
-  showZoneLayer(displayedEntities.length > 0);
-  renderMarkers();
-  renderTable();
-  updateMapFoot();
+  showZoneLayer(displayedEntities.length>0);renderMarkers();renderTable();updateMapFoot();
 }
 
 function clearFilters(){
-  document.getElementById('sourceFilter').value = '';
-  activeStatusKey = null;
-  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
+  document.getElementById('sourceFilter').value='';
+  if(isMobile()) document.getElementById('mobileSourceFilter').value='';
+  activeStatusKey=null;
+  document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
   rebuildFilters();
-  updateFieldUpdatesVisibility();
-  updateCollarColumn();
-  displayRows = [];
-  displayedEntities = [];
-  clearVisuals(true);
-  renderTable();
-  updateMapFoot();
+  if(isMobile()) rebuildMobileFilters();
+  updateFieldUpdatesVisibility();updateCollarColumn();
+  displayRows=[];displayedEntities=[];clearVisuals(true);renderTable();updateMapFoot();
 }
 
 function clearVisuals(resetViewport){
-  markerLayer.clearLayers();
-  entityMarkerMap = {};
-  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
-  if(heatLayer){
-    map.removeLayer(heatLayer);
-    heatLayer = null;
-  }
-  if(kdeLayer){
-    map.removeLayer(kdeLayer);
-    kdeLayer = null;
-  }
-  heatmapOn = false;
-  kdeOn = false;
+  markerLayer.clearLayers();entityMarkerMap={};
+  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  heatmapOn=false;kdeOn=false;
   document.getElementById('heatBtn').classList.remove('on');
   document.getElementById('kdeBtn').classList.remove('on');
+  // sync mobile overlay buttons
+  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
+  if(mobHeat) mobHeat.classList.remove('on');
+  if(mobKde) mobKde.classList.remove('on');
   showZoneLayer(false);
   if(resetViewport) resetView();
 }
 
-function markerIcon(entity, text){
-  const color = markerColor(entity);
-  const fontSize = text.length >= 5 ? 9 : text.length >= 4 ? 10 : 12;
+/* ═══════════════════════════════════════════════
+   MARKER RENDERING
+   ═══════════════════════════════════════════════ */
+function markerIcon(entity,text){
+  const color=markerColor(entity);
+  const fontSize=text.length>=5?9:text.length>=4?10:12;
   return L.divIcon({
     className:'',
-    html:'<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:' + color + ';border:2px solid #fff;color:#fff;font:700 ' + fontSize + 'px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">' + escapeHtml(text) + '</div>',
-    iconSize:[34,34],
-    iconAnchor:[17,17],
-    popupAnchor:[0,-16]
+    html:'<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:'+color+';border:2px solid #fff;color:#fff;font:700 '+fontSize+'px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">'+escapeHtml(text)+'</div>',
+    iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-16]
   });
 }
 
 function popupHtml(entity){
-  const display = entity.displayFix;
-  const status = badgeHtml(entity.status, entity.viewSource);
-  const latestSat = entity.latestATS ? fmtDateTime(entity.latestATS.ts) : '-';
-  const latestVhf = entity.latestVHF ? fmtDateTime(entity.latestVHF.ts) : '-';
-  const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
-  const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
-  const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
-  
-  const rdRaw = entity.tagDate ? daysSince(entity.tagDate) : null;
-  const daysRelease = rdRaw !== null ? rdRaw + 'd' : 'N/A';
-  
-  const showCollar = entity.collar && !['-', 'na', 'n/a', 'null', ''].includes(String(entity.collar).trim().toLowerCase());
-
-  return '' +
-    '<div>' +
-      '<div class="pop-top">' +
-        '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
-        '<div>' +
-          '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
-          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="pop-body">' +
-        '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">' + escapeHtml(fmtDateTime(display?.ts)) + '</span></div>' +
-        (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
-        (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
-        '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
-        (showCollar ? '<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
-        '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
-        (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
-        (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
-      '</div>' +
-      '<div class="pop-actions">' +
-        '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
-        '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
-      '</div>' +
-    '</div>';
+  const display=entity.displayFix;
+  const status=badgeHtml(entity.status,entity.viewSource);
+  const latestSat=entity.latestATS?fmtDateTime(entity.latestATS.ts):'-';
+  const latestVhf=entity.latestVHF?fmtDateTime(entity.latestVHF.ts):'-';
+  const latestPali=entity.latestPali?fmtDateTime(entity.latestPali.ts):'-';
+  const sourceLabel=entity.viewSource==='FieldLog'?'Field Log (VHF)':entity.viewSource;
+  const daysFix=display?.ts?daysSince(display.ts)+'d':'-';
+  const rdRaw=entity.tagDate?daysSince(entity.tagDate):null;
+  const daysRelease=rdRaw!==null?rdRaw+'d':'N/A';
+  const showCollar=entity.collar&&!['-','na','n/a','null',''].includes(String(entity.collar).trim().toLowerCase());
+  return '<div>'+
+    '<div class="pop-top">'+
+      '<div class="pop-id-badge" style="background:'+markerColor(entity)+'">'+escapeHtml(entity.id.length>5?entity.id.slice(0,5):entity.id)+'</div>'+
+      '<div><div class="pop-id">'+escapeHtml(entity.id)+'</div><div class="pop-sub">'+status+' | '+escapeHtml(sourceLabel)+'</div></div>'+
+    '</div>'+
+    '<div class="pop-body">'+
+      '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">'+escapeHtml(fmtDateTime(display?.ts))+'</span></div>'+
+      (entity.viewSource==='ATS'?'<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">'+escapeHtml(latestSat)+'</span></div>':'')+
+      (entity.viewSource==='FieldLog'?'<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">'+escapeHtml(latestVhf)+'</span></div>':'')+
+      (entity.viewSource==='PaliFT'?'<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">'+escapeHtml(latestPali)+'</span></div>':'')+
+      '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">'+escapeHtml(daysFix)+'</span></div>'+
+      '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">'+escapeHtml(daysRelease)+'</span></div>'+
+      '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">'+escapeHtml(entity.zone||'-')+'</span></div>'+
+      '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">'+escapeHtml(entity.category||'-')+'</span></div>'+
+      '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">'+escapeHtml(entity.sex||'-')+'</span></div>'+
+      (showCollar?'<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">'+escapeHtml(entity.collar)+'</span></div>':'')+
+      '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">'+(display?display.lat.toFixed(5)+', '+display.lon.toFixed(5):'-')+'</span></div>'+
+      '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">'+escapeHtml(entity.tagPlace||'-')+'</span></div>'+
+      (entity.tl?'<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">'+escapeHtml(entity.tl)+'</span></div>':'')+
+      (entity.remarks?'<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">'+escapeHtml(entity.remarks)+'</div>':'')+
+    '</div>'+
+    '<div class="pop-actions">'+
+      '<button class="pab" type="button" onclick="focusEntity(\''+entity.compKey+'\')">Focus</button>'+
+      '<button class="pab" type="button" onclick="focusTableRow(\''+entity.compKey+'\')">Table</button>'+
+    '</div>'+
+  '</div>';
 }
 
 function getViewEntities(source){
   if(!source) return [];
   return entities.map(entity=>{
-    if(source === 'PaliFT'){
+    if(source==='PaliFT'){
       if(!entity.isHatchling) return null;
-      const relevantFix = entity.latestPali || null;
-      const locationFix = relevantFix || entity.latestOverall || null;
-      const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
-      return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-'};
+      const relevantFix=entity.latestPali||null,locationFix=relevantFix||entity.latestOverall||null;
+      const status=hatchStatus(entity.id,daysSince(relevantFix?relevantFix.ts:null));
+      return{...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone||'-'};
     }
-    if(source === 'ATS'){
-      if(entity.isHatchling || !entity.latestATS) return null;
-      const relevantFix = entity.latestATS;
-      const locationFix = entity.latestATS;
-      const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
-      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
+    if(source==='ATS'){
+      if(entity.isHatchling||!entity.latestATS) return null;
+      const relevantFix=entity.latestATS,locationFix=entity.latestATS;
+      const status=adultStatus(daysSince(relevantFix.ts),entity.collar);
+      return{...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone||'-'};
     }
-    if(source === 'FieldLog'){
-      if(entity.isHatchling || !entity.latestVHF) return null;
-      const relevantFix = entity.latestVHF;
-      const locationFix = entity.latestVHF;
-      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-'};
+    if(source==='FieldLog'){
+      if(entity.isHatchling||!entity.latestVHF) return null;
+      const relevantFix=entity.latestVHF,locationFix=entity.latestVHF;
+      return{...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone||'-'};
     }
     return null;
   }).filter(Boolean);
 }
 
 function renderMarkers(){
-  markerLayer.clearLayers();
-  entityMarkerMap = {};
-  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
+  markerLayer.clearLayers();entityMarkerMap={};
+  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
   if(!displayedEntities.length){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
     return;
   }
-
   displayedEntities.forEach(entity=>{
-    const fix = entity.displayFix;
-    if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
-    const marker = L.marker([fix.lat,fix.lon],{
-      icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),
-      keyboard:false
+    const fix=entity.displayFix;
+    if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
+    const marker=L.marker([fix.lat,fix.lon],{
+      icon:markerIcon(entity,entity.id.length>5?entity.id.slice(0,5):entity.id),keyboard:false
     });
     marker.bindPopup(popupHtml(entity),{maxWidth:330});
-    marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
-    markerLayer.addLayer(marker);
-    oms.addMarker(marker);
-    entityMarkerMap[entity.compKey] = marker;
+    marker.on('popupclose',()=>{marker.setLatLng([fix.lat,fix.lon]);});
+    markerLayer.addLayer(marker);oms.addMarker(marker);
+    entityMarkerMap[entity.compKey]=marker;
   });
-
   if(heatmapOn) renderHeatmap();
   else if(kdeOn) renderKDE();
   else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-
-  const points = displayedEntities
-    .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+  const points=displayedEntities
+    .filter(e=>e.displayFix&&Number.isFinite(e.displayFix.lat)&&Number.isFinite(e.displayFix.lon))
     .map(e=>[e.displayFix.lat,e.displayFix.lon]);
-  if(points.length){
-    map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
-  }
+  if(points.length) map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
 }
 
 function focusEntity(compKey){
-  const marker = entityMarkerMap[compKey];
+  const marker=entityMarkerMap[compKey];
   if(!marker) return;
-  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
-  marker.setZIndexOffset(9000);
-  map.closePopup();
+  Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
+  marker.setZIndexOffset(9000);map.closePopup();
   map.flyTo(marker.getLatLng(),16,{duration:1});
   setTimeout(()=>marker.openPopup(),700);
+  // on mobile: collapse bottom panel to reveal map
+  if(isMobile()&&!bottomCollapsed) toggleBottom();
 }
 
 function focusTableRow(key){
-  const row = document.querySelector('[data-row-key="' + CSS.escape(key) + '"]');
+  const row=document.querySelector('[data-row-key="'+CSS.escape(key)+'"]');
   if(!row) return;
   row.classList.add('sel');
   row.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(()=>row.classList.remove('sel'),1600);
+  // on mobile: expand bottom panel to show table
+  if(isMobile()&&bottomCollapsed) toggleBottom();
 }
 
+/* ═══════════════════════════════════════════════
+   TABLE RENDERING
+   ═══════════════════════════════════════════════ */
 function buildEntityRow(entity){
-  const fix = entity.displayFix;
-  return {
-    rowKey:entity.compKey,
-    type:'entity',
-    entity,
-    id:entity.id,
-    ts:fix?.ts || null,
-    days:daysSince(fix?.ts || null),
-    status:entity.status,
-    category:entity.category || '-',
-    sex:entity.sex || '-',
-    source:entity.viewSource,
-    zone:entity.zone || '-',
-    collar:entity.collar || '-',
-    lat:Number.isFinite(fix?.lat) ? fix.lat : null,
-    lon:Number.isFinite(fix?.lon) ? fix.lon : null,
-    tagPlace:entity.tagPlace || '-',
-    tl:entity.tl || '-',
-    remarks:(fix?.remarks || entity.remarks || '-')
+  const fix=entity.displayFix;
+  return{
+    rowKey:entity.compKey,type:'entity',entity,id:entity.id,
+    ts:fix?.ts||null,days:daysSince(fix?.ts||null),status:entity.status,
+    category:entity.category||'-',sex:entity.sex||'-',source:entity.viewSource,
+    zone:entity.zone||'-',collar:entity.collar||'-',
+    lat:Number.isFinite(fix?.lat)?fix.lat:null,
+    lon:Number.isFinite(fix?.lon)?fix.lon:null,
+    tagPlace:entity.tagPlace||'-',tl:entity.tl||'-',
+    remarks:(fix?.remarks||entity.remarks||'-')
   };
 }
 
 function renderTable(){
-  const body = document.getElementById('tableBody');
-  body.innerHTML = '';
-  const source = document.getElementById('sourceFilter').value;
-  displayRows = displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent = displayRows.length + ' records';
+  const body=document.getElementById('tableBody');
+  body.innerHTML='';
+  const source=document.getElementById('sourceFilter').value;
+  displayRows=displayedEntities.map(buildEntityRow);
+  document.getElementById('tableBadge').textContent=displayRows.length+' records';
   updateCollarColumn();
-  if(!source && !displayedEntities.length){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
-    return;
+  if(!source&&!displayedEntities.length){
+    body.innerHTML='<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';return;
   }
   if(!displayRows.length){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>';
-    return;
+    body.innerHTML='<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>';return;
   }
   displayRows.forEach(row=>{
-    const tr = document.createElement('tr');
-    tr.dataset.rowKey = row.rowKey;
-    const rowSource = row.source === 'FieldLog' ? 'VHF' : row.source;
-    tr.innerHTML =
-      '<td><strong style="color:' + markerColor(row.entity) + '">' + escapeHtml(row.id) + '</strong></td>' +
-      '<td>' + escapeHtml(fmtDateTime(row.ts)) + '</td>' +
-      '<td>' + escapeHtml(String(row.days)) + '</td>' +
-      '<td>' + badgeHtml(row.status, row.entity.viewSource) + '</td>' +
-      '<td>' + escapeHtml(row.category) + '</td>' +
-      '<td>' + escapeHtml(row.sex) + '</td>' +
-      '<td>' + escapeHtml(rowSource) + '</td>' +
-      '<td>' + escapeHtml(row.zone) + '</td>' +
-      '<td class="collar-cell" style="' + (VIEW_META[source]?.hideCollar ? 'display:none' : '') + '">' + escapeHtml(row.collar) + '</td>' +
-      '<td>' + (row.lat === null ? '-' : row.lat.toFixed(5)) + '</td>' +
-      '<td>' + (row.lon === null ? '-' : row.lon.toFixed(5)) + '</td>' +
-      '<td>' + escapeHtml(row.tagPlace) + '</td>' +
-      '<td>' + escapeHtml(row.tl) + '</td>' +
-      '<td>' + escapeHtml(row.remarks) + '</td>';
+    const tr=document.createElement('tr');
+    tr.dataset.rowKey=row.rowKey;
+    const rowSource=row.source==='FieldLog'?'VHF':row.source;
+    tr.innerHTML=
+      '<td><strong style="color:'+markerColor(row.entity)+'">'+escapeHtml(row.id)+'</strong></td>'+
+      '<td>'+escapeHtml(fmtDateTime(row.ts))+'</td>'+
+      '<td>'+escapeHtml(String(row.days))+'</td>'+
+      '<td>'+badgeHtml(row.status,row.entity.viewSource)+'</td>'+
+      '<td>'+escapeHtml(row.category)+'</td>'+
+      '<td>'+escapeHtml(row.sex)+'</td>'+
+      '<td>'+escapeHtml(rowSource)+'</td>'+
+      '<td>'+escapeHtml(row.zone)+'</td>'+
+      '<td class="collar-cell" style="'+(VIEW_META[source]?.hideCollar?'display:none':'')+'">'+escapeHtml(row.collar)+'</td>'+
+      '<td>'+(row.lat===null?'-':row.lat.toFixed(5))+'</td>'+
+      '<td>'+(row.lon===null?'-':row.lon.toFixed(5))+'</td>'+
+      '<td>'+escapeHtml(row.tagPlace)+'</td>'+
+      '<td>'+escapeHtml(row.tl)+'</td>'+
+      '<td>'+escapeHtml(row.remarks)+'</td>';
     tr.addEventListener('click',()=>{
-      document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
+      document.querySelectorAll('#tableBody tr').forEach(r=>r.classList.remove('sel'));
       tr.classList.add('sel');
       focusEntity(row.entity.compKey);
     });
@@ -1539,238 +1946,154 @@ function renderTable(){
 }
 
 function updateMapFoot(){
-  const source = document.getElementById('sourceFilter').value;
-  if(!source && !displayedEntities.length){
-    document.getElementById('mapFootText').textContent = 'Select a source to begin.';
-    document.getElementById('mapFootCount').textContent = '';
-    return;
+  const source=document.getElementById('sourceFilter').value;
+  if(!source&&!displayedEntities.length){
+    document.getElementById('mapFootText').textContent='Select a source to begin.';
+    document.getElementById('mapFootCount').textContent='';return;
   }
   if(!displayedEntities.length){
-    document.getElementById('mapFootText').textContent = 'No mapped entities match the current filter set.';
-    document.getElementById('mapFootCount').textContent = '0 visible';
-    return;
+    document.getElementById('mapFootText').textContent='No mapped entities match the current filter set.';
+    document.getElementById('mapFootCount').textContent='0 visible';return;
   }
-  const latest = displayedEntities.reduce((memo, entity)=>{
-    if(entity.displayFix?.ts && (!memo || entity.displayFix.ts > memo)) return entity.displayFix.ts;
+  const latest=displayedEntities.reduce((memo,entity)=>{
+    if(entity.displayFix?.ts&&(!memo||entity.displayFix.ts>memo)) return entity.displayFix.ts;
     return memo;
-  }, null);
-  document.getElementById('mapFootText').textContent = 'Latest visible fix: ' + fmtDateTime(latest);
-  document.getElementById('mapFootCount').textContent = displayedEntities.length + ' entities';
+  },null);
+  document.getElementById('mapFootText').textContent='Latest visible fix: '+fmtDateTime(latest);
+  document.getElementById('mapFootCount').textContent=displayedEntities.length+' entities';
 }
 
+/* ═══════════════════════════════════════════════
+   OVERLAYS (Heatmap / KDE)
+   ═══════════════════════════════════════════════ */
 function getOverlayFixes(){
-  const fixes = [];
-  displayedEntities.forEach(entity=>{
-    entity.trackHistory.forEach(fix=>{
-      if(Number.isFinite(fix.lat) && Number.isFinite(fix.lon)) fixes.push(fix);
-    });
-  });
+  const fixes=[];
+  displayedEntities.forEach(entity=>{entity.trackHistory.forEach(fix=>{if(Number.isFinite(fix.lat)&&Number.isFinite(fix.lon))fixes.push(fix);});});
   return fixes;
 }
 
 function renderHeatmap(){
-  const fixes = getOverlayFixes();
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-  if(!fixes.length){
-    heatmapOn = false;
-    document.getElementById('heatBtn').classList.remove('on');
-    return;
-  }
-  heatLayer = L.heatLayer(fixes.map(fix=>[fix.lat,fix.lon,.65]),{
-    radius:22,
-    blur:18,
-    maxZoom:17,
-    gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}
-  }).addTo(map);
+  const fixes=getOverlayFixes();
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  if(!fixes.length){heatmapOn=false;document.getElementById('heatBtn').classList.remove('on');return;}
+  heatLayer=L.heatLayer(fixes.map(fix=>[fix.lat,fix.lon,.65]),{radius:22,blur:18,maxZoom:17,gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}}).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
 function renderKDE(){
-  const fixes = getOverlayFixes();
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-  if(fixes.length < 4){
-    kdeOn = false;
-    document.getElementById('kdeBtn').classList.remove('on');
-    return;
-  }
-  const points = fixes.map(fix=>[fix.lat,fix.lon]);
-  const KDE = L.Layer.extend({
-    initialize(){ this._points = points; },
+  const fixes=getOverlayFixes();
+  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if(fixes.length<4){kdeOn=false;document.getElementById('kdeBtn').classList.remove('on');return;}
+  const points=fixes.map(fix=>[fix.lat,fix.lon]);
+  const KDE=L.Layer.extend({
+    initialize(){this._points=points;},
     onAdd(instanceMap){
-      this._map = instanceMap;
-      this._canvas = document.createElement('canvas');
-      this._canvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
+      this._map=instanceMap;this._canvas=document.createElement('canvas');
+      this._canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
       instanceMap.getPanes().overlayPane.appendChild(this._canvas);
-      instanceMap.on('moveend zoomend resize', this.draw, this);
-      this.draw();
+      instanceMap.on('moveend zoomend resize',this.draw,this);this.draw();
     },
     onRemove(instanceMap){
-      if(this._canvas?.parentNode) this._canvas.parentNode.removeChild(this._canvas);
-      instanceMap.off('moveend zoomend resize', this.draw, this);
+      if(this._canvas?.parentNode)this._canvas.parentNode.removeChild(this._canvas);
+      instanceMap.off('moveend zoomend resize',this.draw,this);
     },
     draw(){
-      const size = this._map.getSize();
-      const canvas = this._canvas;
-      canvas.width = size.x;
-      canvas.height = size.y;
-      L.DomUtil.setPosition(canvas, this._map.containerPointToLayerPoint([0,0]));
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,size.x,size.y);
-      const pixels = this._points.map(point=>this._map.latLngToContainerPoint(L.latLng(point[0],point[1])));
-      const bandwidth = 26;
+      const size=this._map.getSize(),canvas=this._canvas;
+      canvas.width=size.x;canvas.height=size.y;
+      L.DomUtil.setPosition(canvas,this._map.containerPointToLayerPoint([0,0]));
+      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,size.x,size.y);
+      const pixels=this._points.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
+      const bandwidth=26;
       pixels.forEach(pixel=>{
-        const gradient = ctx.createRadialGradient(pixel.x,pixel.y,0,pixel.x,pixel.y,bandwidth);
-        gradient.addColorStop(0,'rgba(127,29,29,.35)');
-        gradient.addColorStop(.45,'rgba(239,68,68,.18)');
-        gradient.addColorStop(1,'rgba(255,255,255,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth*2,bandwidth*2);
+        const gradient=ctx.createRadialGradient(pixel.x,pixel.y,0,pixel.x,pixel.y,bandwidth);
+        gradient.addColorStop(0,'rgba(127,29,29,.35)');gradient.addColorStop(.45,'rgba(239,68,68,.18)');gradient.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=gradient;ctx.fillRect(pixel.x-bandwidth,pixel.y-bandwidth,bandwidth*2,bandwidth*2);
       });
     }
   });
-  kdeLayer = new KDE().addTo(map);
+  kdeLayer=new KDE().addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
 function toggleHeatmap(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using the heatmap.'); return; }
-  heatmapOn = !heatmapOn;
-  if(heatmapOn) kdeOn = false;
-  document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
+  if(!displayedEntities.length){toast('Apply a source filter before using the heatmap.');return;}
+  heatmapOn=!heatmapOn;if(heatmapOn)kdeOn=false;
+  document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
   document.getElementById('kdeBtn').classList.remove('on');
-  if(!heatmapOn){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-    return;
-  }
+  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
+  if(mobHeat)mobHeat.classList.toggle('on',heatmapOn);if(mobKde)mobKde.classList.remove('on');
+  if(!heatmapOn){if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
   renderHeatmap();
 }
 
 function toggleKDE(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using KDE.'); return; }
-  kdeOn = !kdeOn;
-  if(kdeOn) heatmapOn = false;
-  document.getElementById('kdeBtn').classList.toggle('on', kdeOn);
+  if(!displayedEntities.length){toast('Apply a source filter before using KDE.');return;}
+  kdeOn=!kdeOn;if(kdeOn)heatmapOn=false;
+  document.getElementById('kdeBtn').classList.toggle('on',kdeOn);
   document.getElementById('heatBtn').classList.remove('on');
-  if(!kdeOn){
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-    return;
-  }
+  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
+  if(mobKde)mobKde.classList.toggle('on',kdeOn);if(mobHeat)mobHeat.classList.remove('on');
+  if(!kdeOn){if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
   renderKDE();
 }
 
 function exportCSV(){
-  if(!displayRows.length){ toast('No visible records to export.'); return; }
-  const rows = [['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
+  if(!displayRows.length){toast('No visible records to export.');return;}
+  const rows=[['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
   displayRows.forEach(row=>{
-    rows.push([
-      row.id,
-      fmtDateTime(row.ts),
-      row.days,
-      statusLabel(row.status, row.entity.viewSource),
-      row.category,
-      row.sex,
-      row.source,
-      row.zone,
-      row.collar,
-      row.lat ?? '',
-      row.lon ?? '',
-      row.tagPlace,
-      row.tl,
-      row.remarks
-    ]);
+    rows.push([row.id,fmtDateTime(row.ts),row.days,statusLabel(row.status,row.entity.viewSource),row.category,row.sex,row.source,row.zone,row.collar,row.lat??'',row.lon??'',row.tagPlace,row.tl,row.remarks]);
   });
-  const csv = rows.map(row=>row.map(value=>'"' + String(value).replace(/"/g,'""') + '"').join(',')).join('\n');
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  link.download = 'gep_telemetry_' + new Date().toISOString().slice(0,10) + '.csv';
-  link.click();
-  URL.revokeObjectURL(link.href);
+  const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  link.download='gep_telemetry_'+new Date().toISOString().slice(0,10)+'.csv';
+  link.click();URL.revokeObjectURL(link.href);
 }
 
-function formatUpdateText(text) {
+/* ═══════════════════════════════════════════════
+   FIELD UPDATES PANEL
+   ═══════════════════════════════════════════════ */
+function formatUpdateText(text){
   if(!text) return '';
-  const blocks = [
-    'Current Status', 
-    'Pali Release Site Aggregation', 
-    'Suspected Dropped Radios & Observations',
-    'Lost Radios & Predation',
-    'Already present:',
-    'Recently found at Pali release stretch:'
-  ];
-  let html = escapeHtml(text);
-  blocks.forEach(b => {
-    const regex = new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-    html = html.replace(regex, '<strong>' + b + '</strong>');
+  const blocks=['Current Status','Pali Release Site Aggregation','Suspected Dropped Radios & Observations','Lost Radios & Predation','Already present:','Recently found at Pali release stretch:'];
+  let html=escapeHtml(text);
+  blocks.forEach(b=>{
+    const regex=new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
+    html=html.replace(regex,'<strong>'+b+'</strong>');
   });
   return html;
 }
 
 function getUpdateDate(row){
-  const raw = gc(row,
-    'Date','date',
-    'Update Date','UpdateDate','update date','updatedate',
-    'Timestamp','timestamp',
-    'Posted','posted',
-    'When','when',
-    'Field Date','FieldDate','field date',
-    'Log Date','LogDate','log date'
-  );
+  const raw=gc(row,'Date','date','Update Date','UpdateDate','update date','updatedate','Timestamp','timestamp','Posted','posted','When','when','Field Date','FieldDate','field date','Log Date','LogDate','log date');
   return parseTagDate(raw);
 }
 
 function loadUpdates(rows){
-  updatesRows = rows || [];
-  const latestDate = document.getElementById('fuDate');
-  const latestText = document.getElementById('fuText');
-  const list = document.getElementById('fuList');
-  list.innerHTML = '';
-
-  const sorted = updatesRows
-    .filter(row => {
-      const hasDate = !!getUpdateDate(row);
-      const hasText = !!(gc(row,'Update','update','Notes','Text','notes','text','Content','content'));
-      return hasDate || hasText;
-    })
-    .sort((a, b) => {
-      const da = getUpdateDate(a);
-      const db = getUpdateDate(b);
-      const ta = da ? da.getTime() : -Infinity;
-      const tb = db ? db.getTime() : -Infinity;
-      return tb - ta;
-    });
-
+  updatesRows=rows||[];
+  const latestDate=document.getElementById('fuDate'),latestText=document.getElementById('fuText'),list=document.getElementById('fuList');
+  list.innerHTML='';
+  const sorted=updatesRows.filter(row=>{
+    const hasDate=!!getUpdateDate(row),hasText=!!(gc(row,'Update','update','Notes','Text','notes','text','Content','content'));
+    return hasDate||hasText;
+  }).sort((a,b)=>{
+    const da=getUpdateDate(a),db=getUpdateDate(b),ta=da?da.getTime():-Infinity,tb=db?db.getTime():-Infinity;
+    return tb-ta;
+  });
   if(!sorted.length){
-    latestDate.textContent = 'No updates';
-    latestText.innerHTML = '';
-    list.innerHTML = '<div class="fu"><div class="update-content">No field updates available.</div></div>';
-    return;
+    latestDate.textContent='No updates';latestText.innerHTML='';
+    list.innerHTML='<div class="fu"><div class="update-content">No field updates available.</div></div>';return;
   }
-
-  const latestRowDate = getUpdateDate(sorted[0]);
-  latestDate.textContent = latestRowDate
-    ? fmtDateOnly(latestRowDate)
-    : (gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date') || 'Unknown date');
-
-  latestText.innerHTML = formatUpdateText(
-    gc(sorted[0],'Update','update','Notes','Text','notes','text','Content','content')
-  );
-
-  sorted.slice(1).forEach(row => {
-    const rowDate = getUpdateDate(row);
-    const dateLabel = rowDate
-      ? fmtDateOnly(rowDate)
-      : (gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date') || 'Unknown date');
-    const item = document.createElement('div');
-    item.className = 'fu';
-    item.innerHTML =
-      '<div class="fu-date">' + escapeHtml(dateLabel) + '</div>' +
-      '<div class="update-content">' + formatUpdateText(
-        gc(row,'Update','update','Notes','Text','notes','text','Content','content')
-      ) + '</div>';
+  const latestRowDate=getUpdateDate(sorted[0]);
+  latestDate.textContent=latestRowDate?fmtDateOnly(latestRowDate):(gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date')||'Unknown date');
+  latestText.innerHTML=formatUpdateText(gc(sorted[0],'Update','update','Notes','Text','notes','text','Content','content'));
+  sorted.slice(1).forEach(row=>{
+    const rowDate=getUpdateDate(row);
+    const dateLabel=rowDate?fmtDateOnly(rowDate):(gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date')||'Unknown date');
+    const item=document.createElement('div');item.className='fu';
+    item.innerHTML='<div class="fu-date">'+escapeHtml(dateLabel)+'</div><div class="update-content">'+formatUpdateText(gc(row,'Update','update','Notes','Text','notes','text','Content','content'))+'</div>';
     list.appendChild(item);
   });
 }
@@ -1779,123 +2102,124 @@ function toggleFieldPanel(){
   document.getElementById('fp').classList.toggle('open');
   document.getElementById('fpBg').classList.toggle('open');
 }
-
 function closeFieldPanel(){
   document.getElementById('fp').classList.remove('open');
   document.getElementById('fpBg').classList.remove('open');
 }
 
+/* ═══════════════════════════════════════════════
+   LAYOUT CONTROLS
+   ═══════════════════════════════════════════════ */
 function toggleFilterBar(){
-  filterBarHidden = !filterBarHidden;
-  document.getElementById('fbar').classList.toggle('hidden', filterBarHidden);
-  document.getElementById('filterToggleBtn').classList.toggle('on', !filterBarHidden);
-  document.getElementById('map-wrap').style.top = filterBarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
+  filterBarHidden=!filterBarHidden;
+  document.getElementById('fbar').classList.toggle('hidden',filterBarHidden);
+  document.getElementById('filterToggleBtn').classList.toggle('on',!filterBarHidden);
+  document.getElementById('map-wrap').style.top=filterBarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
   setTimeout(()=>map.invalidateSize(),220);
 }
 
-function resetView(){
-  map.setView(MAP_CENTER, MAP_ZOOM);
-}
+function resetView(){map.setView(MAP_CENTER,MAP_ZOOM);}
 
 function toggleBottom(){
-  bottomCollapsed = !bottomCollapsed;
-  const btm = document.getElementById('btm');
-  const wrap = document.getElementById('map-wrap');
-  const button = document.getElementById('btmToggleBtn');
-  if(bottomCollapsed){
-    btm.style.height = '42px';
-    wrap.style.bottom = '42px';
-    button.textContent = 'Show';
+  bottomCollapsed=!bottomCollapsed;
+  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap'),btn=document.getElementById('btmToggleBtn');
+  if(isMobile()){
+    if(bottomCollapsed){
+      btm.style.height='52px';wrap.style.bottom='52px';btn.textContent='Show';
+      btm.classList.remove('mobile-expanded');
+    }else{
+      btm.style.height='55vh';wrap.style.bottom='55vh';btn.textContent='Hide';
+      btm.classList.add('mobile-expanded');
+    }
   }else{
-    btm.style.height = bottomHeight + 'px';
-    wrap.style.bottom = bottomHeight + 'px';
-    button.textContent = 'Hide';
+    if(bottomCollapsed){btm.style.height='42px';wrap.style.bottom='42px';btn.textContent='Show';}
+    else{btm.style.height=bottomHeight+'px';wrap.style.bottom=bottomHeight+'px';btn.textContent='Hide';}
   }
   setTimeout(()=>map.invalidateSize(),220);
 }
 
 function initResize(){
-  const bar = document.getElementById('resizeBar');
-  const btm = document.getElementById('btm');
-  const wrap = document.getElementById('map-wrap');
-  let dragging = false;
-  let startY = 0;
-  let startHeight = 0;
-  function begin(y){
-    if(bottomCollapsed) return;
-    dragging = true;
-    startY = y;
-    startHeight = btm.offsetHeight;
-    document.body.style.cursor = 'ns-resize';
-  }
+  const bar=document.getElementById('resizeBar'),btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
+  let dragging=false,startY=0,startHeight=0;
+  function begin(y){if(bottomCollapsed||isMobile()) return;dragging=true;startY=y;startHeight=btm.offsetHeight;document.body.style.cursor='ns-resize';}
   function move(y){
     if(!dragging) return;
-    const nextHeight = Math.min(Math.max(120, startHeight + (startY - y)), window.innerHeight * .7);
-    bottomHeight = nextHeight;
-    btm.style.height = nextHeight + 'px';
-    wrap.style.bottom = nextHeight + 'px';
+    const nextHeight=Math.min(Math.max(120,startHeight+(startY-y)),window.innerHeight*.7);
+    bottomHeight=nextHeight;btm.style.height=nextHeight+'px';wrap.style.bottom=nextHeight+'px';
   }
-  function end(){
-    dragging = false;
-    document.body.style.cursor = '';
-    setTimeout(()=>map.invalidateSize(),100);
-  }
-  bar.addEventListener('mousedown', event=>{ begin(event.clientY); event.preventDefault(); });
-  document.addEventListener('mousemove', event=>move(event.clientY));
-  document.addEventListener('mouseup', end);
+  function end(){dragging=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),100);}
+  bar.addEventListener('mousedown',event=>{begin(event.clientY);event.preventDefault();});
+  document.addEventListener('mousemove',event=>move(event.clientY));
+  document.addEventListener('mouseup',end);
 }
 
+/* ═══════════════════════════════════════════════
+   DATA LOADING
+   ═══════════════════════════════════════════════ */
 async function loadAllData(){
-  const button = document.getElementById('refreshBtn');
+  const button=document.getElementById('refreshBtn');
   button.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
   ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('ok','err');
+    const el=document.getElementById(id);if(el)el.classList.remove('ok','err');
   });
   loadingCopy('Fetching Google Sheets and GeoJSON layers...');
   try{
-    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
-      fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
-      fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
-      fetchCSV(URLS.fl).then(data=>{ setLoadingState('ld-fl', true); return data; }).catch(()=>{ setLoadingState('ld-fl', false); return []; }),
-      fetchCSV(URLS.pali).then(data=>{ setLoadingState('ld-pali', true); return data; }).catch(()=>{ setLoadingState('ld-pali', false); return []; }),
-      fetchJSON(URLS.zones).then(data=>{ setLoadingState('ld-zones', true); return data; }).catch(()=>{ setLoadingState('ld-zones', false); return null; }),
+    const [masterRows,atsRows,fieldRows,paliRows,zonesData,updateRows]=await Promise.all([
+      fetchCSV(URLS.master).then(data=>{setLoadingState('ld-master',true);return data;}).catch(()=>{setLoadingState('ld-master',false);return[];}),
+      fetchCSV(URLS.ats).then(data=>{setLoadingState('ld-ats',true);return data;}).catch(()=>{setLoadingState('ld-ats',false);return[];}),
+      fetchCSV(URLS.fl).then(data=>{setLoadingState('ld-fl',true);return data;}).catch(()=>{setLoadingState('ld-fl',false);return[];}),
+      fetchCSV(URLS.pali).then(data=>{setLoadingState('ld-pali',true);return data;}).catch(()=>{setLoadingState('ld-pali',false);return[];}),
+      fetchJSON(URLS.zones).then(data=>{setLoadingState('ld-zones',true);return data;}).catch(()=>{setLoadingState('ld-zones',false);return null;}),
       fetchCSV(URLS.updates).catch(()=>[])
     ]);
     loadingCopy('Routing records through the master dictionary...');
-    fixBuckets = {};
-    buildMasterMaps(masterRows);
-    ingestATS(atsRows);
-    ingestFieldLog(fieldRows);
-    ingestPali(paliRows);
-    geojsonData = zonesData;
+    fixBuckets={};buildMasterMaps(masterRows);
+    ingestATS(atsRows);ingestFieldLog(fieldRows);ingestPali(paliRows);
+    geojsonData=zonesData;
     loadingCopy('Assigning zones and merging entities...');
     if(geojsonData) assignZones();
-    mergeEntities();
-    loadUpdates(updateRows);
+    mergeEntities();loadUpdates(updateRows);
     rebuildFilters();
-    updateFieldUpdatesVisibility();
-    updateCollarColumn();
+    if(isMobile()) rebuildMobileFilters();
+    updateFieldUpdatesVisibility();updateCollarColumn();
     clearFilters();
-    document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    toast('Loaded ' + entities.length + ' routed telemetry entities.', true);
+    document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    toast('Loaded '+entities.length+' routed telemetry entities.',true);
   }catch(error){
-    console.error(error);
-    toast('Failed to load telemetry data.');
+    console.error(error);toast('Failed to load telemetry data.');
   }finally{
     button.classList.remove('loading');
-    const elapsed = performance.now() - SPLASH_START;
-    const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
-    setTimeout(()=>document.getElementById('loading').classList.add('hide'), wait);
+    const elapsed=performance.now()-SPLASH_START,wait=Math.max(0,SPLASH_MIN_MS-elapsed);
+    setTimeout(()=>document.getElementById('loading').classList.add('hide'),wait);
   }
 }
 
-window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
+/* ═══════════════════════════════════════════════
+   RESIZE OBSERVER — keeps map sized correctly
+   ═══════════════════════════════════════════════ */
+window.addEventListener('resize',()=>{
+  setTimeout(()=>map.invalidateSize(),150);
+});
 
+/* Observe the bottom panel height change and update map-wrap */
+const resizeObserver=new ResizeObserver(()=>{
+  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
+  if(btm&&wrap&&!bottomCollapsed){
+    wrap.style.bottom=btm.offsetHeight+'px';
+  }
+  setTimeout(()=>map&&map.invalidateSize(),80);
+});
+resizeObserver.observe(document.getElementById('btm'));
+
+/* ═══════════════════════════════════════════════
+   BOOT
+   ═══════════════════════════════════════════════ */
 (function boot(){
   initMap();
   initResize();
+  // Set up mobile bottom panel on small screens
+  if(isMobile()) initMobileBottomPanel();
   loadAllData();
 })();
 </script>
