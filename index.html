@@ -9,9 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<!-- ═══════════════════════════════════════════════════════════
-     BASE STYLES (desktop-first, unchanged from original)
-     ═══════════════════════════════════════════════════════════ -->
 <style>
 :root{
   --forest:#173f31;
@@ -363,7 +360,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 
 <body>
 
-<!-- ─── Loading Screen ─── -->
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
@@ -386,10 +382,8 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<!-- ─── Toast ─── -->
 <div id="toast"></div>
 
-<!-- ─── Header ─── -->
 <header id="hdr">
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
@@ -405,7 +399,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="hdr-sub">Desktop telemetry monitor | ATS + VHF + hatchling routing</div>
   </div>
 
-  <!-- Desktop-only status blocks (row 2) -->
   <div id="statusBlocks">
     <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock1" type="button" onclick="toggleStatusBlock(1)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
@@ -421,12 +414,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">R</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
     <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()" style="display:none">Field Updates</button>
-    <!-- Mobile-only hamburger (shown via media query) -->
     <button class="hbtn" id="mobileMenuBtn" type="button" onclick="openMobileDrawer()" aria-label="Open filters" style="display:none">☰ Filters</button>
   </div>
 </header>
 
-<!-- ─── Desktop Filter Bar ─── -->
 <div id="fbar">
   <div id="fbar-inner">
     <div class="fg">
@@ -509,7 +500,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<!-- ─── Mobile Filter Drawer ─── -->
 <div id="drawerBg" onclick="closeMobileDrawer()"></div>
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
@@ -519,7 +509,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
   <div class="drawer-body">
 
-    <!-- Source -->
     <div class="drawer-row">
       <span class="drawer-label">Data Source</span>
       <select class="fsel" id="mobileSourceFilter" onchange="onMobileSourceChange()">
@@ -530,7 +519,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </select>
     </div>
 
-    <!-- Radio ID -->
     <div class="drawer-row">
       <span class="drawer-label">Radio ID</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -548,7 +536,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
 
-    <!-- Category -->
     <div class="drawer-row">
       <span class="drawer-label">Category</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -566,7 +553,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
 
-    <!-- Zone -->
     <div class="drawer-row">
       <span class="drawer-label">Zone</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -584,7 +570,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
 
-    <!-- Status -->
     <div class="drawer-row">
       <span class="drawer-label">Status</span>
       <div class="ms-wrap" style="flex-shrink:0;width:100%">
@@ -602,7 +587,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
 
-    <!-- Overlays -->
     <div class="drawer-row">
       <span class="drawer-label">Map Overlays</span>
       <div class="drawer-toggles">
@@ -611,14 +595,12 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       </div>
     </div>
 
-    <!-- Export -->
     <div class="drawer-row">
       <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px" type="button" onclick="exportCSV();closeMobileDrawer()">
         ↓ Export CSV
       </button>
     </div>
 
-    <!-- Field Updates (shown when PaliFT source active) -->
     <div class="drawer-row" id="mob-fieldUpdatesRow" style="display:none">
       <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px;background:#eef8f1;color:var(--forest-2);border-color:#8ab99a" type="button" onclick="toggleFieldPanel();closeMobileDrawer()">
         📋 Field Updates
@@ -632,7 +614,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<!-- ─── Map Container ─── -->
 <div id="map-wrap">
   <div id="map"></div>
   <div class="map-fab">
@@ -646,7 +627,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<!-- ─── Field Updates Panel ─── -->
 <div id="fpBg" onclick="closeFieldPanel()"></div>
 <aside id="fp">
   <div class="fp-hdr">
@@ -666,7 +646,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </aside>
 
-<!-- ─── Bottom Panel ─── -->
 <div id="btm">
   <div id="resizeBar"></div>
   <div id="btmHdr">
@@ -702,9 +681,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     RESPONSIVE STYLES
-     ═══════════════════════════════════════════════════════════ -->
 <style>
 /* ── Tablet tweaks (768–1024px) ── */
 @media(max-width:1024px){
@@ -857,7 +833,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 }
 </style>
 
-<!-- ─── Leaflet + dependencies ─── -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -882,7 +857,13 @@ const MAP_ZOOM = 12;
 const TODAY = new Date();
 const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
-const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
+
+// Explicit overrides to lock the dashboard strictly to the Pali Field Report 
+const DEAD_IDS = new Set(['35', '36', '64', '66', '70', '76', '98']); // Recovered Radios 
+const GONE_IDS = new Set(['30', '33', '34', '38', '96']);
+const MISSING_IDS = new Set(['39', '40', '62', '82']);
+const ACTIVE_IDS = new Set(['31', '32', '37', '65', '67', '69', '71', '72', '74', '78', '80', '90', '92', '94']);
+
 const NOT_DEPLOYED_COLLAR = '060336';
 const ZONE_SNAP_MAX_KM = 0.5;
 const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
@@ -1343,7 +1324,14 @@ function adultStatus(days,collar){
   return 'crit';
 }
 function hatchStatus(id,days){
-  if(DEAD_IDS.has(String(id))) return 'dead';
+  const strId = String(id);
+  // Strict override based on explicitly provided field categories
+  if(DEAD_IDS.has(strId)) return 'dead';
+  if(GONE_IDS.has(strId)) return 'gone';
+  if(MISSING_IDS.has(strId)) return 'tmiss';
+  if(ACTIVE_IDS.has(strId)) return 'active';
+  
+  // Fallback if an ID is missing from the explicit lists
   if(days<=10) return 'active';
   if(days<=30) return 'tmiss';
   return 'gone';
