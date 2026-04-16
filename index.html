@@ -113,7 +113,7 @@ button{cursor:pointer}
 /* ─── Filter Bar (desktop) ─── */
 #fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
+#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;}
 .fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
@@ -126,7 +126,7 @@ button{cursor:pointer}
 
 /* ─── Multi-select dropdowns ─── */
 .ms-wrap{position:relative;flex-shrink:0}
-.ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
+.ms-btn{min-width:110px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
@@ -182,6 +182,27 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
 .pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
 .pop-telemetry-sep{height:1px;background:var(--line);margin:8px 0 8px 0}
+.pop-animal-id{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pop-animal-id .pop-label{color:#166534}
+.pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
+.pop-details-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--line-2);
+  background: var(--panel-2);
+  color: var(--forest-2);
+  font: 700 .62rem var(--mono);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  transition: all .15s ease;
+}
+.pop-details-btn:hover {
+  background: #eef8f1;
+  border-color: #8ab99a;
+}
 
 /* ─── Field Updates Panel ─── */
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
@@ -394,6 +415,51 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
     <div class="fsep"></div>
     <div class="fg">
+      <label>Animal_ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-srno" type="button" onclick="toggleMS('srno',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-srno">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('srno')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('srno')">None</button>
+            <span class="ms-count" id="msc-srno"></span>
+          </div>
+          <div class="ms-items" id="msi-srno"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Enclosure_ID</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-enc" type="button" onclick="toggleMS('enc',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-enc">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('enc')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('enc')">None</button>
+            <span class="ms-count" id="msc-enc"></span>
+          </div>
+          <div class="ms-items" id="msi-enc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
+      <label>Pen</label>
+      <div class="ms-wrap">
+        <button class="ms-btn disabled" id="msb-pen" type="button" onclick="toggleMS('pen',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <div class="ms-drop" id="msd-pen">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('pen')">All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('pen')">None</button>
+            <span class="ms-count" id="msc-pen"></span>
+          </div>
+          <div class="ms-items" id="msi-pen"></div>
+        </div>
+      </div>
+    </div>
+    <div class="fsep"></div>
+    <div class="fg">
       <label>Radio ID</label>
       <div class="ms-wrap">
         <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
@@ -467,7 +533,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="drawer-handle"></div>
   <div class="drawer-hdr">
-    <span class="drawer-title">🔍 Filters &amp; Tools</span>
+    <span class="drawer-title">🔍 Filters & Tools</span>
     <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
   </div>
   <div class="drawer-body">
@@ -479,6 +545,54 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         <option value="FieldLog">Field Log (VHF)</option>
         <option value="PaliFT">Pali FT (Hatchlings)</option>
       </select>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Animal_ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-srno" type="button" onclick="toggleMobMS('srno',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-srno">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('srno')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('srno')">None</button>
+            <span class="ms-count" id="mob-msc-srno"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-srno"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Enclosure_ID</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-enc" type="button" onclick="toggleMobMS('enc',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-enc">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('enc')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('enc')">None</button>
+            <span class="ms-count" id="mob-msc-enc"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-enc"></div>
+        </div>
+      </div>
+    </div>
+    <div class="drawer-row">
+      <span class="drawer-label">Pen</span>
+      <div class="ms-wrap" style="flex-shrink:0;width:100%">
+        <button class="ms-btn disabled" id="mob-msb-pen" type="button" onclick="toggleMobMS('pen',event)">
+          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
+        </button>
+        <div class="ms-drop" id="mob-msd-pen">
+          <div class="ms-head">
+            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('pen')">All</button>
+            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('pen')">None</button>
+            <span class="ms-count" id="mob-msc-pen"></span>
+          </div>
+          <div class="ms-items" id="mob-msi-pen"></div>
+        </div>
+      </div>
     </div>
     <div class="drawer-row">
       <span class="drawer-label">Radio ID</span>
@@ -614,6 +728,9 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <table class="dtbl">
       <thead>
         <tr>
+          <th>Animal_ID</th>
+          <th>Enclosure_ID</th>
+          <th>Pen</th>
           <th>Radio ID</th>
           <th>Last Fix</th>
           <th>Days</th>
@@ -631,7 +748,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="no-data"><td colspan="14">Select a source to display telemetry records.</td></tr>
+        <tr class="no-data"><td colspan="17">Select a source to display telemetry records.</td></tr>
       </tbody>
     </table>
   </div>
@@ -716,6 +833,24 @@ const MISSING_START_IDS  = new Set(['30','33','34','96']);
 const WATER_IDS          = new Set(['31','38','72']);
 const HARD_MISSING_IDS   = new Set(['39','40','62','82']);
 const HARD_ACTIVE_IDS    = new Set(['32','37','65','67','69','71','74','78','80','90','92','94']);
+
+const SR_NO_MAP = {
+  '30':{ srNo:1,  pen:'P3', animal:'P3-G3' }, '31':{ srNo:2,  pen:'P3', animal:'P3-G1' },
+  '32':{ srNo:3,  pen:'P3', animal:'P3-G4' }, '33':{ srNo:4,  pen:'P3', animal:'P3-G5' },
+  '34':{ srNo:5,  pen:'P3', animal:'P3-G2' }, '35':{ srNo:6,  pen:'P4', animal:'P4-G2' },
+  '36':{ srNo:7,  pen:'P4', animal:'P4-G4' }, '37':{ srNo:8,  pen:'P4', animal:'P4-G1' },
+  '38':{ srNo:9,  pen:'P4', animal:'P4-G3' }, '39':{ srNo:10, pen:'P4', animal:'P4-G5' },
+  '40':{ srNo:11, pen:'P5', animal:'P5-G3' }, '62':{ srNo:12, pen:'P5', animal:'P5-G1' },
+  '64':{ srNo:13, pen:'P5', animal:'P5-G5' }, '66':{ srNo:14, pen:'P5', animal:'P5-G2' },
+  '68':{ srNo:15, pen:'P5', animal:'P5-G4' }, '70':{ srNo:16, pen:'P6', animal:'P6-G5' },
+  '72':{ srNo:17, pen:'P6', animal:'P6-G1' }, '74':{ srNo:18, pen:'P6', animal:'P6-G4' },
+  '76':{ srNo:19, pen:'P6', animal:'P6-G3' }, '78':{ srNo:20, pen:'P6', animal:'P6-G2' },
+  '80':{ srNo:21, pen:'P7', animal:'P7-G2' }, '82':{ srNo:22, pen:'P7', animal:'P7-G1' },
+  '84':{ srNo:23, pen:'P7', animal:'P7-G5' }, '86':{ srNo:24, pen:'P7', animal:'P7-G4' },
+  '88':{ srNo:25, pen:'P7', animal:'P7-G3' }, '90':{ srNo:26, pen:'P8', animal:'P8-G2' },
+  '92':{ srNo:27, pen:'P8', animal:'P8-G3' }, '94':{ srNo:28, pen:'P8', animal:'P8-G1' },
+  '96':{ srNo:29, pen:'P8', animal:'P8-G5' }, '98':{ srNo:30, pen:'P8', animal:'P8-G4' }
+};
 
 const MAP_CENTER = [25.84,76.56];
 const MAP_ZOOM = 12;
@@ -849,7 +984,14 @@ function initMap(){
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
-  oms.addListener('click', marker => marker.openPopup());
+  
+  oms.addListener('click', m => {
+    L.popup({maxWidth:340})
+     .setLatLng(m.getLatLng())
+     .setContent(m._popupContent)
+     .openOn(map);
+  });
+
   map.on('click',()=>{
     document.querySelectorAll('.leaflet-interactive').forEach(el=>el.blur());
   });
@@ -898,9 +1040,11 @@ function onMobileSourceChange(){
 
 function mobileApplyFilters(){
   // copy mobile MS selections to desktop MS before applying
-  ['rid','cat','zone','status'].forEach(key=>{
+  ['rid','cat','zone','status','srno','enc','pen'].forEach(key=>{
+    const list = document.getElementById('mob-msi-' + key);
+    if(!list) return;
     const mobChecked = new Set(
-      [...document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]:checked')].map(i=>i.value)
+      [...list.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value)
     );
     document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(inp=>{
       inp.checked = mobChecked.has(inp.value);
@@ -924,6 +1068,7 @@ function mobileClearFilters(){
   clearVisuals(true);
   renderTable();
   updateMapFoot();
+  map.closePopup();
   closeMobileDrawer();
 }
 
@@ -939,6 +1084,7 @@ function toggleMobMS(key, event){
 }
 
 function mobMsSelectAll(key){
+  clearOtherIdFilters(key);
   document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]').forEach(i=>{i.checked=true;});
   updateMobMSBtn(key);
 }
@@ -969,6 +1115,15 @@ function rebuildMobileFilters(){
   const source = document.getElementById('sourceFilter').value;
   const sourcePool = source ? getViewEntities(source) : null;
   const poolForFilters = sourcePool || entities;
+
+  const srnoOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
+  buildMobMSOptions('srno', srnoOpts);
+
+  const encOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
+  buildMobMSOptions('enc', encOpts);
+
+  const penOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
+  buildMobMSOptions('pen', penOpts);
 
   const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
     String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
@@ -1012,8 +1167,11 @@ function buildMobMSOptions(key, options, formatter){
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.value = option;
-    input.checked = true;
-    input.addEventListener('change',()=>updateMobMSBtn(key));
+    input.checked = false; // Start empty by default
+    input.addEventListener('change',(e)=>{
+       if(e.target.checked) clearOtherIdFilters(key);
+       updateMobMSBtn(key);
+    });
     label.appendChild(input);
     label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
     list.appendChild(label);
@@ -1173,7 +1331,7 @@ function fmtDateOnly(ts){
   return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
 }
 function escapeHtml(value){
-  return String(value??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(value??'').replace(/&/g,'&').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function toast(message,ok=false){
   const el=document.getElementById('toast');
@@ -1181,6 +1339,26 @@ function toast(message,ok=false){
   el.className=ok?'on ok':'on';
   clearTimeout(el._timer);
   el._timer=setTimeout(()=>{el.className='';},3600);
+}
+
+function getSrNoInfo(entity){
+  let info = SR_NO_MAP[entity.id];
+  if(!info){
+    const oldId = RETAG_NEW_TO_OLD[entity.id] || entity.oldId;
+    if(oldId) info = SR_NO_MAP[oldId];
+  }
+  return info || null;
+}
+
+function togglePopDetails(btn) {
+  const extra = btn.nextElementSibling;
+  if (extra.style.display === 'none' || !extra.style.display) {
+    extra.style.display = 'block';
+    btn.textContent = 'Hide Details ▴';
+  } else {
+    extra.style.display = 'none';
+    btn.textContent = 'View More Details ▾';
+  }
 }
 
 function adultStatus(days,collar){
@@ -1472,7 +1650,7 @@ function updateStatusBlocks(source,pool){
       label.textContent=counts[i].label;
       count.textContent=counts[i].count;
     } else {
-      el.style.display = 'none'; // Hide unused blocks (e.g. 5th block on ATS)
+      el.style.display = 'none'; // Hide unused blocks
     }
   }
 }
@@ -1500,6 +1678,32 @@ function updateLegend(source){
 /* ═══════════════════════════════════════════════
    DESKTOP MULTISELECT
    ═══════════════════════════════════════════════ */
+function clearOtherIdFilters(activeKey) {
+  const specificIds = ['srno', 'enc', 'rid'];
+  const broadCats = ['pen', 'zone', 'cat', 'status'];
+
+  let keysToClear = [];
+  if (specificIds.includes(activeKey)) {
+    keysToClear = ['srno', 'enc', 'rid', 'pen', 'zone', 'cat', 'status'].filter(k => k !== activeKey);
+  } else if (broadCats.includes(activeKey)) {
+    keysToClear = specificIds;
+  }
+
+  keysToClear.forEach(k => {
+    const desktopList = document.getElementById('msi-'+k);
+    if(desktopList) {
+      desktopList.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false);
+      updateMSBtn(k);
+    }
+    const mobileList = document.getElementById('mob-msi-'+k);
+    if(mobileList) {
+      mobileList.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false);
+      const mobBtn = document.getElementById('mob-msb-'+k);
+      if (mobBtn) updateMobMSBtn(k);
+    }
+  });
+}
+
 function resetMultiSelect(key,message,disabled){
   const btn=document.getElementById('msb-'+key),list=document.getElementById('msi-'+key),counter=document.getElementById('msc-'+key);
   btn.classList.toggle('disabled',!!disabled);btn.classList.remove('active');
@@ -1517,8 +1721,11 @@ function buildMSOptions(key,options,formatter,preserveSelection=false){
   options.forEach(option=>{
     const label=document.createElement('label');label.className='ms-item';
     const input=document.createElement('input');input.type='checkbox';input.value=option;
-    input.checked=previous.size?previous.has(option):true;
-    input.addEventListener('change',()=>updateMSBtn(key));
+    input.checked = false; // Start empty by default
+    input.addEventListener('change',(e)=>{
+       if(e.target.checked) clearOtherIdFilters(key);
+       updateMSBtn(key);
+    });
     label.appendChild(input);label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
     list.appendChild(label);
   });
@@ -1546,8 +1753,16 @@ function toggleMS(key,event){
   if(!isOpen) drop.classList.add('open');
 }
 
-function msSelectAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});updateMSBtn(key);}
-function msClearAll(key){document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});updateMSBtn(key);}
+function msSelectAll(key){
+  clearOtherIdFilters(key);
+  document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});
+  updateMSBtn(key);
+}
+
+function msClearAll(key){
+  document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});
+  updateMSBtn(key);
+}
 
 document.addEventListener('click',event=>{
   if(!event.target.closest('#fbar .ms-wrap')){
@@ -1563,17 +1778,30 @@ function rebuildFilters(){
   const sourcePool=source?getViewEntities(source):null;
   const poolForFilters=sourcePool||entities;
 
+  const srnoOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
+  buildMSOptions('srno', srnoOptions);
+
+  const encOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
+  buildMSOptions('enc', encOptions);
+
+  const penOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
+  buildMSOptions('pen', penOptions);
+
   const allIds=[...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMSOptions('rid',allIds);
+
   const allCats=[...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
   buildMSOptions('cat',allCats);
+
   const zoneCounts={};
   if(sourcePool){sourcePool.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
   else{entities.forEach(e=>{const z=e.latestOverall?.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
   const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
   buildMSOptions('zone',sortedZones,zone=>zone+' ('+zoneCounts[zone]+')');
+
   if(source&&VIEW_META[source].statusEnabled){buildMSOptions('status',VIEW_META[source].statusKeys,key=>statusLabel(key,source));}
   else{resetMultiSelect('status','Not applicable',true);}
+  
   updateStatusBlocks(source||'',sourcePool||[]);
   updateLegend(source||'');
 }
@@ -1611,43 +1839,66 @@ function selectedSet(key){
 
 function applyFilters(){
   const source=document.getElementById('sourceFilter').value;
-  const idFilter=selectedSet('rid'),catFilter=selectedSet('cat'),zoneFilter=selectedSet('zone');
-  if(!source){
-    const hasFilter=idFilter||catFilter||zoneFilter;
-    if(!hasFilter){
-      displayedEntities=[];displayRows=[];activeStatusKey=null;
-      clearVisuals(true);renderTable();updateLegend('');updateStatusBlocks('',[]); showZoneLayer(false);return;
-    }
-    const seen=new Set(),allEntities=[];
-    ['ATS','FieldLog','PaliFT'].forEach(src=>{
-      getViewEntities(src).forEach(entity=>{if(!seen.has(entity.compKey)){seen.add(entity.compKey);allEntities.push(entity);}});
-    });
-    displayedEntities=allEntities.filter(entity=>{
-      if(idFilter&&!idFilter.has(entity.id)) return false;
-      if(catFilter&&!catFilter.has(entity.category||'-')) return false;
-      if(zoneFilter&&!zoneFilter.has(entity.zone||'-')) return false;
-      return true;
-    });
-    displayedEntities.sort((a,b)=>{
-      const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity,tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
-      return tb-ta;
-    });
-    showZoneLayer(displayedEntities.length>0);renderMarkers();renderTable();updateMapFoot();return;
+  const idFilter=selectedSet('rid');
+  const catFilter=selectedSet('cat');
+  const zoneFilter=selectedSet('zone');
+  let statusFilter=selectedSet('status');
+  const srnoFilter=selectedSet('srno');
+  const penFilter=selectedSet('pen');
+  const encFilter=selectedSet('enc');
+
+  // Smart clear activeStatusKey if a specific identity is filtered
+  if ((idFilter || srnoFilter || encFilter || penFilter) && activeStatusKey) {
+     activeStatusKey = null;
+     document.querySelectorAll('#msi-status input[type=checkbox], #mob-msi-status input[type=checkbox]').forEach(inp=>inp.checked=true);
+     updateMSBtn('status');
+     const mobBtn = document.getElementById('mob-msb-status');
+     if (mobBtn) updateMobMSBtn('status');
+     const pool=getViewEntities(source);
+     updateStatusBlocks(source||'', pool);
+     statusFilter = selectedSet('status'); 
   }
-  const statusFilter=selectedSet('status'),pool=getViewEntities(source);
+
+  // Count how many boxes are actually checked across all valid filters
+  let totalChecked = 0;
+  ['rid','cat','zone','status','srno','pen','enc'].forEach(k => {
+     const els = document.querySelectorAll('#msi-'+k+' input[type=checkbox]:checked');
+     if(els) totalChecked += els.length;
+  });
+
+  clearVisuals(false); 
+
+  if(!source || totalChecked === 0){
+    displayedEntities=[];displayRows=[];
+    renderTable();updateMapFoot();
+    showZoneLayer(false);
+    return;
+  }
+
+  const pool=getViewEntities(source);
   updateStatusBlocks(source,pool);
+  
   displayedEntities=pool.filter(entity=>{
     if(idFilter&&!idFilter.has(entity.id)) return false;
     if(catFilter&&!catFilter.has(entity.category||'-')) return false;
     if(zoneFilter&&!zoneFilter.has(entity.zone||'-')) return false;
     if(statusFilter&&!statusFilter.has(entity.status)) return false;
+    const info = getSrNoInfo(entity);
+    if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))  return false;
+    if(penFilter    && (!info || !penFilter.has(info.pen)))            return false;
+    if(encFilter    && (!info || !encFilter.has(info.animal)))         return false;
     return true;
   });
+
   displayedEntities.sort((a,b)=>{
     const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity,tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
     return tb-ta;
   });
-  showZoneLayer(displayedEntities.length>0);renderMarkers();renderTable();updateMapFoot();
+  
+  showZoneLayer(displayedEntities.length>0);
+  renderMarkers();
+  renderTable();
+  updateMapFoot();
 }
 
 function clearFilters(){
@@ -1658,7 +1909,9 @@ function clearFilters(){
   rebuildFilters();
   if(isMobile()) rebuildMobileFilters();
   updateFieldUpdatesVisibility();updateCollarColumn();
-  displayRows=[];displayedEntities=[];clearVisuals(true);renderTable();updateMapFoot();
+  displayRows=[];displayedEntities=[];clearVisuals(true);
+  renderTable();updateMapFoot();
+  map.closePopup();
 }
 
 function clearVisuals(resetViewport){
@@ -1700,37 +1953,57 @@ function popupHtml(entity){
   const rdRaw=entity.tagDate?daysSince(entity.tagDate):null;
   const daysRelease=rdRaw!==null?rdRaw+'d':'N/A';
   const showCollar=entity.collar&&!['-','na','n/a','null',''].includes(String(entity.collar).trim().toLowerCase());
-  
-  let retagHtml = entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : '';
+  const srInfo = getSrNoInfo(entity);
+
+  const badgeParts = [];
+  if(srInfo) badgeParts.push(`#${srInfo.srNo}`);
+  if(srInfo) badgeParts.push(`Pen ${srInfo.pen}`);
+  badgeParts.push(escapeHtml(sourceLabel));
+  const subLine = badgeParts.join(' | ');
+
+  const badgeText = srInfo ? String(srInfo.srNo) : (entity.id.length>5?entity.id.slice(0,5):entity.id);
 
   return `<div>
     <div class="pop-top">
-      <div class="pop-id-badge" style="background:${markerColor(entity)}">${escapeHtml(entity.id.length>5?entity.id.slice(0,5):entity.id)}</div>
-      <div><div class="pop-id">${escapeHtml(entity.id)}</div><div class="pop-sub">${status} | ${escapeHtml(sourceLabel)}</div></div>
+      <div class="pop-id-badge" style="background:${markerColor(entity)}">${escapeHtml(badgeText)}</div>
+      <div>
+        <div class="pop-id">Radio ID: ${escapeHtml(entity.id)}</div>
+        <div class="pop-sub">${status} | ${subLine}</div>
+      </div>
     </div>
     <div class="pop-body">
-      ${retagHtml}
-      <div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">${escapeHtml(fmtDateTime(display?.ts))}</span></div>
-      ${entity.latestATS ? `<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">${escapeHtml(latestSat)}</span></div>` : ''}
-      ${entity.latestVHF ? `<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">${escapeHtml(latestVhf)}</span></div>` : ''}
-      ${entity.latestPali ? `<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">${escapeHtml(latestPali)}</span></div>` : ''}
-      <div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
-      <div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
+      
+      ${srInfo ? `
+      <div class="pop-animal-id">
+        <span class="pop-label">Enclosure_ID</span>
+        <span class="pop-value">${escapeHtml(srInfo.animal)}</span>
+      </div>
+      <div class="pop-row"><span class="pop-label">Animal_ID</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
+      ` : ''}
       <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
-      ${showCollar ? `<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">${escapeHtml(entity.collar)}</span></div>` : ''}
-      
-      <div class="pop-telemetry-sep"></div>
-      <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Latest Fix</span><span class="pop-value">${escapeHtml(fmtDateTime(display?.ts))}</span></div>
+      <div class="pop-row"><span class="pop-label">Days Since Last Fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
       <div class="pop-row"><span class="pop-label">Current Place</span><span class="pop-value">${escapeHtml(display?.place||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">${escapeHtml(display?.activity||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(display?.signal||'-')}</span></div>
-      <div class="pop-telemetry-sep"></div>
-      
       <div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">${display?display.lat.toFixed(5)+', '+display.lon.toFixed(5):'-'}</span></div>
-      <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
-      ${entity.tl ? `<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">${escapeHtml(entity.tl)}</span></div>` : ''}
-      ${entity.remarks ? `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>` : ''}
+
+      <button class="pop-details-btn" type="button" onclick="togglePopDetails(this)">View More Details ▾</button>
+
+      <div class="pop-extra" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);">
+        ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
+        ${srInfo ? `<div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>` : ''}
+        ${entity.latestATS ? `<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">${escapeHtml(latestSat)}</span></div>` : ''}
+        ${entity.latestVHF ? `<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">${escapeHtml(latestVhf)}</span></div>` : ''}
+        ${entity.latestPali ? `<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">${escapeHtml(latestPali)}</span></div>` : ''}
+        <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
+        ${showCollar ? `<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">${escapeHtml(entity.collar)}</span></div>` : ''}
+        <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
+        ${entity.tl ? `<div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl)}</span></div>` : ''}
+        <div class="pop-row"><span class="pop-label">Days Since Release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
+        <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">${escapeHtml(display?.activity||'-')}</span></div>
+        <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(display?.signal||'-')}</span></div>
+        ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
+      </div>
     </div>
     <div class="pop-actions">
       <button class="pab" type="button" onclick="focusEntity('${entity.compKey}')">Focus</button>
@@ -1777,8 +2050,7 @@ function renderMarkers(){
     const marker=L.marker([fix.lat,fix.lon],{
       icon:markerIcon(entity,entity.id.length>5?entity.id.slice(0,5):entity.id),keyboard:false
     });
-    marker.bindPopup(popupHtml(entity),{maxWidth:330});
-    marker.on('popupclose',()=>{marker.setLatLng([fix.lat,fix.lon]);});
+    marker._popupContent = popupHtml(entity);
     markerLayer.addLayer(marker);oms.addMarker(marker);
     entityMarkerMap[entity.compKey]=marker;
   });
@@ -1797,7 +2069,12 @@ function focusEntity(compKey){
   Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
   marker.setZIndexOffset(9000);map.closePopup();
   map.flyTo(marker.getLatLng(),16,{duration:1});
-  setTimeout(()=>marker.openPopup(),700);
+  setTimeout(()=>{
+    L.popup({maxWidth:340})
+     .setLatLng(marker.getLatLng())
+     .setContent(marker._popupContent)
+     .openOn(map);
+  },700);
   // on mobile: collapse bottom panel to reveal map
   if(isMobile()&&!bottomCollapsed) toggleBottom();
 }
@@ -1817,8 +2094,12 @@ function focusTableRow(key){
    ═══════════════════════════════════════════════ */
 function buildEntityRow(entity){
   const fix=entity.displayFix;
+  const srInfo = getSrNoInfo(entity);
   return{
     rowKey:entity.compKey,type:'entity',entity,id:entity.id,
+    srNo: srInfo ? String(srInfo.srNo) : '-',
+    animalId: srInfo ? srInfo.animal : '-',
+    pen: srInfo ? srInfo.pen : '-',
     ts:fix?.ts||null,days:daysSince(fix?.ts||null),status:entity.status,
     category:entity.category||'-',sex:entity.sex||'-',source:entity.viewSource,
     zone:entity.zone||'-',collar:entity.collar||'-',
@@ -1837,16 +2118,19 @@ function renderTable(){
   document.getElementById('tableBadge').textContent=displayRows.length+' records';
   updateCollarColumn();
   if(!source&&!displayedEntities.length){
-    body.innerHTML='<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';return;
+    body.innerHTML='<tr class="no-data"><td colspan="17">Select a source or apply filters to display telemetry records.</td></tr>';return;
   }
   if(!displayRows.length){
-    body.innerHTML='<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>';return;
+    body.innerHTML='<tr class="no-data"><td colspan="17">No records match the current filters.</td></tr>';return;
   }
   displayRows.forEach(row=>{
     const tr=document.createElement('tr');
     tr.dataset.rowKey=row.rowKey;
     const rowSource=row.source==='FieldLog'?'VHF':row.source;
     tr.innerHTML=
+      '<td>'+escapeHtml(row.srNo)+'</td>'+
+      '<td><strong style="color:var(--forest-2)">'+escapeHtml(row.animalId)+'</strong></td>'+
+      '<td>'+escapeHtml(row.pen)+'</td>'+
       '<td><strong style="color:'+markerColor(row.entity)+'">'+escapeHtml(row.id)+'</strong></td>'+
       '<td>'+escapeHtml(fmtDateTime(row.ts))+'</td>'+
       '<td>'+escapeHtml(String(row.days))+'</td>'+
@@ -1966,9 +2250,9 @@ function toggleKDE(){
 
 function exportCSV(){
   if(!displayRows.length){toast('No visible records to export.');return;}
-  const rows=[['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
+  const rows=[['Animal_ID','Enclosure_ID','Pen','Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
   displayRows.forEach(row=>{
-    rows.push([row.id,fmtDateTime(row.ts),row.days,statusLabel(row.status,row.entity.viewSource),row.category,row.sex,row.source,row.zone,row.collar,row.lat??'',row.lon??'',row.tagPlace,row.tl,row.remarks]);
+    rows.push([row.srNo,row.animalId,row.pen,row.id,fmtDateTime(row.ts),row.days,statusLabel(row.status,row.entity.viewSource),row.category,row.sex,row.source,row.zone,row.collar,row.lat??'',row.lon??'',row.tagPlace,row.tl,row.remarks]);
   });
   const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
   const link=document.createElement('a');
