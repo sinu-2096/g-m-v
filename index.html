@@ -9,224 +9,424 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{
-  --forest:#173f31;
-  --forest-2:#215742;
-  --forest-3:#2f7a5a;
-  --lime:#7ecf9b;
-  --sand:#f4f7f2;
-  --panel:#ffffff;
-  --panel-2:#f7faf7;
-  --line:#dde7df;
-  --line-2:#c4d4c8;
-  --text:#122118;
-  --muted:#587064;
-  --muted-2:#7d9489;
-  --shadow:0 10px 28px rgba(18,33,24,.12);
+/* ── Design tokens ──────────────────────────────────────────────────── */
+:root {
+  --forest:   #173f31;
+  --forest-2: #215742;
+  --forest-3: #2f7a5a;
+  --lime:     #7ecf9b;
+  --sand:     #f4f7f2;
+  --panel:    #ffffff;
+  --panel-2:  #f7faf7;
+  --line:     #dde7df;
+  --line-2:   #c4d4c8;
+  --text:     #122118;
+  --muted:    #587064;
+  --muted-2:  #7d9489;
+  --shadow:   0 10px 28px rgba(18,33,24,.12);
   --shadow-lg:0 18px 44px rgba(18,33,24,.18);
-  --hdr:118px;
-  --hdr-mob:auto; /* Added for mobile */
-  --fbar:54px;
-  --btm:250px;
-  --radius:12px;
-  --mono:'IBM Plex Mono',monospace;
-  --font:'Space Grotesk',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;background:var(--sand);color:var(--text);font-family:var(--font)}
-button,select,input{font:inherit}
-button{cursor:pointer}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-thumb{background:#bfd0c2;border-radius:999px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-#loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
-#loading.hide{opacity:0;visibility:hidden;pointer-events:none}
-.loading-bg{position:absolute;inset:0;background:url('background.gif') center/cover no-repeat}
-.loading-veil{position:absolute;inset:0;background:rgba(9,22,15,.72);backdrop-filter:blur(4px)}
-.loading-card{position:relative;z-index:2;width:min(720px,92vw);padding:36px 28px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:rgba(12,24,18,.45);box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;color:#fff}
-.loading-logos{display:flex;align-items:center;gap:24px}
-.loading-logos img{height:96px;max-width:220px;object-fit:contain;filter:drop-shadow(0 4px 18px rgba(0,0,0,.45))}
-.loading-divider{width:2px;height:72px;background:rgba(255,255,255,.2);border-radius:999px}
-.loading-ring{width:46px;height:46px;border:4px solid rgba(255,255,255,.16);border-top-color:var(--lime);border-radius:50%;animation:spin .85s linear infinite}
-.loading-title{font:700 1rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.loading-copy{font:600 .72rem var(--mono);letter-spacing:.05em;color:rgba(255,255,255,.74)}
-.loading-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-top:6px}
-.loading-item{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.58);font:.66rem var(--mono);text-align:left}
-.loading-item.ok{color:#b7f0c6;background:rgba(31,94,54,.34)}
-.loading-item.err{color:#fecaca;background:rgba(127,29,29,.26)}
-
-#toast{position:fixed;left:50%;bottom:calc(var(--btm) + 14px);transform:translateX(-50%) translateY(10px);z-index:9500;padding:8px 16px;border-radius:999px;border:1px solid rgba(153,27,27,.25);background:rgba(255,244,244,.96);color:#991b1b;font:.68rem var(--mono);letter-spacing:.05em;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
-#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-#toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
-#hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
-.hdr-logos{display:flex;align-items:center;gap:10px}
-.hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
-.hdr-logos a:hover{opacity:1}
-.hdr-logos img{height:46px;max-width:110px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(0,0,0,.34))}
-.hdr-brand {flex: 1 1 auto; min-width: 150px;}
-.hdr-brand{min-width:0}
-.hdr-logos,.hdr-divider,.hdr-brand,.syncbox,.hdr-actions{grid-row:1}
-.hdr-title{font:700 .94rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
-
-#statusBlocks{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:8px;width:100%; order: 3;}
-.sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease}
-.sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
-.sblock.muted{color:rgba(255,255,255,.42)}
-.sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
-.sblock-count{font:700 .98rem var(--mono)}
-
-.hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
-.syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
-.syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
-.syncbox span{font:600 .64rem var(--mono);color:#fff}
-.hbtn{height:36px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.12);color:#fff;font:700 .66rem var(--mono);letter-spacing:.04em;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;transition:all .15s ease}
-.hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
-.hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
-
-#fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
-#fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#statusBlocks{display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:8px;width:100%; order: 3;}
-.fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-.fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
-.fsel{min-width:148px;height:34px;padding:0 28px 0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center/8px;color:var(--text);font:600 .68rem var(--mono);appearance:none}
-.fbtn{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);font:700 .64rem var(--mono);letter-spacing:.02em;display:inline-flex;align-items:center;gap:6px;transition:all .14s ease;white-space:nowrap}
-.fbtn:hover,.fbtn.on{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
-.fbtn.apply{background:var(--forest-2);border-color:var(--forest-2);color:#fff}
-.fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
-.fbtn.clear{color:#6b7280}
-
-.ms-wrap{position:relative;flex-shrink:0}
-.ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
-.ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
-.ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
-.ms-caret{font-size:.56rem;color:currentColor}
-.ms-drop{display:none;position:absolute;top:100%;left:0;z-index:99999;min-width:220px;max-width:300px;max-height:300px;background:#fff;border:1px solid var(--line-2);border-radius:14px;box-shadow:var(--shadow-lg);overflow:hidden}
-.ms-drop.open{display:flex;flex-direction:column}
-.ms-head{display:flex;align-items:center;gap:6px;padding:8px 10px;background:var(--panel-2);border-bottom:1px solid var(--line)}
-.ms-hbtn{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--line-2);background:#fff;color:var(--text);font:700 .58rem var(--mono)}
-.ms-count{margin-left:auto;font:600 .58rem var(--mono);color:var(--muted-2)}
-.ms-items{overflow:auto;padding:6px 0}
-.ms-empty{padding:12px 14px;color:var(--muted-2);font:.66rem var(--mono)}
-.ms-item{display:flex;align-items:center;gap:8px;padding:6px 12px;font:600 .64rem var(--mono);color:var(--text);cursor:pointer}
-.ms-item:hover{background:#f0f7f1}
-.ms-item input{accent-color:var(--forest-3)}
-
-#map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
-#map{width:100%;height:100%}
-.leaflet-control-attribution{display:none}
-.leaflet-popup-content-wrapper{border-radius:16px;border:1px solid var(--line-2);box-shadow:var(--shadow-lg)}
-.leaflet-popup-content{margin:0}
-.leaflet-popup-tip{background:#fff}
-.leaflet-popup-close-button{top:10px!important;right:10px!important}
-.leaflet-marker-icon:focus,.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
-path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
-.leaflet-interactive:active{outline:none!important}
-.leaflet-container a.leaflet-popup-close-button:focus{outline:none}
-.map-fab{position:absolute;top:12px;left:12px;z-index:500;display:flex;flex-direction:column;gap:6px}
-.fab{width:34px;height:34px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.94);color:var(--text);font-size:.92rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow)}
-.fab:hover{background:#eef8f1;color:var(--forest-2);border-color:#8ab99a}
-#legend{position:absolute;right:12px;bottom:12px;z-index:500;min-width:220px;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid var(--line-2);box-shadow:var(--shadow);display:none}
-.legend-title{font:700 .58rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.legend-row{display:flex;align-items:center;gap:8px;font:600 .62rem var(--mono);color:var(--text);margin-bottom:6px}
-.legend-row:last-child{margin-bottom:0}
-.legend-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-#mapFoot{position:absolute;left:0;right:0;bottom:0;z-index:450;display:flex;align-items:center;gap:10px;padding:6px 14px;background:rgba(255,255,255,.94);border-top:1px solid var(--line);backdrop-filter:blur(10px)}
-.map-foot-dot{width:8px;height:8px;border-radius:50%;background:var(--lime);flex-shrink:0}
-#mapFootText{font:600 .65rem var(--mono);color:var(--muted)}
-#mapFootCount{margin-left:auto;font:600 .62rem var(--mono);color:var(--muted-2)}
-.zone-label{border:1px solid var(--line-2)!important;border-radius:999px!important;background:rgba(255,255,255,.94)!important;color:var(--forest)!important;font:700 .58rem var(--mono)!important;padding:3px 8px!important}
-
-.pop-top{padding:14px 14px 12px 14px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);border-bottom:2px solid rgba(126,207,155,.45);display:flex;align-items:center;gap:12px}
-.pop-id-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.72);color:#fff;font:700 .8rem var(--mono)}
-.pop-id{font:700 .9rem var(--mono);color:#fff}
-.pop-sub{margin-top:3px;font:600 .58rem var(--mono);color:rgba(255,255,255,.74);letter-spacing:.05em}
-.pop-body{padding:12px 14px}
-.pop-row{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px}
-.pop-label{font:700 .54rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.pop-value{font:600 .66rem var(--mono);color:var(--text);text-align:right}
-.pop-actions{display:flex;gap:6px;padding:10px 14px 14px 14px}
-.pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
-.pab:hover{background:#dff1e5;border-color:#8ab99a}
-.sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
-
-#fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
-#fpBg.open{display:block}
-/* FIX-2: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
-#fp{position:fixed;top:0;right:-100%;width:100%;max-width:400px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
-#fp.open{right:0}
-.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.fp-hdr h3{font:700 .88rem var(--mono)}
-.fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
-.fp-cl:hover{color:#fff}
-.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
-.fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
-.fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
-.fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-/*
- * FIX-3: .fp-scroll — removed conflicting max-height so the flex container's own
- * height:100vh + overflow:hidden on #fp controls vertical clipping correctly.
- * padding-bottom:120px ensures the last update entry can be scrolled fully
- * clear of the bottom edge of the screen.
- */
-.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
-.fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.fu{padding:10px 0;border-bottom:1px solid var(--line)}
-.fu-date{font:700 .67rem var(--mono);color:var(--forest)}
-.fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
-
-#btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
-#resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-#resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
-#btmHdr{height:42px;padding:0 16px;background:var(--forest);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
-.btm-title{font:700 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.tbl-badge{display:inline-flex;align-items:center;margin-left:8px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.14);font:700 .58rem var(--mono);letter-spacing:.04em}
-.btm-actions{display:flex;align-items:center;gap:6px}
-.bc{height:28px;padding:0 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.12);color:#fff;font:700 .58rem var(--mono)}
-.bc:hover{background:rgba(255,255,255,.2)}
-#btmScroll{flex:1;overflow:auto;min-height:0}
-.dtbl{width:100%;border-collapse:collapse;font:600 .66rem var(--mono);white-space:nowrap}
-.dtbl th,.dtbl td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-.dtbl th{position:sticky;top:0;z-index:3;background:#f5faf6;color:var(--text);font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.dtbl tbody tr{transition:background .12s ease;cursor:pointer}
-.dtbl tbody tr:hover{background:#eff7f1}
-.dtbl tbody tr.sel{background:#dff1e5}
-.no-data td{padding:20px 12px;text-align:center;color:var(--muted-2);font:600 .7rem var(--mono)}
-
-@media (max-width: 1360px) {
-  .hdr-title { font-size: .84rem; }
+  /* Layout rhythm — only --hdr changes per breakpoint */
+  --hdr:  118px;
+  --fbar:  54px;
+  --btm:  250px;
+  --radius: 12px;
+  --mono: 'IBM Plex Mono', monospace;
+  --font: 'Space Grotesk', sans-serif;
 }
 
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; background: var(--sand); color: var(--text); font-family: var(--font); }
+button, select, input { font: inherit; cursor: pointer; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: #bfd0c2; border-radius: 999px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Loading overlay ────────────────────────────────────────────────── */
+#loading { position: fixed; inset: 0; z-index: 99999; display: flex; align-items: center; justify-content: center; transition: opacity .5s ease, visibility .5s ease; }
+#loading.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+.loading-bg   { position: absolute; inset: 0; background: url('background.gif') center/cover no-repeat; }
+.loading-veil { position: absolute; inset: 0; background: rgba(9,22,15,.72); backdrop-filter: blur(4px); }
+.loading-card {
+  position: relative; z-index: 2;
+  width: min(720px, 92vw); padding: 36px 28px;
+  border: 1px solid rgba(255,255,255,.16); border-radius: 20px;
+  background: rgba(12,24,18,.45); box-shadow: 0 24px 60px rgba(0,0,0,.3);
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  text-align: center; color: #fff;
+}
+.loading-logos { display: flex; align-items: center; gap: 24px; }
+.loading-logos img { height: 96px; max-width: 220px; object-fit: contain; filter: drop-shadow(0 4px 18px rgba(0,0,0,.45)); }
+.loading-divider { width: 2px; height: 72px; background: rgba(255,255,255,.2); border-radius: 999px; }
+.loading-ring { width: 46px; height: 46px; border: 4px solid rgba(255,255,255,.16); border-top-color: var(--lime); border-radius: 50%; animation: spin .85s linear infinite; }
+.loading-title { font: 700 1rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.loading-copy  { font: 600 .72rem var(--mono); letter-spacing: .05em; color: rgba(255,255,255,.74); }
+.loading-list  { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 6px; }
+.loading-item  { padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08); color: rgba(255,255,255,.58); font: .66rem var(--mono); text-align: left; }
+.loading-item.ok  { color: #b7f0c6; background: rgba(31,94,54,.34); }
+.loading-item.err { color: #fecaca; background: rgba(127,29,29,.26); }
+
+/* ── Toast ──────────────────────────────────────────────────────────── */
+#toast {
+  position: fixed; left: 50%; bottom: calc(var(--btm) + 14px);
+  transform: translateX(-50%) translateY(10px);
+  z-index: 9500; padding: 8px 16px; border-radius: 999px;
+  border: 1px solid rgba(153,27,27,.25); background: rgba(255,244,244,.96);
+  color: #991b1b; font: .68rem var(--mono); letter-spacing: .05em;
+  opacity: 0; pointer-events: none; transition: opacity .22s ease, transform .22s ease;
+}
+#toast.on    { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.ok    { background: rgba(240,253,244,.96); border-color: rgba(22,101,52,.2); color: #14532d; }
+
+/* ── Header — 2-row grid (desktop) ─────────────────────────────────── */
+#hdr {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--hdr);
+  z-index: 10020;
+  display: grid;
+  /* 4 cols: logos | brand | sync | actions  — statusBlocks span all in row 2 */
+  grid-template-columns: auto minmax(200px, 1fr) auto auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 12px;
+  row-gap: 10px;
+  padding: 10px 16px 12px;
+  background: linear-gradient(110deg, #163a2e 0%, #215742 48%, #1b4b3a 100%);
+  border-bottom: 2px solid rgba(126,207,155,.45);
+  box-shadow: 0 8px 24px rgba(10,26,18,.28);
+}
+
+/* Explicit grid placement — row 1 */
+.hdr-logos   { grid-column: 1; grid-row: 1; }
+.hdr-brand   { grid-column: 2; grid-row: 1; min-width: 0; }
+.syncbox     { grid-column: 3; grid-row: 1; }
+.hdr-actions { grid-column: 4; grid-row: 1; justify-self: end; }
+
+/* Status blocks — row 2, full width */
+#statusBlocks {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+}
+
+.hdr-logos { display: flex; align-items: center; gap: 10px; }
+.hdr-logos a { display: flex; align-items: center; opacity: .96; transition: opacity .15s ease; }
+.hdr-logos a:hover { opacity: 1; }
+.hdr-logos img { height: 46px; max-width: 110px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,.34)); }
+
+.hdr-title { font: 700 .94rem var(--mono); letter-spacing: .04em; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hdr-sub   { margin-top: 3px; font: 600 .62rem var(--mono); letter-spacing: .08em; color: rgba(255,255,255,.62); text-transform: uppercase; }
+
+.sblock {
+  min-height: 48px; padding: 7px 10px; border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.1);
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px;
+  color: #fff; transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.sblock.clickable:hover, .sblock.on { transform: translateY(-1px); border-color: rgba(255,255,255,.36); background: rgba(255,255,255,.18); }
+.sblock.muted { color: rgba(255,255,255,.42); }
+.sblock-label { font: 700 .62rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+.sblock-count { font: 700 .98rem var(--mono); }
+
+.hdr-actions { display: flex; align-items: center; gap: 8px; z-index: 10021; position: relative; }
+.syncbox     { display: flex; flex-direction: column; align-items: flex-end; min-width: 92px; }
+.syncbox strong { font: 700 .5rem var(--mono); letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.42); }
+.syncbox span   { font: 600 .64rem var(--mono); color: #fff; }
+
+.hbtn {
+  height: 36px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.12);
+  color: #fff; font: 700 .66rem var(--mono); letter-spacing: .04em;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  transition: all .15s ease;
+}
+.hbtn:hover, .hbtn.on  { background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.42); }
+.hbtn.loading .spin-icon { display: inline-block; animation: spin .7s linear infinite; }
+
+/* ── Filter bar ─────────────────────────────────────────────────────── */
+#fbar {
+  position: fixed;
+  /* top set by JS via adjustLayout() */
+  left: 0; right: 0;
+  height: var(--fbar);
+  z-index: 10010;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255,255,255,.96);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  /* overflow MUST stay visible so absolute dropdowns can escape on desktop */
+  overflow: visible;
+}
+#fbar.hidden { height: 0; border-bottom: none; opacity: 0; pointer-events: none; }
+
+/* Inner strip — horizontally scrollable; hides scrollbar visually */
+#fbar-inner {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 0 16px;
+  min-width: 0;
+  white-space: nowrap;
+  /* Scroll enabled via JS class on mobile — see .fbar-scroll below */
+}
+
+/* Applied by JS on narrow viewports so filter controls stay accessible */
+#fbar-inner.fbar-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+#fbar-inner.fbar-scroll::-webkit-scrollbar { display: none; }
+
+.fg { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.fg label { font: 700 .56rem var(--mono); letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.fsep { width: 1px; height: 22px; background: var(--line); flex-shrink: 0; margin: 0 8px; }
+.fsel {
+  min-width: 148px; height: 34px; padding: 0 28px 0 10px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: var(--panel-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23587064'/%3E%3C/svg%3E") no-repeat right 10px center / 8px;
+  color: var(--text); font: 600 .68rem var(--mono); appearance: none;
+}
+.fbtn {
+  height: 34px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: var(--panel-2);
+  color: var(--text); font: 700 .64rem var(--mono); letter-spacing: .02em;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: all .14s ease; white-space: nowrap; flex-shrink: 0;
+}
+.fbtn:hover, .fbtn.on { background: #eef8f1; border-color: #8ab99a; color: var(--forest-2); }
+.fbtn.apply { background: var(--forest-2); border-color: var(--forest-2); color: #fff; }
+.fbtn.apply:hover { background: var(--forest-3); border-color: var(--forest-3); }
+.fbtn.clear { color: #6b7280; }
+
+/* ── Multi-select dropdowns ─────────────────────────────────────────── */
+.ms-wrap { position: relative; flex-shrink: 0; }
+.ms-btn {
+  min-width: 136px; height: 34px; padding: 0 10px; border-radius: 10px;
+  border: 1px solid var(--line-2); background: var(--panel-2);
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  color: var(--text); font: 600 .67rem var(--mono);
+}
+.ms-btn.active, .ms-btn:hover { background: #eef8f1; border-color: #8ab99a; color: var(--forest-2); }
+.ms-btn.disabled { background: #f2f4f3; color: #99a7a0; border-color: #d9dfdb; cursor: not-allowed; }
+.ms-caret { font-size: .56rem; color: currentColor; }
+/* Default positioning: absolute (desktop) */
+.ms-drop {
+  display: none;
+  position: absolute; top: calc(100% + 2px); left: 0;
+  z-index: 99999;
+  min-width: 220px; max-width: 300px; max-height: 300px;
+  background: #fff; border: 1px solid var(--line-2); border-radius: 14px;
+  box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.ms-drop.open { display: flex; flex-direction: column; }
+/* When JS sets fixed positioning on narrow viewports, override here */
+.ms-drop[style*="position: fixed"] { position: fixed !important; }
+.ms-head { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
+.ms-hbtn { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line-2); background: #fff; color: var(--text); font: 700 .58rem var(--mono); }
+.ms-count { margin-left: auto; font: 600 .58rem var(--mono); color: var(--muted-2); }
+.ms-items { overflow: auto; padding: 6px 0; }
+.ms-empty { padding: 12px 14px; color: var(--muted-2); font: .66rem var(--mono); }
+.ms-item  { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font: 600 .64rem var(--mono); color: var(--text); cursor: pointer; }
+.ms-item:hover { background: #f0f7f1; }
+.ms-item input { accent-color: var(--forest-3); }
+
+/* ── Map ────────────────────────────────────────────────────────────── */
+#map-wrap {
+  position: fixed;
+  /* top set by JS via adjustLayout() */
+  left: 0; right: 0;
+  bottom: var(--btm);
+  z-index: 1;
+}
+#map { width: 100%; height: 100%; }
+.leaflet-control-attribution { display: none; }
+.leaflet-popup-content-wrapper { border-radius: 16px; border: 1px solid var(--line-2); box-shadow: var(--shadow-lg); }
+.leaflet-popup-content { margin: 0; }
+.leaflet-popup-tip { background: #fff; }
+.leaflet-popup-close-button { top: 10px !important; right: 10px !important; }
+.leaflet-marker-icon:focus, .leaflet-interactive:focus { outline: none !important; box-shadow: none !important; }
+path.leaflet-interactive:focus { outline: none !important; }
+.leaflet-interactive:active { outline: none !important; }
+.leaflet-container a.leaflet-popup-close-button:focus { outline: none; }
+.map-fab { position: absolute; top: 12px; left: 12px; z-index: 500; display: flex; flex-direction: column; gap: 6px; }
+.fab {
+  width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line-2);
+  background: rgba(255,255,255,.94); color: var(--text); font-size: .92rem;
+  display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);
+}
+.fab:hover { background: #eef8f1; color: var(--forest-2); border-color: #8ab99a; }
+#legend {
+  position: absolute; right: 12px; bottom: 12px; z-index: 500;
+  min-width: 220px; padding: 12px 14px; border-radius: 14px;
+  background: rgba(255,255,255,.95); border: 1px solid var(--line-2);
+  box-shadow: var(--shadow); display: none;
+}
+.legend-title { font: 700 .58rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.legend-row   { display: flex; align-items: center; gap: 8px; font: 600 .62rem var(--mono); color: var(--text); margin-bottom: 6px; }
+.legend-row:last-child { margin-bottom: 0; }
+.legend-dot   { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+#mapFoot {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 450;
+  display: flex; align-items: center; gap: 10px; padding: 6px 14px;
+  background: rgba(255,255,255,.94); border-top: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+}
+.map-foot-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); flex-shrink: 0; }
+#mapFootText  { font: 600 .65rem var(--mono); color: var(--muted); }
+#mapFootCount { margin-left: auto; font: 600 .62rem var(--mono); color: var(--muted-2); }
+.zone-label {
+  border: 1px solid var(--line-2) !important; border-radius: 999px !important;
+  background: rgba(255,255,255,.94) !important; color: var(--forest) !important;
+  font: 700 .58rem var(--mono) !important; padding: 3px 8px !important;
+}
+
+/* ── Popup ──────────────────────────────────────────────────────────── */
+.pop-top {
+  padding: 14px 14px 12px;
+  background: linear-gradient(110deg, #173f31 0%, #215742 100%);
+  border-bottom: 2px solid rgba(126,207,155,.45);
+  display: flex; align-items: center; gap: 12px;
+}
+.pop-id-badge { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,.72); color: #fff; font: 700 .8rem var(--mono); }
+.pop-id  { font: 700 .9rem var(--mono); color: #fff; }
+.pop-sub { margin-top: 3px; font: 600 .58rem var(--mono); color: rgba(255,255,255,.74); letter-spacing: .05em; }
+.pop-body { padding: 12px 14px; }
+.pop-row  { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 6px; }
+.pop-label{ font: 700 .54rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.pop-value{ font: 600 .66rem var(--mono); color: var(--text); text-align: right; }
+.pop-actions { display: flex; gap: 6px; padding: 10px 14px 14px; }
+.pab { flex: 1; height: 34px; border-radius: 10px; border: 1px solid var(--line-2); background: #eef8f1; color: var(--forest-2); font: 700 .62rem var(--mono); }
+.pab:hover { background: #dff1e5; border-color: #8ab99a; }
+.sbadge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px; font: 700 .56rem var(--mono); letter-spacing: .04em; border: 1px solid transparent; }
+
+/* ── Field-updates slide panel ──────────────────────────────────────── */
+#fpBg { display: none; position: fixed; inset: 0; z-index: 1180; background: rgba(12,24,18,.38); }
+#fpBg.open { display: block; }
+#fp {
+  position: fixed; top: 0; right: -100%;
+  width: 360px; max-width: 100vw;
+  height: 100vh; z-index: 1190;
+  background: #fff; border-left: 1px solid var(--line-2);
+  box-shadow: -18px 0 44px rgba(12,24,18,.18);
+  transition: right .24s ease;
+  display: flex; flex-direction: column;
+  overflow: hidden; /* clips children, scroll handled inside */
+}
+#fp.open { right: 0; }
+.fp-hdr { padding: 14px 16px; background: linear-gradient(110deg,#173f31 0%,#215742 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.fp-hdr h3 { font: 700 .88rem var(--mono); }
+.fp-cl { border: none; background: none; color: rgba(255,255,255,.74); font-size: 1.2rem; }
+.fp-cl:hover { color: #fff; }
+.fp-latest { padding: 14px 16px; background: #f4fbf5; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.fp-kicker { font: 700 .58rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--forest-3); }
+.fp-date   { margin-top: 4px; font: 700 .8rem var(--mono); color: var(--forest); }
+.fp-copy   { margin-top: 6px; font: 600 .74rem/1.55 var(--font); color: var(--text); }
+.fp-scroll { padding: 12px 16px 120px; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+.fp-scroll h4 { font: 700 .58rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.fu        { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.fu-date   { font: 700 .67rem var(--mono); color: var(--forest); }
+.fu-text   { margin-top: 4px; font: 600 .74rem/1.55 var(--font); color: var(--text); }
+
+/* ── Bottom table drawer ────────────────────────────────────────────── */
+#btm {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: var(--btm); z-index: 900;
+  background: #fff; border-top: 1px solid var(--line-2);
+  display: flex; flex-direction: column;
+  box-shadow: 0 -10px 28px rgba(18,33,24,.08);
+}
+#resizeBar {
+  height: 8px; cursor: ns-resize;
+  background: linear-gradient(180deg, #eef4ef 0%, #dfe8e1 100%);
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#resizeBar::after { content: ''; width: 50px; height: 4px; border-radius: 999px; background: #c1d0c3; }
+#btmHdr {
+  height: 42px; padding: 0 16px;
+  background: var(--forest); color: #fff;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0;
+}
+.btm-title  { font: 700 .72rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.tbl-badge  { display: inline-flex; align-items: center; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.14); font: 700 .58rem var(--mono); letter-spacing: .04em; }
+.btm-actions{ display: flex; align-items: center; gap: 6px; }
+.bc { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.12); color: #fff; font: 700 .58rem var(--mono); }
+.bc:hover { background: rgba(255,255,255,.2); }
+#btmScroll  { flex: 1; overflow: auto; min-height: 0; }
+.dtbl { width: 100%; border-collapse: collapse; font: 600 .66rem var(--mono); white-space: nowrap; }
+.dtbl th, .dtbl td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
+.dtbl th {
+  position: sticky; top: 0; z-index: 3;
+  background: #f5faf6; color: var(--text);
+  font: 700 .58rem var(--mono); letter-spacing: .08em; text-transform: uppercase;
+}
+.dtbl tbody tr { transition: background .12s ease; cursor: pointer; }
+.dtbl tbody tr:hover { background: #eff7f1; }
+.dtbl tbody tr.sel { background: #dff1e5; }
+.no-data td { padding: 20px 12px; text-align: center; color: var(--muted-2); font: 600 .7rem var(--mono); }
+
+/* ── Mobile / narrow viewport ───────────────────────────────────────── */
 @media (max-width: 768px) {
-  /* Header adjustments */
-  :root { --hdr: auto; }
-  .hdr-divider, .syncbox { display: none; } /* Hide non-essentials */
-  .hdr-actions { margin-left: auto; order: 2; }
-  .hdr-brand { order: 1; width: 100%; margin-bottom: 8px; }
-  
-  /* Filter bar placement adjustment based on dynamic header height */
-  #fbar { top: 140px; } /* Adjust this value if header overlaps */
-  #map-wrap { top: calc(140px + var(--fbar)); }
 
-  /* Map controls */
-  #legend { right: 8px; bottom: 8px; min-width: 160px; padding: 8px; }
-  .legend-title { font-size: 0.5rem; }
-  .legend-row { font-size: 0.55rem; }
-  
+  /* Header: collapse to flex-wrap, auto height */
+  #hdr {
+    height: auto;
+    /* Switch to 3-col flex-like grid: logos | brand | actions */
+    grid-template-columns: auto 1fr auto;
+    grid-template-rows: auto auto;
+    padding: 8px 12px;
+    column-gap: 8px;
+    row-gap: 8px;
+  }
+  .hdr-logos   { grid-column: 1; grid-row: 1; }
+  .hdr-brand   { grid-column: 2; grid-row: 1; }
+  .syncbox     { display: none; } /* hide on mobile — saves space */
+  .hdr-actions { grid-column: 3; grid-row: 1; }
+  #statusBlocks {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    grid-template-columns: 1fr 1fr; /* 2 × 2 layout */
+  }
+
+  .hdr-title  { font-size: .78rem; }
+  .hdr-sub    { display: none; } /* sub-label not needed on small screens */
+  .hdr-logos img { height: 36px; }
+  .sblock-count  { font-size: .84rem; }
+  .hbtn { height: 32px; padding: 0 9px; font-size: .62rem; }
+
+  /* Field panel: full-screen width on mobile */
+  #fp { width: 100vw; }
+
+  /* Bottom table: reduce density */
+  .btm-title { font-size: .62rem; }
+  .bc { padding: 0 8px; font-size: .52rem; }
+  .dtbl th, .dtbl td { padding: 6px 8px; font-size: .6rem; }
+
+  /* Legend compact */
+  #legend { right: 8px; bottom: 8px; min-width: 160px; padding: 8px 10px; }
+  .legend-title { font-size: .52rem; }
+  .legend-row   { font-size: .57rem; }
+
   /* Loading screen */
-  .loading-logos img { height: 60px; }
+  .loading-logos img  { height: 60px; }
   .loading-list { grid-template-columns: 1fr; }
-  
-  /* Bottom Table Drawer */
-  #btmHdr { padding: 0 8px; }
-  .btm-title { font-size: 0.6rem; }
-  .bc { padding: 0 8px; font-size: 0.5rem; }
+}
+
+/* Very narrow (e.g. iPhone SE) */
+@media (max-width: 390px) {
+  #hdr { grid-template-columns: auto 1fr auto; }
+  .hdr-title { font-size: .7rem; }
 }
 </style>
 </head>
 <body>
+
+<!-- ── Loading overlay ──────────────────────────────────────────────── -->
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
@@ -246,8 +446,10 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
   </div>
 </div>
+
 <div id="toast"></div>
 
+<!-- ── Header ───────────────────────────────────────────────────────── -->
 <header id="hdr">
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
@@ -257,41 +459,43 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <img src="gep.png" alt="GEP" onerror="this.style.display='none'">
     </a>
   </div>
-  <div class="hdr-divider"></div>
   <div class="hdr-brand">
-    <div class="hdr-title">Gharial Ecology Project - Unified Telemetry Dashboard</div>
+    <div class="hdr-title">Gharial Ecology Project — Unified Telemetry Dashboard</div>
     <div class="hdr-sub">Desktop telemetry monitor | ATS Satellite routing</div>
-  </div>
-  <div id="statusBlocks">
-    <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
-    <button class="sblock muted" id="statusBlock1" type="button" onclick="toggleStatusBlock(1)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
-    <button class="sblock muted" id="statusBlock2" type="button" onclick="toggleStatusBlock(2)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
-    <button class="sblock muted" id="statusBlock3" type="button" onclick="toggleStatusBlock(3)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
   </div>
   <div class="syncbox">
     <strong>Last Sync</strong>
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
-    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">R</span> Refresh</button>
+    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↻</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
+  </div>
+
+  <!-- Status blocks — grid-row: 2 via CSS -->
+  <div id="statusBlocks">
+    <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
+    <button class="sblock muted" id="statusBlock1" type="button" onclick="toggleStatusBlock(1)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
+    <button class="sblock muted" id="statusBlock2" type="button" onclick="toggleStatusBlock(2)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
+    <button class="sblock muted" id="statusBlock3" type="button" onclick="toggleStatusBlock(3)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
   </div>
 </header>
 
+<!-- ── Filter bar ───────────────────────────────────────────────────── -->
 <div id="fbar">
   <div id="fbar-inner">
     <div class="fg">
       <label for="sourceFilter">Source</label>
       <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
         <option value="">Select Source</option>
-        <option value="ATS">ATS Satellite</option> 
+        <option value="ATS">ATS Satellite</option>
       </select>
     </div>
     <div class="fsep"></div>
     <div class="fg">
       <label>Radio ID</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading…</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-rid">
           <div class="ms-head">
             <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
@@ -306,7 +510,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Category</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading…</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-cat">
           <div class="ms-head">
             <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
@@ -321,7 +525,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Zone</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading…</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-zone">
           <div class="ms-head">
             <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
@@ -336,7 +540,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Status</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">▾</span></button>
         <div class="ms-drop" id="msd-status">
           <div class="ms-head">
             <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
@@ -349,19 +553,23 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     </div>
     <div class="fsep"></div>
     <button class="fbtn apply" type="button" onclick="applyFilters()">Apply</button>
-    <button class="fbtn clear" type="button" onclick="clearFilters()">Clear All</button>
+    <button class="fbtn clear"  type="button" onclick="clearFilters()">Clear All</button>
     <div class="fsep"></div>
     <button class="fbtn" id="heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-    <button class="fbtn" id="kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
+    <button class="fbtn" id="kdeBtn"  type="button" onclick="toggleKDE()">KDE</button>
     <div class="fsep"></div>
     <button class="fbtn" type="button" onclick="exportCSV()">Export CSV</button>
+    <!-- Field updates button — shown/hidden per source by JS -->
+    <div class="fsep" id="fieldUpdatesSep" style="display:none"></div>
+    <button class="fbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()" style="display:none">Field Updates</button>
   </div>
 </div>
 
+<!-- ── Map ──────────────────────────────────────────────────────────── -->
 <div id="map-wrap">
   <div id="map"></div>
   <div class="map-fab">
-    <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
+    <button class="fab" type="button" title="Reset View" onclick="resetView()">⌂</button>
   </div>
   <div id="legend"></div>
   <div id="mapFoot">
@@ -371,15 +579,16 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
+<!-- ── Field-updates slide panel ────────────────────────────────────── -->
 <div id="fpBg" onclick="closeFieldPanel()"></div>
 <aside id="fp">
   <div class="fp-hdr">
     <h3>Pali FT Field Updates</h3>
-    <button class="fp-cl" type="button" onclick="closeFieldPanel()">X</button>
+    <button class="fp-cl" type="button" onclick="closeFieldPanel()">✕</button>
   </div>
   <div class="fp-latest">
     <div class="fp-kicker">Latest update</div>
-    <div class="fp-date" id="fuDate">Loading...</div>
+    <div class="fp-date" id="fuDate">Loading…</div>
     <div class="fp-copy" id="fuText"></div>
   </div>
   <div class="fp-scroll">
@@ -388,6 +597,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </aside>
 
+<!-- ── Bottom table drawer ──────────────────────────────────────────── -->
 <div id="btm">
   <div id="resizeBar"></div>
   <div id="btmHdr">
@@ -423,843 +633,670 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
+<!-- ── Scripts ──────────────────────────────────────────────────────── -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script>
-/* ─────────────── STRICT DATA SOURCE URLS ─────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   DATA SOURCE URLS
+   ══════════════════════════════════════════════════════════════════════ */
 const URLS = {
-  master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
-  ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
-  fl:'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
-  pali:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  /* FIX-2: Field Updates target Sheet2 (gid=238985281) of the Palighat spreadsheet. */
-  updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
-  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
+  master:  'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
+  ats:     'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
+  fl:      'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
+  pali:    'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
+  updates: 'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
+  zones:   'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
 };
 
-const MAP_CENTER = [25.84,76.56];
-const MAP_ZOOM = 12;
-const TODAY = new Date();
+const MAP_CENTER   = [25.84, 76.56];
+const MAP_ZOOM     = 12;
+const TODAY        = new Date();
 const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
-const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
+const DEAD_IDS     = new Set(['30','33','34','38','96','64','98']);
 const NOT_DEPLOYED_COLLAR = '060336';
-/* FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
-   before it is labelled "Outside Defined Zones" instead of snapping to the nearest. */
 const ZONE_SNAP_MAX_KM = 0.5;
-const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
+
+const EMPTY_STATUS = [
+  {label:'Awaiting Source',count:'-'},
+  {label:'Awaiting Source',count:'-'},
+  {label:'Awaiting Source',count:'-'},
+  {label:'Awaiting Source',count:'-'}
+];
 
 const STATUS_META = {
-  active:{label:'Active',color:'#1565c0',bg:'#dbeafe',border:'#bfdbfe'},
-  s7:{label:'Silent',color:'#b45309',bg:'#fef3c7',border:'#fde68a'},
-  s30:{label:'Silent 30+',color:'#b91c1c',bg:'#fee2e2',border:'#fecaca'},
-  crit:{label:'Critical',color:'#7f1d1d',bg:'#fee2e2',border:'#fca5a5'},
-  tmiss:{label:'Temp Missing',color:'#d97706',bg:'#fef9c3',border:'#fde68a'},
-  gone:{label:'Gone',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
-  dead:{label:'Dead',color:'#991b1b',bg:'#fee2e2',border:'#fecaca'},
-  vhf:{label:'VHF',color:'#2f7a5a',bg:'#dcfce7',border:'#bbf7d0'},
-  ndep:{label:'Not Deployed',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'}
+  active:{label:'Active',        color:'#1565c0',bg:'#dbeafe',border:'#bfdbfe'},
+  s7:    {label:'Silent',        color:'#b45309',bg:'#fef3c7',border:'#fde68a'},
+  s30:   {label:'Silent 30+',    color:'#b91c1c',bg:'#fee2e2',border:'#fecaca'},
+  crit:  {label:'Critical',      color:'#7f1d1d',bg:'#fee2e2',border:'#fca5a5'},
+  tmiss: {label:'Temp Missing',  color:'#d97706',bg:'#fef9c3',border:'#fde68a'},
+  gone:  {label:'Gone',          color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
+  dead:  {label:'Dead',          color:'#991b1b',bg:'#fee2e2',border:'#fecaca'},
+  vhf:   {label:'VHF',           color:'#2f7a5a',bg:'#dcfce7',border:'#bbf7d0'},
+  ndep:  {label:'Not Deployed',  color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'}
 };
 
 const VIEW_META = {
-  '':{
-    blocks:EMPTY_STATUS,
-    legend:[],
-    statusKeys:[],
-    showFieldUpdates:false,
-    hideCollar:false,
-    statusEnabled:false
+  '': {
+    blocks:EMPTY_STATUS, legend:[], statusKeys:[],
+    showFieldUpdates:false, hideCollar:false, statusEnabled:false
   },
-  ATS:{
+  ATS: {
     blocks:[
       {key:'active',label:'Active <= 7d'},
-      {key:'s7',label:'Silent > 7d'},
-      {key:'s30',label:'Silent > 30d'},
-      {key:'crit',label:'Critical >= 45d'}
+      {key:'s7',   label:'Silent > 7d'},
+      {key:'s30',  label:'Silent > 30d'},
+      {key:'crit', label:'Critical >= 45d'}
     ],
     legend:[
-      {label:'Active <= 7d',color:'#1565c0'},
-      {label:'Silent 8-30d',color:'#b45309'},
-      {label:'Silent 31-44d',color:'#b91c1c'},
+      {label:'Active <= 7d',   color:'#1565c0'},
+      {label:'Silent 8-30d',   color:'#b45309'},
+      {label:'Silent 31-44d',  color:'#b91c1c'},
       {label:'Critical >= 45d',color:'#7f1d1d'}
     ],
     statusKeys:['active','s7','s30','crit'],
-    showFieldUpdates:false,
-    hideCollar:false,
-    statusEnabled:true
+    showFieldUpdates:false, hideCollar:false, statusEnabled:true
   },
-  FieldLog:{
+  FieldLog: {
     blocks:[
       {key:null,label:'Not applicable'},
       {key:null,label:'Not applicable'},
       {key:null,label:'Not applicable'},
       {key:null,label:'Not applicable'}
     ],
-    legend:[
-      {label:'Merged adult latest positions',color:'#2f7a5a'}
-    ],
+    legend:[{label:'Merged adult latest positions',color:'#2f7a5a'}],
     statusKeys:[],
-    showFieldUpdates:false,
-    hideCollar:true,
-    statusEnabled:false
+    showFieldUpdates:false, hideCollar:true, statusEnabled:false
   },
-  PaliFT:{
+  PaliFT: {
     blocks:[
       {key:'active',label:'Active <= 10d'},
-      {key:'tmiss',label:'Temp Missing'},
-      {key:'gone',label:'Gone > 30d'},
-      {key:'dead',label:'Dead'}
+      {key:'tmiss', label:'Temp Missing'},
+      {key:'gone',  label:'Gone > 30d'},
+      {key:'dead',  label:'Dead'}
     ],
     legend:[
       {label:'Active <= 10d',color:'#16a34a'},
-      {label:'Temp Missing',color:'#d97706'},
-      {label:'Gone > 30d',color:'#374151'},
-      {label:'Dead',color:'#991b1b'}
+      {label:'Temp Missing', color:'#d97706'},
+      {label:'Gone > 30d',   color:'#374151'},
+      {label:'Dead',         color:'#991b1b'}
     ],
     statusKeys:['active','tmiss','gone','dead'],
-    showFieldUpdates:true,
-    hideCollar:true,
-    statusEnabled:true
+    showFieldUpdates:true, hideCollar:true, statusEnabled:true
   }
 };
 
-let map;
-let oms;
-let markerLayer;
-let zoneGeoLayer = null;
-let heatLayer = null;
-let kdeLayer = null;
-let heatmapOn = false;
-let kdeOn = false;
-let bottomCollapsed = false;
-let bottomHeight = 250;
+/* ── State ────────────────────────────────────────────────────────── */
+let map, oms, markerLayer;
+let zoneGeoLayer = null, heatLayer = null, kdeLayer = null;
+let heatmapOn = false, kdeOn = false;
+let bottomCollapsed = false, bottomHeight = 250;
 let filterBarHidden = false;
 let activeStatusKey = null;
-let masterAdultMap = {};
-let masterHatchMap = {};
-/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. */
-let masterAdultMapRaw = {};
-let masterHatchMapRaw = {};
-/*
- * FIX-1: Tertiary lookup maps keyed by flatId (strips ALL non-alphanumeric chars).
- * Resolves IDs like "50-60" (field log) matching "50-60" in master even when
- * the two sheets store the hyphen differently or with surrounding whitespace.
- */
-let masterAdultMapFlat = {};
-let masterHatchMapFlat = {};
+let masterAdultMap = {}, masterHatchMap = {};
+let masterAdultMapRaw = {}, masterHatchMapRaw = {};
+let masterAdultMapFlat = {}, masterHatchMapFlat = {};
 let fixBuckets = {};
-let entities = [];
-let displayedEntities = [];
-let displayRows = [];
-let updatesRows = [];
-let zonePolygons = [];
-let geojsonData = null;
+let entities = [], displayedEntities = [], displayRows = [], updatesRows = [];
+let zonePolygons = [], geojsonData = null;
 let entityMarkerMap = {};
 
-function initMap() {
-  map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
-  L.control.zoom({position:'bottomright'}).addTo(map);
-  L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
-  markerLayer = L.layerGroup().addTo(map);
-  oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
-  oms.addListener('click', marker => marker.openPopup());
-  map.on('click', () => {
-    document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur());
-  });
+/* ══════════════════════════════════════════════════════════════════════
+   LAYOUT — dynamic top calculation via ResizeObserver
+   ══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Recalculate and apply positions for #fbar and #map-wrap based on the
+ * actual rendered height of #hdr. Called on boot, on header resize
+ * (ResizeObserver), on filter-bar toggle, and on window resize.
+ */
+function adjustLayout() {
+  const hdr = document.getElementById('hdr');
+  const fbar = document.getElementById('fbar');
+  const mapWrap = document.getElementById('map-wrap');
+  if (!hdr || !fbar || !mapWrap) return;
+
+  const hdrH  = hdr.offsetHeight;
+  const fbarH = filterBarHidden ? 0 : fbar.offsetHeight;
+
+  fbar.style.top    = hdrH + 'px';
+  mapWrap.style.top = (hdrH + fbarH) + 'px';
+
+  // Enable/disable horizontal scrolling on the filter inner strip
+  const inner = document.getElementById('fbar-inner');
+  if (inner) {
+    // Enable scroll when viewport is narrower than the natural content width
+    if (window.innerWidth < 900) {
+      inner.classList.add('fbar-scroll');
+    } else {
+      inner.classList.remove('fbar-scroll');
+    }
+  }
+
+  if (map) setTimeout(() => map.invalidateSize(), 50);
 }
 
-function fetchCSV(url){
-  return new Promise((resolve,reject)=>{
-    Papa.parse(url + '&_t=' + Date.now(),{
-      download:true,
-      header:true,
-      skipEmptyLines:true,
-      complete:results=>resolve(results.data || []),
-      error:reject
+/* ══════════════════════════════════════════════════════════════════════
+   MAP INIT
+   ══════════════════════════════════════════════════════════════════════ */
+function initMap() {
+  map = L.map('map', {zoomControl: false, attributionControl: false}).setView(MAP_CENTER, MAP_ZOOM);
+  L.control.zoom({position: 'bottomright'}).addTo(map);
+  L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}', {maxZoom: 21}).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+  oms = new OverlappingMarkerSpiderfier(map, {keepSpiderfied: true, nearbyDistance: 28, circleSpiralSwitchover: 7});
+  oms.addListener('click', marker => marker.openPopup());
+  map.on('click', () => { document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur()); });
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   DATA HELPERS
+   ══════════════════════════════════════════════════════════════════════ */
+function fetchCSV(url) {
+  return new Promise((resolve, reject) => {
+    Papa.parse(url + '&_t=' + Date.now(), {
+      download: true, header: true, skipEmptyLines: true,
+      complete: r => resolve(r.data || []),
+      error: reject
     });
   });
 }
 
-function fetchJSON(url){
-  return fetch(url + '?_t=' + Date.now()).then(r=>r.json());
+function fetchJSON(url) {
+  return fetch(url + '?_t=' + Date.now()).then(r => r.json());
 }
 
-function setLoadingState(id, ok){
+function setLoadingState(id, ok) {
   const el = document.getElementById(id);
-  if(!el) return;
-  el.classList.remove('ok','err');
+  if (!el) return;
+  el.classList.remove('ok', 'err');
   el.classList.add(ok ? 'ok' : 'err');
 }
 
-function loadingCopy(text){
-  document.getElementById('loadingCopy').textContent = text;
-}
+function loadingCopy(text) { document.getElementById('loadingCopy').textContent = text; }
 
-function gc(row, ...keys){
+function gc(row, ...keys) {
   const rowKeys = Object.keys(row || {});
-  for(const key of keys){
-    const normal = String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-    for(const rowKey of rowKeys){
-      const probe = String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-      if(probe === normal){
+  for (const key of keys) {
+    const normal = String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g, '');
+    for (const rowKey of rowKeys) {
+      const probe = String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g, '');
+      if (probe === normal) {
         const value = String(row[rowKey] || '').trim();
-        if(value && !['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
+        if (value && !['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
       }
     }
   }
   return '';
 }
 
-function nid(raw){
-  return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
+function nid(raw)      { return String(raw || '').trim().toUpperCase().replace(/\s+/g,''); }
+function rawTrimId(raw){ return String(raw || '').trim().toUpperCase(); }
+function flatId(raw)   { return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,''); }
+
+function isHatchCategory(row) {
+  const c = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
+  return /hatch|hatchling|fth|pali\s*ft/i.test(c);
 }
 
-/* FIX-1: rawTrimId — preserves hyphens and other separators that nid() removes. */
-function rawTrimId(raw){
-  return String(raw || '').trim().toUpperCase();
+function parseFieldDate(v) {
+  if (!v) return null;
+  const m = String(v).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!m) return null;
+  const d = new Date(+m[3], +m[1]-1, +m[2], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+  return isNaN(d) ? null : d;
 }
 
-/*
- * FIX-1: flatId — strips ALL non-alphanumeric characters (hyphens, spaces, dots, etc.)
- * allowing "50-60" from the field log to match "50-60" or "50 60" from the master sheet
- * when the two datasets encode the separator differently.
- * Example: flatId("50-60") === flatId("50 60") === "5060"
- */
-function flatId(raw){
-  return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+function parsePaliDate(v) {
+  if (!v) return null;
+  const m = String(v).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (!m) return null;
+  const d = new Date(+m[3], +m[2]-1, +m[1], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+  return isNaN(d) ? null : d;
 }
 
-function isHatchCategory(row){
-  const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
-  return /hatch|hatchling|fth|pali\s*ft/i.test(category);
+function parseATSDate(v) {
+  if (!v) return null;
+  const d = new Date(String(v).trim());
+  return isNaN(d) ? null : d;
 }
 
-function parseFieldDate(value){
-  if(!value) return null;
-  const match = String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date = new Date(+match[3], +match[1]-1, +match[2], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parsePaliDate(value){
-  if(!value) return null;
-  const match = String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date = new Date(+match[3], +match[2]-1, +match[1], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parseATSDate(value){
-  if(!value) return null;
-  const date = new Date(String(value).trim());
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function parseAnyDate(value, isHatch){
-  return isHatch ? (parsePaliDate(value) || parseFieldDate(value) || parseATSDate(value)) : (parseFieldDate(value) || parseATSDate(value) || parsePaliDate(value));
-}
-
-/*
- * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
- * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
- * Tag Date / Release Date column of the Master Radio sheet.
- *
- * Resolution order:
- *   1. DD-MMM-YY or DD-MMM-YYYY  ← NEW: month-name aware (handles "26-Jan-25")
- *   2. DD-MM-YYYY or DD/MM/YYYY  (Indian field standard)
- *   3. MM/DD/YYYY                (American fallback)
- *   4. ISO 8601 / browser-native
- *
- * Two-digit years: 00–49 → 2000–2049, 50–99 → 1950–1999.
- * Returns null (never throws) when value is absent or unparseable.
- */
-function parseTagDate(value){
-  if(!value) return null;
-  const s = String(value).trim();
-  if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
-
-  /* 1. DD-MMM-YY or DD-MMM-YYYY  e.g. "26-Jan-25", "26 Jan 2025", "26/Jan/25" */
-  const MONTH_NAMES = {
-    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
-    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
-  };
-  const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
-  if(dmmyMatch){
-    const d = parseInt(dmmyMatch[1], 10);
-    const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
-    const mIdx = MONTH_NAMES[mStr];
-    let y = parseInt(dmmyMatch[3], 10);
-    /* Expand two-digit year: 25 → 2025, 99 → 1999 */
-    if(y < 100) y += (y < 50 ? 2000 : 1900);
-    if(d >= 1 && d <= 31 && mIdx !== undefined){
-      const dt = new Date(y, mIdx, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
+function parseTagDate(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
+  const MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const dmy = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
+  if (dmy) {
+    const day = parseInt(dmy[1],10), mIdx = MONTHS[dmy[2].toLowerCase().slice(0,3)];
+    let yr = parseInt(dmy[3],10);
+    if (yr < 100) yr += yr < 50 ? 2000 : 1900;
+    if (day >= 1 && day <= 31 && mIdx !== undefined) {
+      const dt = new Date(yr, mIdx, day);
+      if (!isNaN(dt)) return dt;
     }
   }
-
-  /* 2. DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
-  const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
-  if(dmyMatch){
-    const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
-    if(d >= 1 && d <= 31 && m >= 1 && m <= 12){
-      const dt = new Date(y, m - 1, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
+  const dm = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (dm) {
+    const d2 = new Date(+dm[3], +dm[2]-1, +dm[1]);
+    if (!isNaN(d2)) return d2;
   }
-
-  /* 3. MM/DD/YYYY (American format fallback) */
-  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(mdyMatch){
-    const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
-    if(m >= 1 && m <= 12 && d >= 1 && d <= 31){
-      const dt = new Date(y, m - 1, d);
-      if(!Number.isNaN(dt.getTime())) return dt;
-    }
-  }
-
-  /* 4. ISO 8601 and other browser-native parseable strings */
   const iso = new Date(s);
-  if(!Number.isNaN(iso.getTime())) return iso;
-
-  return null;
+  return isNaN(iso) ? null : iso;
 }
 
-function daysSince(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return 9999;
+function daysSince(ts) {
+  if (!ts || isNaN(ts.getTime())) return 9999;
   return Math.max(0, Math.floor((TODAY - ts) / 86400000));
 }
 
-function fmtDateTime(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return '-';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+function fmtDateTime(ts) {
+  if (!ts || isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+         ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
 }
 
-function fmtDateOnly(ts){
-  if(!ts || Number.isNaN(ts.getTime())) return '-';
+function fmtDateOnly(ts) {
+  if (!ts || isNaN(ts.getTime())) return '-';
   return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
 }
 
-function escapeHtml(value){
-  return String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+function escapeHtml(v) {
+  return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-function toast(message, ok = false){
+function toast(msg, ok=false) {
   const el = document.getElementById('toast');
-  el.textContent = message;
+  el.textContent = msg;
   el.className = ok ? 'on ok' : 'on';
   clearTimeout(el._timer);
-  el._timer = setTimeout(()=>{ el.className = ''; }, 3600);
+  el._timer = setTimeout(() => { el.className = ''; }, 3600);
 }
 
-function adultStatus(days, collar){
-  if(collar === NOT_DEPLOYED_COLLAR) return 'ndep';
-  if(days <= 7) return 'active';
-  if(days <= 30) return 's7';
-  if(days < 45) return 's30';
+function adultStatus(days, collar) {
+  if (collar === NOT_DEPLOYED_COLLAR) return 'ndep';
+  if (days <= 7) return 'active';
+  if (days <= 30) return 's7';
+  if (days < 45) return 's30';
   return 'crit';
 }
 
-function hatchStatus(id, days){
-  if(DEAD_IDS.has(String(id))) return 'dead';
-  if(days <= 10) return 'active';
-  if(days <= 30) return 'tmiss';
+function hatchStatus(id, days) {
+  if (DEAD_IDS.has(String(id))) return 'dead';
+  if (days <= 10) return 'active';
+  if (days <= 30) return 'tmiss';
   return 'gone';
 }
 
-function markerColor(entity){
-  if(entity.viewSource === 'FieldLog') return STATUS_META.vhf.color;
+function markerColor(entity) {
+  if (entity.viewSource === 'FieldLog') return STATUS_META.vhf.color;
   return (STATUS_META[entity.status] || STATUS_META.vhf).color;
 }
 
-function getBucket(compKey){
-  if(!fixBuckets[compKey]) fixBuckets[compKey] = {ATS:[],FieldLog:[],PaliFT:[]};
-  return fixBuckets[compKey];
+function getBucket(k) {
+  if (!fixBuckets[k]) fixBuckets[k] = {ATS:[],FieldLog:[],PaliFT:[]};
+  return fixBuckets[k];
 }
 
-/*
- * FIX-1: buildMasterMaps — stores each master row under three key variants so
- * that field logs using "50-60" always resolve to the correct master record
- * regardless of whether the master sheet stores it as "50-60", "50 60", or "5060":
- *
- *   masterAdultMap[nid]      — whitespace-stripped uppercase   ("5060")  [primary]
- *   masterAdultMapRaw[rid]   — whitespace-trimmed uppercase    ("50-60") [secondary]
- *   masterAdultMapFlat[fid]  — all non-alphanumeric stripped   ("5060")  [tertiary]
- *
- * The flat variant handles the most common mismatch: a hyphen present in one
- * sheet but absent (or encoded as a space) in the other.
- */
-function buildMasterMaps(rows){
-  masterAdultMap = {};
-  masterHatchMap = {};
-  masterAdultMapRaw = {};
-  masterHatchMapRaw = {};
-  masterAdultMapFlat = {};
-  masterHatchMapFlat = {};
-  rows.forEach(row=>{
-    const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
-    const id  = nid(rawVal);      // strips whitespace only
-    const rid = rawTrimId(rawVal); // trim + uppercase (preserves hyphens)
-    const fid = flatId(rawVal);   // strips ALL non-alphanumeric chars
-    if(!id) return;
-    if(isHatchCategory(row)){
+/* ── Master lookup maps ────────────────────────────────────────────── */
+function buildMasterMaps(rows) {
+  masterAdultMap = {}; masterHatchMap = {};
+  masterAdultMapRaw = {}; masterHatchMapRaw = {};
+  masterAdultMapFlat = {}; masterHatchMapFlat = {};
+  rows.forEach(row => {
+    const rv = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID')||'').trim().toUpperCase();
+    const id  = nid(rv), rid = rawTrimId(rv), fid = flatId(rv);
+    if (!id) return;
+    if (isHatchCategory(row)) {
       masterHatchMap[id] = row;
-      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
-    }else{
+      if (rid && rid !== id) masterHatchMapRaw[rid]  = row;
+      if (fid && fid !== id) masterHatchMapFlat[fid] = row;
+    } else {
       masterAdultMap[id] = row;
-      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
-      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
+      if (rid && rid !== id) masterAdultMapRaw[rid]  = row;
+      if (fid && fid !== id) masterAdultMapFlat[fid] = row;
     }
   });
 }
 
-/*
- * FIX-1: lookupMasterRow — three-tier fallback chain.
- * Primary  : nid-normalised key  (strips whitespace)
- * Secondary: raw-trimmed key     (preserves hyphens, catches spaces-vs-no-spaces)
- * Tertiary : flatId key          (strips ALL non-alphanum — resolves "50-60" ↔ "5060")
- *
- * The tertiary flat lookup is the decisive fix for VHF animals like "50-60" and
- * "51-61" that the master sheet stores with a different separator encoding.
- */
-function lookupMasterRow(rawId, isHatchling){
+function lookupMasterRow(rawId, isHatchling) {
   const fid = flatId(rawId);
-  if(isHatchling){
-    return masterHatchMap[rawId]
-      || masterAdultMap[rawId]
-      || masterHatchMapRaw[rawId]
-      || masterAdultMapRaw[rawId]
-      || masterHatchMapFlat[fid]
-      || masterAdultMapFlat[fid]
-      || null;
+  if (isHatchling) {
+    return masterHatchMap[rawId] || masterAdultMap[rawId] ||
+           masterHatchMapRaw[rawId] || masterAdultMapRaw[rawId] ||
+           masterHatchMapFlat[fid] || masterAdultMapFlat[fid] || null;
   }
-  return masterAdultMap[rawId]
-    || masterAdultMapRaw[rawId]
-    || masterAdultMapFlat[fid]
-    || null;
+  return masterAdultMap[rawId] || masterAdultMapRaw[rawId] || masterAdultMapFlat[fid] || null;
 }
 
-function ingestATS(rows){
-  rows.forEach(row=>{
+/* ── Ingest ────────────────────────────────────────────────────────── */
+function ingestATS(rows) {
+  rows.forEach(row => {
     const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
-    if(!id) return;
+    if (!id) return;
     const lat = parseFloat(gc(row,'Latitude','Lat'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    if (!isFinite(lat) || !isFinite(lon)) return;
     const ts = parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
-    const bucket = getBucket(id + '|A');
-    bucket.ATS.push({
+    getBucket(id+'|A').ATS.push({
       lat, lon, ts, source:'ATS', rawId:id,
       collar:gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial'),
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','Behavior','Behaviour'),
-      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
-      remarks:gc(row,'Remarks','Notes'),
-      zone:'-'
+      place: gc(row,'Place','Location','Site'),
+      remarks:gc(row,'Remarks','Notes'), zone:'-'
     });
   });
 }
 
-function ingestFieldLog(rows){
-  rows.forEach(row=>{
+function ingestFieldLog(rows) {
+  rows.forEach(row => {
     const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
-    if(!id) return;
-    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)] || masterHatchMapFlat[flatId(id)]) return;
-    if(isHatchCategory(row)) return;
+    if (!id) return;
+    if (masterHatchMap[id]||masterHatchMapRaw[rawTrimId(id)]||masterHatchMapFlat[flatId(id)]) return;
+    if (isHatchCategory(row)) return;
     let lat = parseFloat(gc(row,'Latitude','Lat'));
     let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
     const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
-    if((!Number.isFinite(lat) || !Number.isFinite(lon)) && pair && pair.includes(',')){
-      const parts = pair.split(',').map(item=>parseFloat(item.trim()));
-      lat = parts[0];
-      lon = parts[1];
+    if ((!isFinite(lat)||!isFinite(lon)) && pair && pair.includes(',')) {
+      const p = pair.split(',').map(x => parseFloat(x.trim()));
+      lat = p[0]; lon = p[1];
     }
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    if (!isFinite(lat)||!isFinite(lon)) return;
     const ts = parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
-    const bucket = getBucket(id + '|A');
-    bucket.FieldLog.push({
-      lat, lon, ts, source:'FieldLog', rawId:id,
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','Behavior','Behaviour'),
-      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
-      remarks:gc(row,'Remarks','Notes'),
-      zone:'-'
-    });
+    getBucket(id+'|A').FieldLog.push({lat,lon,ts,source:'FieldLog',rawId:id,
+      place:gc(row,'Place','Location','Site'),remarks:gc(row,'Remarks','Notes'),zone:'-'});
   });
 }
 
-function ingestPali(rows){
-  rows.forEach(row=>{
+function ingestPali(rows) {
+  rows.forEach(row => {
     const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
-    if(!id) return;
+    if (!id) return;
     const lat = parseFloat(gc(row,'Latitude','Lat'));
     const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    if (!isFinite(lat)||!isFinite(lon)) return;
     const ts = parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
-    const bucket = getBucket(id + '|H');
-    bucket.PaliFT.push({
-      lat, lon, ts, source:'PaliFT', rawId:id,
-      place:gc(row,'Place','Location','Site'),
-      activity:gc(row,'Activity','activity'),
-      signal:gc(row,'Signal','signal'),
-      remarks:gc(row,'Remarks','Notes','remarks'),
-      zone:'-'
-    });
+    getBucket(id+'|H').PaliFT.push({lat,lon,ts,source:'PaliFT',rawId:id,
+      place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','activity'),
+      signal:gc(row,'Signal','signal'),remarks:gc(row,'Remarks','Notes','remarks'),zone:'-'});
   });
 }
 
-function sortHistory(list){
-  return list.slice().sort((a,b)=>{
+function sortHistory(list) {
+  return list.slice().sort((a,b) => {
     const ta = a.ts ? a.ts.getTime() : -Infinity;
     const tb = b.ts ? b.ts.getTime() : -Infinity;
     return ta - tb;
   });
 }
+function latestFrom(list) { return sortHistory(list).slice(-1)[0] || null; }
 
-function latestFrom(list){
-  return sortHistory(list).slice(-1)[0] || null;
-}
-
-function mergeEntities(){
+function mergeEntities() {
   const keys = new Set(Object.keys(fixBuckets));
-  Object.keys(masterHatchMap).forEach(id=>keys.add(id + '|H'));
+  Object.keys(masterHatchMap).forEach(id => keys.add(id+'|H'));
   entities = [];
-  keys.forEach(compKey=>{
+  keys.forEach(compKey => {
     const [rawId, scope] = compKey.split('|');
     const isHatchling = scope === 'H';
     const bucket = fixBuckets[compKey] || {ATS:[],FieldLog:[],PaliFT:[]};
     const masterRow = lookupMasterRow(rawId, isHatchling) || {};
-    const allHistory = sortHistory([...(bucket.ATS || []), ...(bucket.FieldLog || []), ...(bucket.PaliFT || [])]);
-    const latestATS = latestFrom(bucket.ATS || []);
-    const latestVHF = latestFrom(bucket.FieldLog || []);
-    const latestPali = latestFrom(bucket.PaliFT || []);
+    const allHistory = sortHistory([...(bucket.ATS||[]),...(bucket.FieldLog||[]),...(bucket.PaliFT||[])]);
+    const latestATS  = latestFrom(bucket.ATS||[]);
+    const latestVHF  = latestFrom(bucket.FieldLog||[]);
+    const latestPali = latestFrom(bucket.PaliFT||[]);
     const latestOverall = latestFrom(allHistory);
-    const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
+    const collar = (latestATS&&latestATS.collar)||gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
     const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
-
-    /*
-     * FIX-1: Resolve Category and T.L strictly from the master row when a match
-     * was found. If masterRow is empty (no match) the fallback placeholder is used.
-     * This ensures "Adult Female" from the master always wins over the default
-     * "Adult / Sub-adult" generated for unrecognised Field Log entries.
-     */
     const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
-
+    const masterTL = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
     entities.push({
-      compKey,
-      rawId,
-      id:rawId,
-      isHatchling,
-      /* FIX-1: masterCategory strictly overwrites the placeholder when present */
+      compKey, rawId, id:rawId, isHatchling,
       category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
       sex:gc(masterRow,'Sex','Gender','M/F'),
-      /* FIX-1: T.L explicitly resolved from master row */
       tl: masterTL,
       tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
       remarks:gc(masterRow,'Remarks','Notes','Comments'),
-      collar,
-      /* FIX-2: parseTagDate now handles "26-Jan-25" month-name format */
-      tagDate:parseTagDate(tagDateRaw),
-      histories:{
-        ATS:sortHistory(bucket.ATS || []),
-        FieldLog:sortHistory(bucket.FieldLog || []),
-        PaliFT:sortHistory(bucket.PaliFT || [])
-      },
-      allHistory,
-      latestATS,
-      latestVHF,
-      latestPali,
-      latestOverall
+      collar, tagDate:parseTagDate(tagDateRaw),
+      histories:{ATS:sortHistory(bucket.ATS||[]),FieldLog:sortHistory(bucket.FieldLog||[]),PaliFT:sortHistory(bucket.PaliFT||[])},
+      allHistory, latestATS, latestVHF, latestPali, latestOverall
     });
   });
-  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
+  entities.sort((a,b) => String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
 }
 
-function getZoneName(feature){
-  return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
+/* ── Zone assignment ───────────────────────────────────────────────── */
+function getZoneName(f) {
+  return f?.properties?.name||f?.properties?.Name||f?.properties?.ZONE||
+         f?.properties?.zone||f?.properties?.STRETCH||f?.properties?.stretch||'-';
 }
 
-/*
- * FIX-1: assignZones — strict 500 m distance threshold.
- * Direct point-in-polygon match → assigned; nearest polygon > ZONE_SNAP_MAX_KM → "Outside Defined Zones".
- */
-function assignZones(){
-  if(!geojsonData || !geojsonData.features) return;
-  zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
+function assignZones() {
+  if (!geojsonData?.features) return;
+  zonePolygons = geojsonData.features.filter(f =>
+    f.geometry && (f.geometry.type==='Polygon'||f.geometry.type==='MultiPolygon'));
   const allFixes = [];
-  Object.values(fixBuckets).forEach(bucket=>{
-    ['ATS','FieldLog','PaliFT'].forEach(source=>{
-      (bucket[source] || []).forEach(fix=>allFixes.push(fix));
-    });
+  Object.values(fixBuckets).forEach(b => {
+    ['ATS','FieldLog','PaliFT'].forEach(s => (b[s]||[]).forEach(fix => allFixes.push(fix)));
   });
-  allFixes.forEach(fix=>{
-    if(!Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)){
-      fix.zone = '-';
-      return;
-    }
-    const point = turf.point([fix.lon,fix.lat]);
+  allFixes.forEach(fix => {
+    if (!isFinite(fix.lat)||!isFinite(fix.lon)) { fix.zone='-'; return; }
+    const pt = turf.point([fix.lon,fix.lat]);
     let found = '-';
-    for(const feature of zonePolygons){
-      try{
-        if(turf.booleanPointInPolygon(point, feature)){
-          found = getZoneName(feature);
-          break;
-        }
-      }catch(error){}
+    for (const f of zonePolygons) {
+      try { if (turf.booleanPointInPolygon(pt,f)) { found=getZoneName(f); break; } } catch(e){}
     }
-    if(found === '-'){
-      let best = Infinity;
-      let bestName = '-';
-      for(const feature of zonePolygons){
-        try{
-          const outline = turf.polygonToLine(feature);
-          const nearest = turf.nearestPointOnLine(outline, point);
-          const distance = turf.distance(point, nearest, {units:'kilometers'});
-          if(distance < best){
-            best = distance;
-            bestName = getZoneName(feature);
-          }
-        }catch(error){}
+    if (found==='-') {
+      let best=Infinity, bestName='-';
+      for (const f of zonePolygons) {
+        try {
+          const d = turf.distance(pt, turf.nearestPointOnLine(turf.polygonToLine(f),pt),{units:'kilometers'});
+          if (d<best) { best=d; bestName=getZoneName(f); }
+        } catch(e){}
       }
-      found = best <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
+      found = best<=ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
     }
     fix.zone = found;
   });
 }
 
-function ensureZoneLayer(){
-  if(zoneGeoLayer || !geojsonData) return;
-  zoneGeoLayer = L.geoJSON(geojsonData,{
-    style:{
-      color:'rgba(23,63,49,.45)',
-      weight:1.5,
-      dashArray:'4 8',
-      fillColor:'rgba(23,63,49,.04)',
-      fillOpacity:.7
-    },
-    onEachFeature(feature, layer){
-      layer.bindTooltip(getZoneName(feature),{className:'zone-label',direction:'center'});
-    }
+function ensureZoneLayer() {
+  if (zoneGeoLayer||!geojsonData) return;
+  zoneGeoLayer = L.geoJSON(geojsonData, {
+    style:{color:'rgba(23,63,49,.45)',weight:1.5,dashArray:'4 8',fillColor:'rgba(23,63,49,.04)',fillOpacity:.7},
+    onEachFeature(f,l) { l.bindTooltip(getZoneName(f),{className:'zone-label',direction:'center'}); }
   });
 }
 
-function showZoneLayer(visible){
+function showZoneLayer(visible) {
   ensureZoneLayer();
-  if(!zoneGeoLayer) return;
-  if(visible){
-    if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);
-  }else if(map.hasLayer(zoneGeoLayer)){
-    map.removeLayer(zoneGeoLayer);
-  }
+  if (!zoneGeoLayer) return;
+  if (visible) { if (!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map); }
+  else if (map.hasLayer(zoneGeoLayer)) map.removeLayer(zoneGeoLayer);
 }
 
-function statusLabel(status, source){
-  if(status === 'active' && source === 'PaliFT') return 'Active <= 10d';
-  if(status === 'active' && source === 'ATS') return 'Active <= 7d';
-  if(status === 's7') return 'Silent > 7d';
-  if(status === 's30') return 'Silent > 30d';
-  if(status === 'crit') return 'Critical >= 45d';
-  if(status === 'tmiss') return 'Temp Missing';
-  if(status === 'gone') return 'Gone > 30d';
-  if(status === 'dead') return 'Dead';
-  if(status === 'ndep') return 'Not Deployed';
-  if(status === 'vhf') return 'VHF';
-  return '-';
+/* ── Status / legend helpers ───────────────────────────────────────── */
+function statusLabel(status, source) {
+  if (status==='active'&&source==='PaliFT') return 'Active <= 10d';
+  if (status==='active'&&source==='ATS')    return 'Active <= 7d';
+  const MAP = {s7:'Silent > 7d',s30:'Silent > 30d',crit:'Critical >= 45d',
+               tmiss:'Temp Missing',gone:'Gone > 30d',dead:'Dead',ndep:'Not Deployed',vhf:'VHF'};
+  return MAP[status] || '-';
 }
 
-function badgeHtml(status, source){
-  const meta = STATUS_META[status] || STATUS_META.vhf;
-  return '<span class="sbadge" style="background:' + meta.bg + ';color:' + meta.color + ';border-color:' + meta.border + '">' + escapeHtml(statusLabel(status, source)) + '</span>';
+function badgeHtml(status, source) {
+  const m = STATUS_META[status]||STATUS_META.vhf;
+  return `<span class="sbadge" style="background:${m.bg};color:${m.color};border-color:${m.border}">${escapeHtml(statusLabel(status,source))}</span>`;
 }
 
-function blockCounts(source, pool){
-  const defs = VIEW_META[source]?.blocks || EMPTY_STATUS;
-  return defs.map(def=>{
-    if(!def.key) return {label:def.label,count:'-'};
-    const count = pool.filter(item=>item.status === def.key).length;
-    return {key:def.key,label:def.label,count};
+function blockCounts(source, pool) {
+  return (VIEW_META[source]?.blocks||EMPTY_STATUS).map(def => {
+    if (!def.key) return {label:def.label,count:'-'};
+    return {key:def.key,label:def.label,count:pool.filter(e=>e.status===def.key).length};
   });
 }
 
-function updateStatusBlocks(source, pool){
-  const counts = blockCounts(source, pool || []);
-  counts.forEach((block, index)=>{
-    const el = document.getElementById('statusBlock' + index);
-    const label = el.querySelector('.sblock-label');
-    const count = el.querySelector('.sblock-count');
+function updateStatusBlocks(source, pool) {
+  blockCounts(source, pool||[]).forEach((block,i) => {
+    const el = document.getElementById('statusBlock'+i);
+    const [lbl,cnt] = [el.querySelector('.sblock-label'),el.querySelector('.sblock-count')];
     el.className = 'sblock';
-    el.dataset.status = block.key || '';
-    if(block.key){
-      el.classList.add('clickable');
-      if(activeStatusKey === block.key) el.classList.add('on');
-    }else{
-      el.classList.add('muted');
-    }
-    label.textContent = block.label;
-    count.textContent = block.count;
+    el.dataset.status = block.key||'';
+    if (block.key) { el.classList.add('clickable'); if (activeStatusKey===block.key) el.classList.add('on'); }
+    else el.classList.add('muted');
+    lbl.textContent = block.label;
+    cnt.textContent = block.count;
   });
 }
 
-function toggleStatusBlock(index){
+function toggleStatusBlock(i) {
   const source = document.getElementById('sourceFilter').value;
-  const defs = VIEW_META[source]?.blocks || [];
-  const def = defs[index];
-  if(!def || !def.key) return;
-  activeStatusKey = activeStatusKey === def.key ? null : def.key;
-  const options = document.querySelectorAll('#msi-status input[type=checkbox]');
-  options.forEach(option=>{
-    option.checked = activeStatusKey ? option.value === activeStatusKey : true;
+  const def = (VIEW_META[source]?.blocks||[])[i];
+  if (!def?.key) return;
+  activeStatusKey = activeStatusKey===def.key ? null : def.key;
+  document.querySelectorAll('#msi-status input[type=checkbox]').forEach(o => {
+    o.checked = activeStatusKey ? o.value===activeStatusKey : true;
   });
   updateMSBtn('status');
   applyFilters();
 }
 
-function updateLegend(source){
+function updateLegend(source) {
   const legend = document.getElementById('legend');
-  const rows = VIEW_META[source]?.legend || [];
-  if(!source || !rows.length){
-    legend.style.display = 'none';
-    legend.innerHTML = '';
-    return;
-  }
-  legend.style.display = '';
-  legend.innerHTML = '<div class="legend-title">Legend</div>' + rows.map(row=>'<div class="legend-row"><span class="legend-dot" style="background:' + row.color + '"></span>' + escapeHtml(row.label) + '</div>').join('');
+  const rows = VIEW_META[source]?.legend||[];
+  if (!source||!rows.length) { legend.style.display='none'; legend.innerHTML=''; return; }
+  legend.style.display='';
+  legend.innerHTML = '<div class="legend-title">Legend</div>' +
+    rows.map(r=>`<div class="legend-row"><span class="legend-dot" style="background:${r.color}"></span>${escapeHtml(r.label)}</div>`).join('');
 }
 
-function resetMultiSelect(key, message, disabled){
-  const button = document.getElementById('msb-' + key);
-  const list = document.getElementById('msi-' + key);
-  const counter = document.getElementById('msc-' + key);
-  button.classList.toggle('disabled', !!disabled);
-  button.classList.remove('active');
-  button.querySelector('.ms-lbl').textContent = message;
-  list.innerHTML = '<div class="ms-empty">' + escapeHtml(message) + '</div>';
-  counter.textContent = disabled ? '' : '0/0';
+/* ── Multi-select helpers ──────────────────────────────────────────── */
+function resetMultiSelect(key, msg, disabled) {
+  const btn = document.getElementById('msb-'+key);
+  const lst = document.getElementById('msi-'+key);
+  const ctr = document.getElementById('msc-'+key);
+  btn.classList.toggle('disabled', !!disabled);
+  btn.classList.remove('active');
+  btn.querySelector('.ms-lbl').textContent = msg;
+  lst.innerHTML = `<div class="ms-empty">${escapeHtml(msg)}</div>`;
+  ctr.textContent = disabled ? '' : '0/0';
 }
 
-function buildMSOptions(key, options, formatter, preserveSelection = false){
-  const button = document.getElementById('msb-' + key);
-  const list = document.getElementById('msi-' + key);
-  const previous = preserveSelection ? new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value)) : new Set();
-  button.classList.remove('disabled');
-  list.innerHTML = '';
-  if(!options.length){
-    resetMultiSelect(key, key === 'status' ? 'Not applicable' : 'No options', key === 'status');
-    return;
-  }
-  options.forEach(option=>{
-    const label = document.createElement('label');
-    label.className = 'ms-item';
-    const input = document.createElement('input');
-    input.type = 'checkbox';
-    input.value = option;
-    input.checked = previous.size ? previous.has(option) : true;
-    input.addEventListener('change',()=>updateMSBtn(key));
-    label.appendChild(input);
-    label.appendChild(document.createTextNode(' ' + (formatter ? formatter(option) : option)));
-    list.appendChild(label);
+function buildMSOptions(key, opts, formatter, preserveSelection=false) {
+  const btn = document.getElementById('msb-'+key);
+  const lst = document.getElementById('msi-'+key);
+  const prev = preserveSelection
+    ? new Set([...document.querySelectorAll('#msi-'+key+' input:checked')].map(i=>i.value))
+    : new Set();
+  btn.classList.remove('disabled');
+  lst.innerHTML = '';
+  if (!opts.length) { resetMultiSelect(key, key==='status'?'Not applicable':'No options', key==='status'); return; }
+  opts.forEach(opt => {
+    const lbl = document.createElement('label');
+    lbl.className = 'ms-item';
+    const inp = document.createElement('input');
+    inp.type='checkbox'; inp.value=opt;
+    inp.checked = prev.size ? prev.has(opt) : true;
+    inp.addEventListener('change', () => updateMSBtn(key));
+    lbl.appendChild(inp);
+    lbl.appendChild(document.createTextNode(' '+(formatter?formatter(opt):opt)));
+    lst.appendChild(lbl);
   });
   updateMSBtn(key);
 }
 
-function updateMSBtn(key){
-  const button = document.getElementById('msb-' + key);
-  if(button.classList.contains('disabled')) return;
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  const checked = all.filter(item=>item.checked);
-  const counter = document.getElementById('msc-' + key);
-  counter.textContent = checked.length + '/' + all.length;
-  if(!all.length){
-    button.querySelector('.ms-lbl').textContent = key === 'status' ? 'Not applicable' : 'No options';
-    return;
-  }
-  if(checked.length === 0){
-    button.querySelector('.ms-lbl').textContent = 'None selected';
-    button.classList.add('active');
-  }else if(checked.length === all.length){
-    button.querySelector('.ms-lbl').textContent = 'All';
-    button.classList.remove('active');
-  }else{
-    button.querySelector('.ms-lbl').textContent = checked.length + ' selected';
-    button.classList.add('active');
-  }
+function updateMSBtn(key) {
+  const btn = document.getElementById('msb-'+key);
+  if (btn.classList.contains('disabled')) return;
+  const all = [...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
+  const chk = all.filter(i=>i.checked);
+  document.getElementById('msc-'+key).textContent = `${chk.length}/${all.length}`;
+  if (!all.length) { btn.querySelector('.ms-lbl').textContent = key==='status'?'Not applicable':'No options'; return; }
+  if (!chk.length)             { btn.querySelector('.ms-lbl').textContent='None selected'; btn.classList.add('active'); }
+  else if (chk.length===all.length) { btn.querySelector('.ms-lbl').textContent='All'; btn.classList.remove('active'); }
+  else                         { btn.querySelector('.ms-lbl').textContent=`${chk.length} selected`; btn.classList.add('active'); }
 }
 
-function toggleMS(key, event){
-  if(event) event.stopPropagation();
-  const button = document.getElementById('msb-' + key);
-  if(button.classList.contains('disabled')) return;
-  const drop = document.getElementById('msd-' + key);
+/**
+ * toggleMS — opens/closes a dropdown.
+ * On narrow viewports (< 900 px) the inner filter strip is horizontally scrollable,
+ * which means absolute-positioned dropdowns would be clipped by its overflow.
+ * Fix: re-position the drop as `position: fixed` using the button's bounding rect.
+ */
+function toggleMS(key, event) {
+  if (event) event.stopPropagation();
+  const btn = document.getElementById('msb-'+key);
+  if (btn.classList.contains('disabled')) return;
+  const drop = document.getElementById('msd-'+key);
   const isOpen = drop.classList.contains('open');
-  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
-  if(!isOpen) drop.classList.add('open');
+  // Close all, reset any fixed positioning
+  document.querySelectorAll('.ms-drop').forEach(d => {
+    d.classList.remove('open');
+    d.style.position=''; d.style.top=''; d.style.left=''; d.style.maxWidth='';
+  });
+  if (!isOpen) {
+    drop.classList.add('open');
+    // On narrow / scrollable layouts, escape overflow clip via fixed positioning
+    if (window.innerWidth < 900) {
+      const rect = btn.getBoundingClientRect();
+      const dropW = 240;
+      let leftPos = Math.max(8, Math.min(rect.left, window.innerWidth - dropW - 8));
+      drop.style.position = 'fixed';
+      drop.style.top      = (rect.bottom + 2) + 'px';
+      drop.style.left     = leftPos + 'px';
+      drop.style.maxWidth = (window.innerWidth - 16) + 'px';
+    }
+  }
 }
 
-function msSelectAll(key){
-  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = true; });
-  updateMSBtn(key);
+function msSelectAll(key) { document.querySelectorAll('#msi-'+key+' input').forEach(i=>i.checked=true); updateMSBtn(key); }
+function msClearAll(key)  { document.querySelectorAll('#msi-'+key+' input').forEach(i=>i.checked=false); updateMSBtn(key); }
+
+function selectedSet(key) {
+  const all = [...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
+  if (!all.length||document.getElementById('msb-'+key).classList.contains('disabled')) return null;
+  const chk = all.filter(i=>i.checked).map(i=>i.value);
+  if (!chk.length||chk.length===all.length) return null;
+  return new Set(chk);
 }
 
-function msClearAll(key){
-  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = false; });
-  updateMSBtn(key);
-}
-
-function selectedSet(key){
-  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
-  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
-  const checked = all.filter(item=>item.checked).map(item=>item.value);
-  if(checked.length === 0 || checked.length === all.length) return null;
-  return new Set(checked);
-}
-
-document.addEventListener('click', event=>{
-  if(!event.target.closest('.ms-wrap')){
-    document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
+// Close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ms-wrap')) {
+    document.querySelectorAll('.ms-drop').forEach(d => {
+      d.classList.remove('open');
+      d.style.position=''; d.style.top=''; d.style.left=''; d.style.maxWidth='';
+    });
   }
 });
 
-/* FIX-5: rebuildFilters — cascading dropdown dependency based on active source pool. */
-function rebuildFilters(){
+/* ── Filter rebuild ────────────────────────────────────────────────── */
+function rebuildFilters() {
   const source = document.getElementById('sourceFilter').value;
   const sourcePool = source ? getViewEntities(source) : null;
-  const poolForFilters = sourcePool || entities;
+  const pool = sourcePool || entities;
 
-  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
+  const allIds = [...new Set(pool.map(e=>e.id))].sort((a,b) =>
     String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
   buildMSOptions('rid', allIds);
 
-  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
+  const allCats = [...new Set(pool.map(e=>e.category||'-'))].sort();
   buildMSOptions('cat', allCats);
 
   const zoneCounts = {};
-  if(sourcePool){
-    sourcePool.forEach(e=>{
-      const z = e.zone||'-';
-      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
-    });
-  }else{
-    entities.forEach(e=>{
-      const z = e.latestOverall?.zone||'-';
-      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
-    });
-  }
-  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
-  buildMSOptions('zone', sortedZones, zone=>zone + ' (' + zoneCounts[zone] + ')');
+  (sourcePool||entities).forEach(e => {
+    const z = (sourcePool?e.zone:e.latestOverall?.zone)||'-';
+    if (z&&z!=='-') zoneCounts[z]=(zoneCounts[z]||0)+1;
+  });
+  buildMSOptions('zone',
+    Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]),
+    z => z+' ('+zoneCounts[z]+')');
 
-  if(source && VIEW_META[source].statusEnabled){
-    buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source));
-  }else{
+  if (source&&VIEW_META[source].statusEnabled) {
+    buildMSOptions('status', VIEW_META[source].statusKeys, k=>statusLabel(k,source));
+  } else {
     resetMultiSelect('status','Not applicable',true);
   }
 
@@ -1267,7 +1304,7 @@ function rebuildFilters(){
   updateLegend(source||'');
 }
 
-function onSourceChange(){
+function onSourceChange() {
   activeStatusKey = null;
   rebuildFilters();
   updateFieldUpdatesVisibility();
@@ -1275,350 +1312,251 @@ function onSourceChange(){
   applyFilters();
 }
 
-function updateFieldUpdatesVisibility(){
+function updateFieldUpdatesVisibility() {
   const source = document.getElementById('sourceFilter').value;
-  document.getElementById('fieldUpdatesBtn').style.display = VIEW_META[source]?.showFieldUpdates ? '' : 'none';
+  const show = VIEW_META[source]?.showFieldUpdates;
+  document.getElementById('fieldUpdatesBtn').style.display  = show ? '' : 'none';
+  document.getElementById('fieldUpdatesSep').style.display  = show ? '' : 'none';
 }
 
-function updateCollarColumn(){
+function updateCollarColumn() {
   const source = document.getElementById('sourceFilter').value;
-  document.getElementById('thCollar').style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
-  document.querySelectorAll('.collar-cell').forEach(cell=>{
-    cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
-  });
+  const hide = VIEW_META[source]?.hideCollar;
+  document.getElementById('thCollar').style.display = hide ? 'none' : '';
+  document.querySelectorAll('.collar-cell').forEach(c => c.style.display = hide ? 'none' : '');
 }
 
-function applyFilters(){
-  const source    = document.getElementById('sourceFilter').value;
-  const idFilter  = selectedSet('rid');
-  const catFilter = selectedSet('cat');
-  const zoneFilter= selectedSet('zone');
+/* ── Apply / clear filters ─────────────────────────────────────────── */
+function applyFilters() {
+  const source     = document.getElementById('sourceFilter').value;
+  const idFilter   = selectedSet('rid');
+  const catFilter  = selectedSet('cat');
+  const zoneFilter = selectedSet('zone');
 
-  if(!source){
-    const hasFilter = idFilter || catFilter || zoneFilter;
-    if(!hasFilter){
-      displayedEntities = [];
-      displayRows = [];
-      activeStatusKey = null;
-      clearVisuals(true);
-      renderTable();
-      updateLegend('');
-      updateStatusBlocks('', []);
-      showZoneLayer(false);
-      return;
+  const passCommon = e =>
+    (!idFilter  || idFilter.has(e.id)) &&
+    (!catFilter || catFilter.has(e.category||'-')) &&
+    (!zoneFilter|| zoneFilter.has(e.zone||'-'));
+
+  if (!source) {
+    if (!idFilter&&!catFilter&&!zoneFilter) {
+      displayedEntities=[]; displayRows=[]; activeStatusKey=null;
+      clearVisuals(true); renderTable(); updateLegend(''); updateStatusBlocks('',[]);
+      showZoneLayer(false); return;
     }
-    const seen = new Set();
-    const allEntities = [];
-    ['ATS','FieldLog','PaliFT'].forEach(src=>{
-      getViewEntities(src).forEach(entity=>{
-        if(!seen.has(entity.compKey)){
-          seen.add(entity.compKey);
-          allEntities.push(entity);
-        }
-      });
-    });
-    displayedEntities = allEntities.filter(entity=>{
-      if(idFilter  && !idFilter.has(entity.id))               return false;
-      if(catFilter && !catFilter.has(entity.category || '-')) return false;
-      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
-      return true;
-    });
-    displayedEntities.sort((a,b)=>{
-      const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
-      const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
-      return tb - ta;
-    });
-    showZoneLayer(displayedEntities.length > 0);
-    renderMarkers();
-    renderTable();
-    updateMapFoot();
-    if(zoneFilter && zoneFilter.size === 1 && geojsonData){
-      const zoneName = [...zoneFilter][0];
-      const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
-      if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
-    } else {
-      const pts = displayedEntities
-        .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
-        .map(e=>[e.displayFix.lat, e.displayFix.lon]);
-      if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
-    }
-    return;
+    const seen=new Set(), all=[];
+    ['ATS','FieldLog','PaliFT'].forEach(s => getViewEntities(s).forEach(e => { if (!seen.has(e.compKey)){seen.add(e.compKey);all.push(e);} }));
+    displayedEntities = all.filter(passCommon);
+  } else {
+    const statusFilter = selectedSet('status');
+    const pool = getViewEntities(source);
+    updateStatusBlocks(source, pool);
+    displayedEntities = pool.filter(e => passCommon(e) && (!statusFilter||statusFilter.has(e.status)));
   }
 
-  const statusFilter = selectedSet('status');
-  const pool = getViewEntities(source);
-  updateStatusBlocks(source, pool);
-  displayedEntities = pool.filter(entity=>{
-    if(idFilter   && !idFilter.has(entity.id))               return false;
-    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
-    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
-    if(statusFilter&& !statusFilter.has(entity.status))      return false;
-    return true;
+  displayedEntities.sort((a,b) => {
+    const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity;
+    const tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
+    return tb-ta;
   });
-  displayedEntities.sort((a,b)=>{
-    const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
-    const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
-    return tb - ta;
-  });
-  showZoneLayer(displayedEntities.length > 0);
+  showZoneLayer(displayedEntities.length>0);
   renderMarkers();
   renderTable();
   updateMapFoot();
-  if(zoneFilter && zoneFilter.size === 1 && geojsonData){
-    const zoneName = [...zoneFilter][0];
-    const feature = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
-    if(feature){
-      try{
-        map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15});
-      }catch(error){}
-    }
+
+  if (zoneFilter&&zoneFilter.size===1&&geojsonData) {
+    const zn = [...zoneFilter][0];
+    const feat = (geojsonData.features||[]).find(f=>getZoneName(f)===zn);
+    if (feat) { try { map.flyToBounds(L.geoJSON(feat).getBounds(),{padding:[40,40],maxZoom:15}); } catch(e){} }
   }
 }
 
-function clearFilters(){
-  document.getElementById('sourceFilter').value = '';
-  activeStatusKey = null;
-  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
-  rebuildFilters();
-  updateFieldUpdatesVisibility();
-  updateCollarColumn();
-  displayRows = [];
-  displayedEntities = [];
-  clearVisuals(true);
-  renderTable();
-  updateMapFoot();
+function clearFilters() {
+  document.getElementById('sourceFilter').value='';
+  activeStatusKey=null;
+  document.querySelectorAll('.ms-drop').forEach(d => d.classList.remove('open'));
+  rebuildFilters(); updateFieldUpdatesVisibility(); updateCollarColumn();
+  displayRows=[]; displayedEntities=[];
+  clearVisuals(true); renderTable(); updateMapFoot();
 }
 
-function clearVisuals(resetViewport){
-  markerLayer.clearLayers();
-  entityMarkerMap = {};
-  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
-  if(heatLayer){
-    map.removeLayer(heatLayer);
-    heatLayer = null;
-  }
-  if(kdeLayer){
-    map.removeLayer(kdeLayer);
-    kdeLayer = null;
-  }
-  heatmapOn = false;
-  kdeOn = false;
+/* ── Map rendering ─────────────────────────────────────────────────── */
+function clearVisuals(resetViewport) {
+  markerLayer.clearLayers(); entityMarkerMap={};
+  try { oms.clearMarkers&&oms.clearMarkers(); } catch(e){}
+  if (heatLayer) { map.removeLayer(heatLayer); heatLayer=null; }
+  if (kdeLayer)  { map.removeLayer(kdeLayer);  kdeLayer=null;  }
+  heatmapOn=kdeOn=false;
   document.getElementById('heatBtn').classList.remove('on');
   document.getElementById('kdeBtn').classList.remove('on');
   showZoneLayer(false);
-  if(resetViewport) resetView();
+  if (resetViewport) resetView();
 }
 
-function markerIcon(entity, text){
+function markerIcon(entity, text) {
   const color = markerColor(entity);
-  const fontSize = text.length >= 5 ? 9 : text.length >= 4 ? 10 : 12;
+  const fs = text.length>=5 ? 9 : text.length>=4 ? 10 : 12;
   return L.divIcon({
     className:'',
-    html:'<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:' + color + ';border:2px solid #fff;color:#fff;font:700 ' + fontSize + 'px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">' + escapeHtml(text) + '</div>',
-    iconSize:[34,34],
-    iconAnchor:[17,17],
-    popupAnchor:[0,-16]
+    html:`<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${color};border:2px solid #fff;color:#fff;font:700 ${fs}px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">${escapeHtml(text)}</div>`,
+    iconSize:[34,34], iconAnchor:[17,17], popupAnchor:[0,-16]
   });
 }
 
-/*
- * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
- *         is absent or unparseable rather than silently omitting the row.
- * FIX-2: tagDate is now correctly parsed (handles "26-Jan-25") so daysRelease
- *         will display the real day-count instead of "N/A" for most animals.
- * FIX-3: "Track" button removed. Popup actions are Focus + Table only.
- */
-function popupHtml(entity){
-  const display = entity.displayFix;
-  const status = badgeHtml(entity.status, entity.viewSource);
-  const latestSat = entity.latestATS ? fmtDateTime(entity.latestATS.ts) : '-';
-  const latestVhf = entity.latestVHF ? fmtDateTime(entity.latestVHF.ts) : '-';
-  const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
-  const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
-  const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
-  /* FIX-2: tagDate now parsed correctly — shows real count; "N/A" only as genuine fallback */
-  const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
-  return '' +
-    '<div>' +
-      '<div class="pop-top">' +
-        '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
-        '<div>' +
-          '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
-          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="pop-body">' +
-        '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">' + escapeHtml(fmtDateTime(display?.ts)) + '</span></div>' +
-        (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
-        (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
-        (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
-        (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
-        '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
-        '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
-        (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
-        (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
-        (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
-      '</div>' +
-      '<div class="pop-actions">' +
-        '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
-        '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
-      '</div>' +
-    '</div>';
+function popupHtml(entity) {
+  const fix = entity.displayFix;
+  const status   = badgeHtml(entity.status, entity.viewSource);
+  const srcLabel = entity.viewSource==='FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
+  const daysFix  = fix?.ts ? daysSince(fix.ts)+'d' : '-';
+  const daysRel  = entity.tagDate ? daysSince(entity.tagDate)+'d' : 'N/A';
+  return `<div>
+    <div class="pop-top">
+      <div class="pop-id-badge" style="background:${markerColor(entity)}">${escapeHtml(entity.id.length>5?entity.id.slice(0,5):entity.id)}</div>
+      <div>
+        <div class="pop-id">${escapeHtml(entity.id)}</div>
+        <div class="pop-sub">${status} | ${escapeHtml(srcLabel)}</div>
+      </div>
+    </div>
+    <div class="pop-body">
+      <div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">${escapeHtml(fmtDateTime(fix?.ts))}</span></div>
+      ${entity.viewSource==='ATS'&&entity.latestVHF?`<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">${escapeHtml(fmtDateTime(entity.latestVHF.ts))}</span></div>`:''}
+      <div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
+      <div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRel)}</span></div>
+      <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
+      <div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">${fix?fix.lat.toFixed(5)+', '+fix.lon.toFixed(5):'-'}</span></div>
+      <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
+      ${entity.tl?`<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">${escapeHtml(entity.tl)}</span></div>`:''}
+      ${entity.collar?`<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">${escapeHtml(entity.collar)}</span></div>`:''}
+      ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
+    </div>
+    <div class="pop-actions">
+      <button class="pab" onclick="focusEntity('${entity.compKey}')">Focus</button>
+      <button class="pab" onclick="focusTableRow('${entity.compKey}')">Table</button>
+    </div>
+  </div>`;
 }
 
-function getViewEntities(source){
-  if(!source) return [];
-  return entities.map(entity=>{
-    if(source === 'PaliFT'){
-      if(!entity.isHatchling) return null;
-      const relevantFix = entity.latestPali || null;
-      const locationFix = relevantFix || entity.latestOverall || null;
-      const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
-      return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-'};
+function getViewEntities(source) {
+  if (!source) return [];
+  return entities.map(entity => {
+    if (source==='PaliFT') {
+      if (!entity.isHatchling) return null;
+      const rFix = entity.latestPali||null;
+      const lFix = rFix||entity.latestOverall||null;
+      const status = hatchStatus(entity.id, daysSince(rFix?.ts||null));
+      return {...entity,viewSource:'PaliFT',displayFix:lFix,relevantFix:rFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:lFix?.zone||'-'};
     }
-    if(source === 'ATS'){
-      if(entity.isHatchling || !entity.latestATS) return null;
-      const relevantFix = entity.latestATS;
-      const locationFix = entity.latestATS;
-      const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
-      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
+    if (source==='ATS') {
+      if (entity.isHatchling||!entity.latestATS) return null;
+      const rFix = entity.latestATS;
+      const status = adultStatus(daysSince(rFix.ts), entity.collar);
+      return {...entity,viewSource:'ATS',displayFix:rFix,relevantFix:rFix,trackHistory:entity.histories.ATS.slice(),status,zone:rFix?.zone||'-'};
     }
-    if(source === 'FieldLog'){
-      if(entity.isHatchling || !entity.latestVHF) return null;
-      const relevantFix = entity.latestVHF;
-      const locationFix = entity.latestVHF;
-      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-'};
+    if (source==='FieldLog') {
+      if (entity.isHatchling||!entity.latestVHF) return null;
+      const rFix = entity.latestVHF;
+      return {...entity,viewSource:'FieldLog',displayFix:rFix,relevantFix:rFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:rFix?.zone||'-'};
     }
     return null;
   }).filter(Boolean);
 }
 
-/*
- * FIX-3: renderMarkers — track entity block completely removed.
- * All displayedEntities are rendered as standard markers; clicking opens the popup.
- */
-function renderMarkers(){
-  markerLayer.clearLayers();
-  entityMarkerMap = {};
-  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
-  if(!displayedEntities.length){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+function renderMarkers() {
+  markerLayer.clearLayers(); entityMarkerMap={};
+  try { oms.clearMarkers&&oms.clearMarkers(); } catch(e){}
+  if (!displayedEntities.length) {
+    if (heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    if (kdeLayer) {map.removeLayer(kdeLayer); kdeLayer=null; }
     return;
   }
-
-  displayedEntities.forEach(entity=>{
-    const fix = entity.displayFix;
-    if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
-    const marker = L.marker([fix.lat,fix.lon],{
-      icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),
+  displayedEntities.forEach(entity => {
+    const fix=entity.displayFix;
+    if (!fix||!isFinite(fix.lat)||!isFinite(fix.lon)) return;
+    const marker=L.marker([fix.lat,fix.lon],{
+      icon:markerIcon(entity, entity.id.length>5?entity.id.slice(0,5):entity.id),
       keyboard:false
     });
     marker.bindPopup(popupHtml(entity),{maxWidth:330});
-    marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
+    marker.on('popupclose',()=>marker.setLatLng([fix.lat,fix.lon]));
     markerLayer.addLayer(marker);
     oms.addMarker(marker);
-    entityMarkerMap[entity.compKey] = marker;
+    entityMarkerMap[entity.compKey]=marker;
   });
-
-  if(heatmapOn) renderHeatmap();
-  else if(kdeOn) renderKDE();
-  else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-
-  const points = displayedEntities
-    .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+  if (heatmapOn) renderHeatmap();
+  else if (kdeOn) renderKDE();
+  else if (!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+  const pts = displayedEntities
+    .filter(e=>e.displayFix&&isFinite(e.displayFix.lat)&&isFinite(e.displayFix.lon))
     .map(e=>[e.displayFix.lat,e.displayFix.lon]);
-  if(points.length){
-    map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
-  }
+  if (pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
 }
 
-function focusEntity(compKey){
-  const marker = entityMarkerMap[compKey];
-  if(!marker) return;
-  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
-  marker.setZIndexOffset(9000);
+function focusEntity(key) {
+  const m=entityMarkerMap[key]; if (!m) return;
+  Object.values(entityMarkerMap).forEach(x=>x.setZIndexOffset(0));
+  m.setZIndexOffset(9000);
   map.closePopup();
-  map.flyTo(marker.getLatLng(),16,{duration:1});
-  setTimeout(()=>marker.openPopup(),700);
+  map.flyTo(m.getLatLng(),16,{duration:1});
+  setTimeout(()=>m.openPopup(),700);
 }
 
-function focusTableRow(key){
-  const row = document.querySelector('[data-row-key="' + CSS.escape(key) + '"]');
-  if(!row) return;
+function focusTableRow(key) {
+  const row=document.querySelector('[data-row-key="'+CSS.escape(key)+'"]'); if (!row) return;
   row.classList.add('sel');
   row.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(()=>row.classList.remove('sel'),1600);
 }
 
-function buildEntityRow(entity){
-  const fix = entity.displayFix;
+function buildEntityRow(entity) {
+  const fix=entity.displayFix;
   return {
-    rowKey:entity.compKey,
-    type:'entity',
-    entity,
-    id:entity.id,
-    ts:fix?.ts || null,
-    days:daysSince(fix?.ts || null),
-    status:entity.status,
-    category:entity.category || '-',
-    sex:entity.sex || '-',
-    source:entity.viewSource,
-    zone:entity.zone || '-',
-    collar:entity.collar || '-',
-    lat:Number.isFinite(fix?.lat) ? fix.lat : null,
-    lon:Number.isFinite(fix?.lon) ? fix.lon : null,
-    tagPlace:entity.tagPlace || '-',
-    tl:entity.tl || '-',
-    remarks:(fix?.remarks || entity.remarks || '-')
+    rowKey:entity.compKey, type:'entity', entity,
+    id:entity.id, ts:fix?.ts||null, days:daysSince(fix?.ts||null),
+    status:entity.status, category:entity.category||'-', sex:entity.sex||'-',
+    source:entity.viewSource, zone:entity.zone||'-', collar:entity.collar||'-',
+    lat:isFinite(fix?.lat)?fix.lat:null, lon:isFinite(fix?.lon)?fix.lon:null,
+    tagPlace:entity.tagPlace||'-', tl:entity.tl||'-',
+    remarks:fix?.remarks||entity.remarks||'-'
   };
 }
 
-/*
- * FIX-3: renderTable — one row per entity (latest fix). Clicking calls focusEntity().
- */
-function renderTable(){
-  const body = document.getElementById('tableBody');
-  body.innerHTML = '';
-  const source = document.getElementById('sourceFilter').value;
-  displayRows = displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent = displayRows.length + ' records';
+function renderTable() {
+  const body=document.getElementById('tableBody');
+  body.innerHTML='';
+  const source=document.getElementById('sourceFilter').value;
+  displayRows=displayedEntities.map(buildEntityRow);
+  document.getElementById('tableBadge').textContent=displayRows.length+' records';
   updateCollarColumn();
-  if(!source && !displayedEntities.length){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
-    return;
+  if (!source&&!displayedEntities.length) {
+    body.innerHTML='<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>'; return;
   }
-  if(!displayRows.length){
-    body.innerHTML = '<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>';
-    return;
+  if (!displayRows.length) {
+    body.innerHTML='<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>'; return;
   }
-  displayRows.forEach(row=>{
-    const tr = document.createElement('tr');
-    tr.dataset.rowKey = row.rowKey;
-    const rowSource = row.source === 'FieldLog' ? 'VHF' : row.source;
-    tr.innerHTML =
-      '<td><strong style="color:' + markerColor(row.entity) + '">' + escapeHtml(row.id) + '</strong></td>' +
-      '<td>' + escapeHtml(fmtDateTime(row.ts)) + '</td>' +
-      '<td>' + escapeHtml(String(row.days)) + '</td>' +
-      '<td>' + badgeHtml(row.status, row.entity.viewSource) + '</td>' +
-      '<td>' + escapeHtml(row.category) + '</td>' +
-      '<td>' + escapeHtml(row.sex) + '</td>' +
-      '<td>' + escapeHtml(rowSource) + '</td>' +
-      '<td>' + escapeHtml(row.zone) + '</td>' +
-      '<td class="collar-cell" style="' + (VIEW_META[source]?.hideCollar ? 'display:none' : '') + '">' + escapeHtml(row.collar) + '</td>' +
-      '<td>' + (row.lat === null ? '-' : row.lat.toFixed(5)) + '</td>' +
-      '<td>' + (row.lon === null ? '-' : row.lon.toFixed(5)) + '</td>' +
-      '<td>' + escapeHtml(row.tagPlace) + '</td>' +
-      '<td>' + escapeHtml(row.tl) + '</td>' +
-      '<td>' + escapeHtml(row.remarks) + '</td>';
+  const hideCollar=VIEW_META[source]?.hideCollar;
+  displayRows.forEach(row => {
+    const tr=document.createElement('tr');
+    tr.dataset.rowKey=row.rowKey;
+    const rowSrc=row.source==='FieldLog'?'VHF':row.source;
+    tr.innerHTML=
+      `<td><strong style="color:${markerColor(row.entity)}">${escapeHtml(row.id)}</strong></td>`+
+      `<td>${escapeHtml(fmtDateTime(row.ts))}</td>`+
+      `<td>${escapeHtml(String(row.days))}</td>`+
+      `<td>${badgeHtml(row.status,row.entity.viewSource)}</td>`+
+      `<td>${escapeHtml(row.category)}</td>`+
+      `<td>${escapeHtml(row.sex)}</td>`+
+      `<td>${escapeHtml(rowSrc)}</td>`+
+      `<td>${escapeHtml(row.zone)}</td>`+
+      `<td class="collar-cell" style="${hideCollar?'display:none':''}">${escapeHtml(row.collar)}</td>`+
+      `<td>${row.lat===null?'-':row.lat.toFixed(5)}</td>`+
+      `<td>${row.lon===null?'-':row.lon.toFixed(5)}</td>`+
+      `<td>${escapeHtml(row.tagPlace)}</td>`+
+      `<td>${escapeHtml(row.tl)}</td>`+
+      `<td>${escapeHtml(row.remarks)}</td>`;
     tr.addEventListener('click',()=>{
-      document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
+      document.querySelectorAll('#tableBody tr').forEach(r=>r.classList.remove('sel'));
       tr.classList.add('sel');
       focusEntity(row.entity.compKey);
     });
@@ -1626,331 +1564,274 @@ function renderTable(){
   });
 }
 
-function updateMapFoot(){
-  const source = document.getElementById('sourceFilter').value;
-  if(!source && !displayedEntities.length){
-    document.getElementById('mapFootText').textContent = 'Select a source to begin.';
-    document.getElementById('mapFootCount').textContent = '';
-    return;
+function updateMapFoot() {
+  const source=document.getElementById('sourceFilter').value;
+  if (!source&&!displayedEntities.length) {
+    document.getElementById('mapFootText').textContent='Select a source to begin.';
+    document.getElementById('mapFootCount').textContent=''; return;
   }
-  if(!displayedEntities.length){
-    document.getElementById('mapFootText').textContent = 'No mapped entities match the current filter set.';
-    document.getElementById('mapFootCount').textContent = '0 visible';
-    return;
+  if (!displayedEntities.length) {
+    document.getElementById('mapFootText').textContent='No mapped entities match the current filter set.';
+    document.getElementById('mapFootCount').textContent='0 visible'; return;
   }
-  const latest = displayedEntities.reduce((memo, entity)=>{
-    if(entity.displayFix?.ts && (!memo || entity.displayFix.ts > memo)) return entity.displayFix.ts;
-    return memo;
-  }, null);
-  document.getElementById('mapFootText').textContent = 'Latest visible fix: ' + fmtDateTime(latest);
-  document.getElementById('mapFootCount').textContent = displayedEntities.length + ' entities';
+  const latest=displayedEntities.reduce((m,e)=>{
+    if (e.displayFix?.ts&&(!m||e.displayFix.ts>m)) return e.displayFix.ts; return m;
+  },null);
+  document.getElementById('mapFootText').textContent='Latest visible fix: '+fmtDateTime(latest);
+  document.getElementById('mapFootCount').textContent=displayedEntities.length+' entities';
 }
 
-function getOverlayFixes(){
-  const fixes = [];
-  displayedEntities.forEach(entity=>{
-    entity.trackHistory.forEach(fix=>{
-      if(Number.isFinite(fix.lat) && Number.isFinite(fix.lon)) fixes.push(fix);
-    });
-  });
+/* ── Overlays ──────────────────────────────────────────────────────── */
+function getOverlayFixes() {
+  const fixes=[];
+  displayedEntities.forEach(e=>e.trackHistory.forEach(f=>{ if (isFinite(f.lat)&&isFinite(f.lon)) fixes.push(f); }));
   return fixes;
 }
 
-function renderHeatmap(){
-  const fixes = getOverlayFixes();
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-  if(!fixes.length){
-    heatmapOn = false;
-    document.getElementById('heatBtn').classList.remove('on');
-    return;
-  }
-  heatLayer = L.heatLayer(fixes.map(fix=>[fix.lat,fix.lon,.65]),{
-    radius:22,
-    blur:18,
-    maxZoom:17,
+function renderHeatmap() {
+  const fixes=getOverlayFixes();
+  if (heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if (kdeLayer) {map.removeLayer(kdeLayer); kdeLayer=null; }
+  if (!fixes.length){heatmapOn=false;document.getElementById('heatBtn').classList.remove('on');return;}
+  heatLayer=L.heatLayer(fixes.map(f=>[f.lat,f.lon,.65]),{
+    radius:22,blur:18,maxZoom:17,
     gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}
   }).addTo(map);
-  if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+  if (map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
-function renderKDE(){
-  const fixes = getOverlayFixes();
-  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-  if(fixes.length < 4){
-    kdeOn = false;
-    document.getElementById('kdeBtn').classList.remove('on');
-    return;
-  }
-  const points = fixes.map(fix=>[fix.lat,fix.lon]);
-  const KDE = L.Layer.extend({
-    initialize(){ this._points = points; },
-    onAdd(instanceMap){
-      this._map = instanceMap;
-      this._canvas = document.createElement('canvas');
-      this._canvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
-      instanceMap.getPanes().overlayPane.appendChild(this._canvas);
-      instanceMap.on('moveend zoomend resize', this.draw, this);
+function renderKDE() {
+  const fixes=getOverlayFixes();
+  if (kdeLayer) {map.removeLayer(kdeLayer); kdeLayer=null; }
+  if (heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+  if (fixes.length<4){kdeOn=false;document.getElementById('kdeBtn').classList.remove('on');return;}
+  const pts=fixes.map(f=>[f.lat,f.lon]);
+  const KDE=L.Layer.extend({
+    initialize(){this._pts=pts;},
+    onAdd(m){
+      this._map=m;
+      this._canvas=document.createElement('canvas');
+      this._canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
+      m.getPanes().overlayPane.appendChild(this._canvas);
+      m.on('moveend zoomend resize',this.draw,this);
       this.draw();
     },
-    onRemove(instanceMap){
-      if(this._canvas?.parentNode) this._canvas.parentNode.removeChild(this._canvas);
-      instanceMap.off('moveend zoomend resize', this.draw, this);
+    onRemove(m){
+      if(this._canvas?.parentNode)this._canvas.parentNode.removeChild(this._canvas);
+      m.off('moveend zoomend resize',this.draw,this);
     },
     draw(){
-      const size = this._map.getSize();
-      const canvas = this._canvas;
-      canvas.width = size.x;
-      canvas.height = size.y;
-      L.DomUtil.setPosition(canvas, this._map.containerPointToLayerPoint([0,0]));
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0,0,size.x,size.y);
-      const pixels = this._points.map(point=>this._map.latLngToContainerPoint(L.latLng(point[0],point[1])));
-      const bandwidth = 26;
-      pixels.forEach(pixel=>{
-        const gradient = ctx.createRadialGradient(pixel.x,pixel.y,0,pixel.x,pixel.y,bandwidth);
-        gradient.addColorStop(0,'rgba(127,29,29,.35)');
-        gradient.addColorStop(.45,'rgba(239,68,68,.18)');
-        gradient.addColorStop(1,'rgba(255,255,255,0)');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth*2,bandwidth*2);
+      const sz=this._map.getSize();
+      const cv=this._canvas;
+      cv.width=sz.x; cv.height=sz.y;
+      L.DomUtil.setPosition(cv,this._map.containerPointToLayerPoint([0,0]));
+      const ctx=cv.getContext('2d');
+      ctx.clearRect(0,0,sz.x,sz.y);
+      const bw=26;
+      this._pts.forEach(p=>{
+        const px=this._map.latLngToContainerPoint(L.latLng(p[0],p[1]));
+        const g=ctx.createRadialGradient(px.x,px.y,0,px.x,px.y,bw);
+        g.addColorStop(0,'rgba(127,29,29,.35)');
+        g.addColorStop(.45,'rgba(239,68,68,.18)');
+        g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=g;
+        ctx.fillRect(px.x-bw,px.y-bw,bw*2,bw*2);
       });
     }
   });
-  kdeLayer = new KDE().addTo(map);
-  if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
+  kdeLayer=new KDE().addTo(map);
+  if (map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
-function toggleHeatmap(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using the heatmap.'); return; }
-  heatmapOn = !heatmapOn;
-  if(heatmapOn) kdeOn = false;
-  document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
+function toggleHeatmap() {
+  if (!displayedEntities.length){toast('Apply a source filter before using the heatmap.');return;}
+  heatmapOn=!heatmapOn; if(heatmapOn)kdeOn=false;
+  document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
   document.getElementById('kdeBtn').classList.remove('on');
-  if(!heatmapOn){
-    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
-    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-    return;
+  if (!heatmapOn){
+    if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
+    if(!map.hasLayer(markerLayer))markerLayer.addTo(map); return;
   }
   renderHeatmap();
 }
 
-function toggleKDE(){
-  if(!displayedEntities.length){ toast('Apply a source filter before using KDE.'); return; }
-  kdeOn = !kdeOn;
-  if(kdeOn) heatmapOn = false;
-  document.getElementById('kdeBtn').classList.toggle('on', kdeOn);
+function toggleKDE() {
+  if (!displayedEntities.length){toast('Apply a source filter before using KDE.');return;}
+  kdeOn=!kdeOn; if(kdeOn)heatmapOn=false;
+  document.getElementById('kdeBtn').classList.toggle('on',kdeOn);
   document.getElementById('heatBtn').classList.remove('on');
-  if(!kdeOn){
-    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
-    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-    return;
+  if (!kdeOn){
+    if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+    if(!map.hasLayer(markerLayer))markerLayer.addTo(map); return;
   }
   renderKDE();
 }
 
-function exportCSV(){
-  if(!displayRows.length){ toast('No visible records to export.'); return; }
-  const rows = [['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
-  displayRows.forEach(row=>{
-    rows.push([
-      row.id,
-      fmtDateTime(row.ts),
-      row.days,
-      statusLabel(row.status, row.entity.viewSource),
-      row.category,
-      row.sex,
-      row.source,
-      row.zone,
-      row.collar,
-      row.lat ?? '',
-      row.lon ?? '',
-      row.tagPlace,
-      row.tl,
-      row.remarks
-    ]);
-  });
-  const csv = rows.map(row=>row.map(value=>'"' + String(value).replace(/"/g,'""') + '"').join(',')).join('\n');
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  link.download = 'gep_telemetry_' + new Date().toISOString().slice(0,10) + '.csv';
-  link.click();
-  URL.revokeObjectURL(link.href);
+/* ── Export ────────────────────────────────────────────────────────── */
+function exportCSV() {
+  if (!displayRows.length){toast('No visible records to export.');return;}
+  const rows=[['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
+  displayRows.forEach(r=>rows.push([
+    r.id,fmtDateTime(r.ts),r.days,statusLabel(r.status,r.entity.viewSource),
+    r.category,r.sex,r.source,r.zone,r.collar,r.lat??'',r.lon??'',r.tagPlace,r.tl,r.remarks
+  ]));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='gep_telemetry_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
-/*
- * FIX-2: loadUpdates — sorts descending (newest first) so the most recent entry
- * appears at the top of both the latest block and the previous-updates list.
- */
-function loadUpdates(rows){
-  updatesRows = rows || [];
-  const latestDate = document.getElementById('fuDate');
-  const latestText = document.getElementById('fuText');
-  const list = document.getElementById('fuList');
-  list.innerHTML = '';
-  const sorted = updatesRows
-    .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
+/* ── Field updates ─────────────────────────────────────────────────── */
+function loadUpdates(rows) {
+  updatesRows=rows||[];
+  const sorted=updatesRows
+    .filter(r=>gc(r,'Date','date')||gc(r,'Update','update','Notes','Text'))
     .sort((a,b)=>{
-      const da = parsePaliDate(gc(a,'Date','date'));
-      const db = parsePaliDate(gc(b,'Date','date'));
-      const ta = da ? da.getTime() : -Infinity;
-      const tb = db ? db.getTime() : -Infinity;
-      return tb - ta; /* descending: newest first */
+      const da=parsePaliDate(gc(a,'Date','date')), db=parsePaliDate(gc(b,'Date','date'));
+      return (db?db.getTime():-Infinity)-(da?da.getTime():-Infinity);
     });
-  if(!sorted.length){
-    latestDate.textContent = 'No updates';
-    latestText.textContent = '';
-    list.innerHTML = '<div class="fu"><div class="fu-text">No field updates available.</div></div>';
-    return;
+  const latestDate=document.getElementById('fuDate');
+  const latestText=document.getElementById('fuText');
+  const list=document.getElementById('fuList');
+  list.innerHTML='';
+  if (!sorted.length){
+    latestDate.textContent='No updates'; latestText.textContent='';
+    list.innerHTML='<div class="fu"><div class="fu-text">No field updates available.</div></div>'; return;
   }
-  latestDate.textContent = fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
-  latestText.textContent = gc(sorted[0],'Update','update','Notes','Text');
-  sorted.slice(1).forEach(row=>{
-    const item = document.createElement('div');
-    item.className = 'fu';
-    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="fu-text">' + escapeHtml(gc(row,'Update','update','Notes','Text')) + '</div>';
+  latestDate.textContent=fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
+  latestText.textContent=gc(sorted[0],'Update','update','Notes','Text');
+  sorted.slice(1).forEach(r=>{
+    const item=document.createElement('div'); item.className='fu';
+    item.innerHTML=`<div class="fu-date">${escapeHtml(fmtDateOnly(parsePaliDate(gc(r,'Date','date'))))}</div><div class="fu-text">${escapeHtml(gc(r,'Update','update','Notes','Text'))}</div>`;
     list.appendChild(item);
   });
 }
 
-function toggleFieldPanel(){
+function toggleFieldPanel() {
   document.getElementById('fp').classList.toggle('open');
   document.getElementById('fpBg').classList.toggle('open');
 }
 
-function closeFieldPanel(){
+function closeFieldPanel() {
   document.getElementById('fp').classList.remove('open');
   document.getElementById('fpBg').classList.remove('open');
 }
 
-function toggleFilterBar(){
-  filterBarHidden = !filterBarHidden;
+/* ── UI controls ───────────────────────────────────────────────────── */
+function toggleFilterBar() {
+  filterBarHidden=!filterBarHidden;
   document.getElementById('fbar').classList.toggle('hidden', filterBarHidden);
   document.getElementById('filterToggleBtn').classList.toggle('on', !filterBarHidden);
-  adjustLayoutForMobile();
-  setTimeout(()=>map.invalidateSize(),220);
+  // Recalculate after CSS transition completes
+  adjustLayout();
+  setTimeout(() => { adjustLayout(); map&&map.invalidateSize(); }, 250);
 }
 
-function resetView(){
-  map.setView(MAP_CENTER, MAP_ZOOM);
-}
+function resetView() { map.setView(MAP_CENTER, MAP_ZOOM); }
 
-function toggleBottom(){
-  bottomCollapsed = !bottomCollapsed;
-  const btm = document.getElementById('btm');
-  const wrap = document.getElementById('map-wrap');
-  const button = document.getElementById('btmToggleBtn');
-  if(bottomCollapsed){
-    btm.style.height = '42px';
-    wrap.style.bottom = '42px';
-    button.textContent = 'Show';
-  }else{
-    btm.style.height = bottomHeight + 'px';
-    wrap.style.bottom = bottomHeight + 'px';
-    button.textContent = 'Hide';
+function toggleBottom() {
+  bottomCollapsed=!bottomCollapsed;
+  const btm=document.getElementById('btm');
+  const wrap=document.getElementById('map-wrap');
+  const btn=document.getElementById('btmToggleBtn');
+  if (bottomCollapsed) {
+    btm.style.height='42px'; wrap.style.bottom='42px'; btn.textContent='Show';
+  } else {
+    btm.style.height=bottomHeight+'px'; wrap.style.bottom=bottomHeight+'px'; btn.textContent='Hide';
   }
   setTimeout(()=>map.invalidateSize(),220);
 }
 
-function initResize(){
-  const bar = document.getElementById('resizeBar');
-  const btm = document.getElementById('btm');
-  const wrap = document.getElementById('map-wrap');
-  let dragging = false;
-  let startY = 0;
-  let startHeight = 0;
-  function begin(y){
-    if(bottomCollapsed) return;
-    dragging = true;
-    startY = y;
-    startHeight = btm.offsetHeight;
-    document.body.style.cursor = 'ns-resize';
-  }
-  function move(y){
-    if(!dragging) return;
-    const nextHeight = Math.min(Math.max(120, startHeight + (startY - y)), window.innerHeight * .7);
-    bottomHeight = nextHeight;
-    btm.style.height = nextHeight + 'px';
-    wrap.style.bottom = nextHeight + 'px';
-  }
-  function end(){
-    dragging = false;
-    document.body.style.cursor = '';
-    setTimeout(()=>map.invalidateSize(),100);
-  }
-  bar.addEventListener('mousedown', event=>{ begin(event.clientY); event.preventDefault(); });
-  document.addEventListener('mousemove', event=>move(event.clientY));
-  document.addEventListener('mouseup', end);
+function initResize() {
+  const bar=document.getElementById('resizeBar');
+  const btm=document.getElementById('btm');
+  const wrap=document.getElementById('map-wrap');
+  let dragging=false, startY=0, startH=0;
+  const begin=y=>{ if(bottomCollapsed)return; dragging=true; startY=y; startH=btm.offsetHeight; document.body.style.cursor='ns-resize'; };
+  const move=y=>{ if(!dragging)return; const h=Math.min(Math.max(120,startH+(startY-y)),window.innerHeight*.7); bottomHeight=h; btm.style.height=h+'px'; wrap.style.bottom=h+'px'; };
+  const end=()=>{ dragging=false; document.body.style.cursor=''; setTimeout(()=>map.invalidateSize(),100); };
+  bar.addEventListener('mousedown',e=>{begin(e.clientY);e.preventDefault();});
+  document.addEventListener('mousemove',e=>move(e.clientY));
+  document.addEventListener('mouseup',end);
+  // Touch support for resize bar
+  bar.addEventListener('touchstart',e=>{begin(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchmove',e=>{move(e.touches[0].clientY);},{passive:true});
+  document.addEventListener('touchend',end);
 }
 
-async function loadAllData(){
-  const button = document.getElementById('refreshBtn');
-  button.classList.add('loading');
+/* ── Data load ─────────────────────────────────────────────────────── */
+async function loadAllData() {
+  const btn=document.getElementById('refreshBtn');
+  btn.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
   ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.classList.remove('ok','err');
+    const el=document.getElementById(id); if(el)el.classList.remove('ok','err');
   });
-  loadingCopy('Fetching Google Sheets and GeoJSON layers...');
-  try{
-    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
-      fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
-      fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
-      fetchCSV(URLS.fl).then(data=>{ setLoadingState('ld-fl', true); return data; }).catch(()=>{ setLoadingState('ld-fl', false); return []; }),
-      fetchCSV(URLS.pali).then(data=>{ setLoadingState('ld-pali', true); return data; }).catch(()=>{ setLoadingState('ld-pali', false); return []; }),
-      fetchJSON(URLS.zones).then(data=>{ setLoadingState('ld-zones', true); return data; }).catch(()=>{ setLoadingState('ld-zones', false); return null; }),
+  loadingCopy('Fetching Google Sheets and GeoJSON layers…');
+  try {
+    const [masterRows,atsRows,fieldRows,paliRows,zonesData,updateRows]=await Promise.all([
+      fetchCSV(URLS.master).then(d=>{setLoadingState('ld-master',true);return d;}).catch(()=>{setLoadingState('ld-master',false);return[];}),
+      fetchCSV(URLS.ats).then(d=>{setLoadingState('ld-ats',true);return d;}).catch(()=>{setLoadingState('ld-ats',false);return[];}),
+      fetchCSV(URLS.fl).then(d=>{setLoadingState('ld-fl',true);return d;}).catch(()=>{setLoadingState('ld-fl',false);return[];}),
+      fetchCSV(URLS.pali).then(d=>{setLoadingState('ld-pali',true);return d;}).catch(()=>{setLoadingState('ld-pali',false);return[];}),
+      fetchJSON(URLS.zones).then(d=>{setLoadingState('ld-zones',true);return d;}).catch(()=>{setLoadingState('ld-zones',false);return null;}),
       fetchCSV(URLS.updates).catch(()=>[])
     ]);
-    loadingCopy('Routing records through the master dictionary...');
-    fixBuckets = {};
+    loadingCopy('Routing records through the master dictionary…');
+    fixBuckets={};
     buildMasterMaps(masterRows);
     ingestATS(atsRows);
     ingestFieldLog(fieldRows);
     ingestPali(paliRows);
-    geojsonData = zonesData;
-    loadingCopy('Assigning zones and merging entities...');
-    if(geojsonData) assignZones();
+    geojsonData=zonesData;
+    loadingCopy('Assigning zones and merging entities…');
+    if (geojsonData) assignZones();
     mergeEntities();
     loadUpdates(updateRows);
     rebuildFilters();
     updateFieldUpdatesVisibility();
     updateCollarColumn();
     clearFilters();
-    document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    toast('Loaded ' + entities.length + ' routed telemetry entities.', true);
-  }catch(error){
-    console.error(error);
+    document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    toast('Loaded '+entities.length+' routed telemetry entities.',true);
+  } catch(err) {
+    console.error(err);
     toast('Failed to load telemetry data.');
-  }finally{
-    button.classList.remove('loading');
-    const elapsed = performance.now() - SPLASH_START;
-    const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
-    setTimeout(()=>document.getElementById('loading').classList.add('hide'), wait);
+  } finally {
+    btn.classList.remove('loading');
+    const elapsed=performance.now()-SPLASH_START;
+    setTimeout(()=>document.getElementById('loading').classList.add('hide'), Math.max(0,SPLASH_MIN_MS-elapsed));
   }
 }
-function adjustLayoutForMobile() {
-  const headerHeight = document.getElementById('hdr').offsetHeight;
-  const fbarHeight = filterBarHidden ? 0 : document.getElementById('fbar').offsetHeight;
-  
-  document.getElementById('fbar').style.top = headerHeight + 'px';
-  document.getElementById('map-wrap').style.top = (headerHeight + fbarHeight) + 'px';
-}
 
-window.addEventListener('resize', () => {
-  setTimeout(() => {
-    map.invalidateSize();
-    adjustLayoutForMobile();
-  }, 150);
-});
-
-(function boot(){
+/* ══════════════════════════════════════════════════════════════════════
+   BOOT
+   ══════════════════════════════════════════════════════════════════════ */
+(function boot() {
   initMap();
   initResize();
-  loadAllData();
-  adjustLayoutForMobile(); 
-})();
 
+  // Observe header height changes (e.g. text reflow on resize, mobile rotation)
+  if (window.ResizeObserver) {
+    const hdrObserver = new ResizeObserver(() => adjustLayout());
+    hdrObserver.observe(document.getElementById('hdr'));
+  }
+
+  // Also recalculate on window resize (fallback + for map invalidation)
+  window.addEventListener('resize', () => {
+    clearTimeout(window._resizeTimer);
+    window._resizeTimer = setTimeout(() => {
+      adjustLayout();
+    }, 120);
+  });
+
+  // Initial layout pass (header may not have final height yet, so run after paint)
+  requestAnimationFrame(() => {
+    adjustLayout();
+    loadAllData();
+  });
+})();
 </script>
 </body>
 </html>
