@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-
 <style>
 :root{
   --forest:#173f31;
@@ -31,13 +30,6 @@
   --radius:12px;
   --mono:'IBM Plex Mono',monospace;
   --font:'Space Grotesk',sans-serif;
-  
-  /* Status bucket accent colours */
-  --col-active:#16a34a;
-  --col-missing:#d97706;
-  --col-missing-start:#7c3aed;
-  --col-water:#2563eb;
-  --col-recovered:#dc2626;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;background:var(--sand);color:var(--text);font-family:var(--font)}
@@ -46,13 +38,10 @@ button{cursor:pointer}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-thumb{background:#bfd0c2;border-radius:999px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
-/* ─── Loading Screen ─── */
 #loading{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;transition:opacity .5s ease,visibility .5s ease}
 #loading.hide{opacity:0;visibility:hidden;pointer-events:none}
-.loading-bg{position:absolute;inset:0;background:url('background (1).gif') center/cover no-repeat}
+.loading-bg{position:absolute;inset:0;background:url('background.gif') center/cover no-repeat}
 .loading-veil{position:absolute;inset:0;background:rgba(9,22,15,.72);backdrop-filter:blur(4px)}
 .loading-card{position:relative;z-index:2;width:min(720px,92vw);padding:36px 28px;border:1px solid rgba(255,255,255,.16);border-radius:20px;background:rgba(12,24,18,.45);box-shadow:0 24px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;color:#fff}
 .loading-logos{display:flex;align-items:center;gap:24px}
@@ -66,12 +55,10 @@ button{cursor:pointer}
 .loading-item.ok{color:#b7f0c6;background:rgba(31,94,54,.34)}
 .loading-item.err{color:#fecaca;background:rgba(127,29,29,.26)}
 
-/* ─── Toast ─── */
 #toast{position:fixed;left:50%;bottom:calc(var(--btm) + 14px);transform:translateX(-50%) translateY(10px);z-index:9500;padding:8px 16px;border-radius:999px;border:1px solid rgba(153,27,27,.25);background:rgba(255,244,244,.96);color:#991b1b;font:.68rem var(--mono);letter-spacing:.05em;opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.ok{background:rgba(240,253,244,.96);border-color:rgba(22,101,52,.2);color:#14532d}
 
-/* ─── Header ─── */
 #hdr{position:fixed;top:0;left:0;right:0;height:var(--hdr);z-index:10020;display:grid;grid-template-columns:auto auto minmax(220px,1fr) auto auto;grid-template-rows:auto auto;align-items:center;row-gap:10px;column-gap:12px;padding:10px 16px 12px;background:linear-gradient(110deg,#163a2e 0%,#215742 48%,#1b4b3a 100%);border-bottom:2px solid rgba(126,207,155,.45);box-shadow:0 8px 24px rgba(10,26,18,.28)}
 .hdr-logos{display:flex;align-items:center;gap:10px}
 .hdr-logos a{display:flex;align-items:center;opacity:.96;transition:opacity .15s ease}
@@ -83,20 +70,13 @@ button{cursor:pointer}
 .hdr-title{font:700 .94rem var(--mono);letter-spacing:.04em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-sub{margin-top:3px;font:600 .62rem var(--mono);letter-spacing:.08em;color:rgba(255,255,255,.62);text-transform:uppercase}
 
-/* Status blocks */
-#statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;min-width:0;width:100%}
-.sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease;border-left:3px solid transparent}
+#statusBlocks{grid-row:2;grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;min-width:0;width:100%}
+.sblock{min-height:48px;padding:7px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.1);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;color:#fff;transition:transform .12s ease,border-color .12s ease,background .12s ease}
 .sblock.clickable:hover,.sblock.on{transform:translateY(-1px);border-color:rgba(255,255,255,.36);background:rgba(255,255,255,.18)}
 .sblock.muted{color:rgba(255,255,255,.42)}
-.sblock-label{font:700 .58rem var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%}
+.sblock-label{font:700 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
 .sblock-count{font:700 .98rem var(--mono)}
-.sblock[data-status="active"]        {border-left-color:var(--col-active)}
-.sblock[data-status="missing"]       {border-left-color:var(--col-missing)}
-.sblock[data-status="missing_start"] {border-left-color:var(--col-missing-start)}
-.sblock[data-status="water"]         {border-left-color:var(--col-water)}
-.sblock[data-status="recovered"]     {border-left-color:var(--col-recovered)}
 
-/* Header actions */
 .hdr-actions{display:flex;align-items:center;gap:8px;justify-self:end;z-index:10021;position:relative}
 .syncbox{display:flex;flex-direction:column;align-items:flex-end;min-width:92px;justify-self:end}
 .syncbox strong{font:700 .5rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.42)}
@@ -105,15 +85,9 @@ button{cursor:pointer}
 .hbtn:hover,.hbtn.on{background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.42)}
 .hbtn.loading .spin-icon{display:inline-block;animation:spin .7s linear infinite}
 
-/* Mobile-only header elements (hidden on desktop) */
-.hdr-mobile-row{display:none}
-#mobileMenuBtn{display:none}
-#mobileStatsBtn{display:none}
-
-/* ─── Filter Bar (desktop) ─── */
 #fbar{position:fixed;top:var(--hdr);left:0;right:0;height:var(--fbar);z-index:10010;display:flex;align-items:center;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(8px);overflow:visible}
 #fbar.hidden{height:0;border-bottom:none;opacity:0;pointer-events:none}
-#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow-x:auto;}
+#fbar-inner{display:flex;align-items:center;gap:8px;padding:0 16px;width:100%;overflow:visible}
 .fg{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fg label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
 .fsep{width:1px;height:22px;background:var(--line);flex-shrink:0}
@@ -124,9 +98,8 @@ button{cursor:pointer}
 .fbtn.apply:hover{background:var(--forest-3);border-color:var(--forest-3);color:#fff}
 .fbtn.clear{color:#6b7280}
 
-/* ─── Multi-select dropdowns ─── */
 .ms-wrap{position:relative;flex-shrink:0}
-.ms-btn{min-width:110px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
+.ms-btn{min-width:136px;height:34px;padding:0 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text);font:600 .67rem var(--mono)}
 .ms-btn.active,.ms-btn:hover{background:#eef8f1;border-color:#8ab99a;color:var(--forest-2)}
 .ms-btn.disabled{background:#f2f4f3;color:#99a7a0;border-color:#d9dfdb;cursor:not-allowed}
 .ms-caret{font-size:.56rem;color:currentColor}
@@ -141,7 +114,6 @@ button{cursor:pointer}
 .ms-item:hover{background:#f0f7f1}
 .ms-item input{accent-color:var(--forest-3)}
 
-/* ─── Map ─── */
 #map-wrap{position:fixed;top:calc(var(--hdr) + var(--fbar));left:0;right:0;bottom:var(--btm);z-index:1}
 #map{width:100%;height:100%}
 .leaflet-control-attribution{display:none}
@@ -167,7 +139,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 #mapFootCount{margin-left:auto;font:600 .62rem var(--mono);color:var(--muted-2)}
 .zone-label{border:1px solid var(--line-2)!important;border-radius:999px!important;background:rgba(255,255,255,.94)!important;color:var(--forest)!important;font:700 .58rem var(--mono)!important;padding:3px 8px!important}
 
-/* ─── Popups ─── */
 .pop-top{padding:14px 14px 12px 14px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);border-bottom:2px solid rgba(126,207,155,.45);display:flex;align-items:center;gap:12px}
 .pop-id-badge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,.72);color:#fff;font:700 .8rem var(--mono)}
 .pop-id{font:700 .9rem var(--mono);color:#fff}
@@ -180,54 +151,32 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .pab{flex:1;height:34px;border-radius:10px;border:1px solid var(--line-2);background:#eef8f1;color:var(--forest-2);font:700 .62rem var(--mono)}
 .pab:hover{background:#dff1e5;border-color:#8ab99a}
 .sbadge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font:700 .56rem var(--mono);letter-spacing:.04em;border:1px solid transparent}
-.pop-retag{margin:6px 0;padding:6px 8px;border-radius:8px;background:#fef9c3;border:1px solid #fde68a;font:600 .62rem var(--mono);color:#78350f}
-.pop-telemetry-sep{height:1px;background:var(--line);margin:8px 0 8px 0}
-.pop-animal-id{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.pop-animal-id .pop-label{color:#166534}
-.pop-animal-id .pop-value{color:#166534;font-weight:700;font-size:.82rem}
-.pop-details-btn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid var(--line-2);
-  background: var(--panel-2);
-  color: var(--forest-2);
-  font: 700 .62rem var(--mono);
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  transition: all .15s ease;
-}
-.pop-details-btn:hover {
-  background: #eef8f1;
-  border-color: #8ab99a;
-}
 
-/* ─── Field Updates Panel ─── */
 #fpBg{display:none;position:fixed;inset:0;z-index:1180;background:rgba(12,24,18,.38)}
 #fpBg.open{display:block}
-#fp{position:fixed;top:calc(var(--hdr) + var(--fbar));right:-400px;width:400px;height:calc(100vh - var(--hdr) - var(--fbar));z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
+/* FIX-2: height:100vh + overflow:hidden ensure the panel never escapes viewport bounds */
+#fp{position:fixed;top:0;right:-360px;width:360px;height:100vh;z-index:1190;background:#fff;border-left:1px solid var(--line-2);box-shadow:-18px 0 44px rgba(12,24,18,.18);transition:right .24s ease;display:flex;flex-direction:column;overflow:hidden}
 #fp.open{right:0}
-.fp-hdr{padding:16px 20px;background:#2d5a45;color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.fp-hdr h3{font:700 .92rem var(--mono);display:flex;align-items:center;gap:10px}
-.fp-hdr h3::before{content:'📋';font-size:1.1rem}
-.fp-cl{border:none;background:none;color:rgba(255,255,255,.7);font-size:1.2rem}
+.fp-hdr{padding:14px 16px;background:linear-gradient(110deg,#173f31 0%,#215742 100%);color:#fff;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.fp-hdr h3{font:700 .88rem var(--mono)}
+.fp-cl{border:none;background:none;color:rgba(255,255,255,.74);font-size:1.2rem}
 .fp-cl:hover{color:#fff}
-.fp-body{flex:1;overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;background:#fff}
-.fp-latest{padding:20px;background:#f8fcf9;border-bottom:1px solid var(--line);flex-shrink:0}
-.fp-kicker{font:700 .62rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#2d5a45;margin-bottom:6px}
-.fp-date{font:700 .9rem var(--mono);color:var(--forest);margin-bottom:12px}
-.update-content{font:500 .82rem/1.6 var(--font);color:var(--text);white-space:pre-wrap}
-.update-content strong{font-weight:700;color:var(--forest);display:block;margin-top:14px;margin-bottom:4px}
-.update-content strong:first-child{margin-top:0}
-.fp-scroll{padding:20px;flex:1}
-.fp-scroll h4{font:700 .64rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-.fu{padding:20px 0;border-bottom:1px solid var(--line)}
-.fu:last-child{border-bottom:none;padding-bottom:120px}
-.fu-date{font:700 .75rem var(--mono);color:var(--forest);margin-bottom:8px}
+.fp-latest{padding:14px 16px;background:#f4fbf5;border-bottom:1px solid var(--line);flex-shrink:0}
+.fp-kicker{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--forest-3)}
+.fp-date{margin-top:4px;font:700 .8rem var(--mono);color:var(--forest)}
+.fp-copy{margin-top:6px;font:600 .74rem/1.55 var(--font);color:var(--text)}
+/*
+ * FIX-3: .fp-scroll — removed conflicting max-height so the flex container's own
+ * height:100vh + overflow:hidden on #fp controls vertical clipping correctly.
+ * padding-bottom:120px ensures the last update entry can be scrolled fully
+ * clear of the bottom edge of the screen.
+ */
+.fp-scroll{padding:12px 16px 120px !important;flex:1;min-height:0;overflow-y:auto !important;overflow-x:hidden}
+.fp-scroll h4{font:700 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.fu{padding:10px 0;border-bottom:1px solid var(--line)}
+.fu-date{font:700 .67rem var(--mono);color:var(--forest)}
+.fu-text{margin-top:4px;font:600 .74rem/1.55 var(--font);color:var(--text)}
 
-/* ─── Bottom Panel ─── */
 #btm{position:fixed;left:0;right:0;bottom:0;height:var(--btm);z-index:900;background:#fff;border-top:1px solid var(--line-2);display:flex;flex-direction:column;box-shadow:0 -10px 28px rgba(18,33,24,.08)}
 #resizeBar{height:8px;cursor:ns-resize;background:linear-gradient(180deg,#eef4ef 0%,#dfe8e1 100%);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 #resizeBar::after{content:'';width:50px;height:4px;border-radius:999px;background:#c1d0c3}
@@ -246,112 +195,20 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 .dtbl tbody tr.sel{background:#dff1e5}
 .no-data td{padding:20px 12px;text-align:center;color:var(--muted-2);font:600 .7rem var(--mono)}
 
-/* Desktop-only adjustments */
-@media(max-width:1360px){ .hdr-title{font-size:.84rem} }
-
-/* ═══════════════════════════════════════════════════════════
-   MOBILE FILTER DRAWER (bottom-sheet pattern)
-   ═══════════════════════════════════════════════════════════ */
-#drawerBg{display:none;position:fixed;inset:0;z-index:10030;background:rgba(12,24,18,.52);backdrop-filter:blur(2px);animation:fadeIn .2s ease;}
-#drawerBg.open{display:block}
-#mobileDrawer{position:fixed;left:0;right:0;bottom:0;z-index:10040;background:#fff;border-radius:20px 20px 0 0;border-top:2px solid var(--lime);box-shadow:0 -18px 48px rgba(12,24,18,.22);max-height:88vh;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,1,.46,1);will-change:transform;}
-#mobileDrawer.open{transform:translateY(0)}
-.drawer-handle{width:44px;height:5px;border-radius:999px;background:#c4d4c8;margin:12px auto 4px;flex-shrink:0;}
-.drawer-hdr{padding:4px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);flex-shrink:0;}
-.drawer-title{font:700 .78rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--forest);}
-.drawer-close{width:32px;height:32px;border-radius:50%;border:1px solid var(--line-2);background:var(--panel-2);color:var(--muted);font-size:.9rem;display:flex;align-items:center;justify-content:center;}
-.drawer-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:calc(env(safe-area-inset-bottom) + 16px);}
-.drawer-row{display:flex;flex-direction:column;gap:6px;}
-.drawer-label{font:700 .56rem var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase;}
-.drawer-footer{display:flex;gap:10px;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);border-top:1px solid var(--line);background:#fff;flex-shrink:0;}
-.drawer-footer .fbtn{flex:1;height:48px;border-radius:12px;justify-content:center;font-size:.72rem;}
-#mobileDrawer .ms-btn{width:100%;min-width:0;height:44px;border-radius:12px;font-size:.72rem;}
-#mobileDrawer .fsel{width:100%;min-width:0;height:44px;border-radius:12px;font-size:.72rem;}
-#mobileDrawer .ms-drop{position:static;max-height:220px;border-radius:12px;margin-top:4px;box-shadow:var(--shadow);display:none;}
-#mobileDrawer .ms-drop.open{display:flex}
-#mobileDrawer .ms-item{padding:10px 12px;min-height:44px}
-#mobileDrawer .ms-hbtn{height:36px;padding:0 12px}
-.drawer-toggles{display:flex;gap:8px;}
-.drawer-toggles .fbtn{flex:1;height:44px;justify-content:center;border-radius:12px;}
-
-/* ── Tablet tweaks (768–1024px) ── */
-@media(max-width:1200px){ #statusBlocks{grid-template-columns:repeat(3,1fr) repeat(2,1fr)} .hdr-sub{display:none} }
-@media(max-width:1024px){
-  :root{--hdr:108px}
-  #statusBlocks{grid-template-columns:repeat(3,1fr)}
-  .sblock:nth-child(4),.sblock:nth-child(5){grid-column:span 1}
-  .hdr-sub{display:none}
-  .hdr-title{font-size:.8rem}
-  .syncbox{display:none}
-}
-
-/* ── Mobile (≤767px) — full responsive rewrite ── */
-@media(max-width:767px){
-  :root{--hdr:60px;--fbar:0px;--btm:52px;}
-  #hdr{height:var(--hdr);grid-template-columns:auto auto 1fr auto;grid-template-rows:1fr;row-gap:0;column-gap:8px;padding:8px 12px;align-items:center;}
-  .hdr-logos{gap:6px}
-  .hdr-logos img{height:32px;max-width:72px}
-  .hdr-divider{height:24px}
-  .hdr-title{font-size:.72rem;white-space:normal;line-height:1.2}
-  .hdr-sub{display:none}
-  .hdr-brand{grid-row:1;grid-column:3}
-  #statusBlocks{display:none}
-  .syncbox{display:none}
-  .hdr-actions{grid-row:1;grid-column:4;gap:6px;}
-  #filterToggleBtn{display:none}
-  #fieldUpdatesBtn{display:none}
-  #mobileMenuBtn{display:inline-flex !important}
-  #refreshBtn{min-width:0;padding:0 10px}
-  .hbtn{height:44px;min-width:44px}
-  #fbar{display:none !important}
-  #map-wrap{top:var(--hdr);bottom:var(--btm);left:0;right:0;}
-  #mapFoot{padding:4px 10px}
-  #mapFootText{font-size:.58rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .fab{width:40px;height:40px}
-  #legend{right:auto;left:8px;bottom:8px;min-width:160px;padding:10px 12px;}
-  .legend-title{font-size:.52rem}
-  .legend-row{font-size:.58rem}
-  .leaflet-popup-content-wrapper{max-width:calc(100vw - 32px);}
-  .pop-body{padding:10px 12px}
-  .pop-row{flex-direction:column;gap:2px}
-  .pop-value{text-align:left}
-  #btm{height:var(--btm);transition:height .25s ease;}
-  #resizeBar{display:none}
-  #btmHdr{height:52px;padding:0 12px;}
-  .btm-title{font-size:.66rem}
-  #btmScroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .dtbl{min-width:820px;}
-  .dtbl th,.dtbl td{padding:7px 8px;font-size:.6rem;}
-  .dtbl tbody tr{min-height:44px}
-  #btm.mobile-expanded{height:55vh;}
-  .btm-actions{gap:4px}
-  .bc{height:36px;padding:0 10px;font-size:.6rem}
-  #toast{bottom:calc(var(--btm) + 8px)}
-  #fp{width:100%;right:-100%;top:var(--hdr);height:calc(100vh - var(--hdr))}
-  #fp.open{right:0}
-  .loading-logos img{height:56px}
-  .loading-logos .loading-divider{height:44px}
-  .loading-list{grid-template-columns:1fr}
-  .loading-card{padding:24px 18px;gap:12px}
-}
-@media(max-width:380px){
-  .hdr-logos img{height:26px;max-width:56px}
-  .hdr-title{font-size:.64rem}
-  #mobileMenuBtn .menu-text{display:none}
+@media (max-width:1360px){
+  .hdr-title{font-size:.84rem}
 }
 </style>
 </head>
-
 <body>
-
 <div id="loading">
   <div class="loading-bg"></div>
   <div class="loading-veil"></div>
   <div class="loading-card">
     <div class="loading-logos">
-      <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
+      <img src="mcbt.png" alt="MCBT" onerror="this.style.display='none'">
       <div class="loading-divider"></div>
-      <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
+      <img src="gep.png" alt="GEP" onerror="this.style.display='none'">
     </div>
     <div class="loading-ring"></div>
     <div class="loading-title">Gharial Ecology Project</div>
@@ -359,46 +216,39 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="loading-list">
       <div class="loading-item" id="ld-master">Master Radio Dictionary</div>
       <div class="loading-item" id="ld-ats">ATS Satellite Log</div>
-      <div class="loading-item" id="ld-fl">Field Log (VHF)</div>
-      <div class="loading-item" id="ld-pali">Pali FT Hatchlings</div>
+      <div class="loading-item" id="ld-zones">River Zones GeoJSON</div>
     </div>
   </div>
 </div>
-
 <div id="toast"></div>
 
 <header id="hdr">
   <div class="hdr-logos">
     <a href="https://madrascrocodilebank.org" target="_blank" rel="noopener" title="Madras Crocodile Bank Trust">
-      <img src="mcbt (1).png" alt="MCBT" onerror="this.style.display='none'">
+      <img src="mcbt.png" alt="MCBT" onerror="this.style.display='none'">
     </a>
     <a href="https://www.instagram.com/gharialecologyproject/" target="_blank" rel="noopener" title="Gharial Ecology Project on Instagram">
-      <img src="gep (1).png" alt="GEP" onerror="this.style.display='none'">
+      <img src="gep.png" alt="GEP" onerror="this.style.display='none'">
     </a>
   </div>
   <div class="hdr-divider"></div>
   <div class="hdr-brand">
     <div class="hdr-title">Gharial Ecology Project - Unified Telemetry Dashboard</div>
-    <div class="hdr-sub">Desktop telemetry monitor | ATS + VHF + hatchling routing</div>
+    <div class="hdr-sub">Desktop telemetry monitor | ATS Satellite routing</div>
   </div>
-
   <div id="statusBlocks">
     <button class="sblock muted" id="statusBlock0" type="button" onclick="toggleStatusBlock(0)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock1" type="button" onclick="toggleStatusBlock(1)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock2" type="button" onclick="toggleStatusBlock(2)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
     <button class="sblock muted" id="statusBlock3" type="button" onclick="toggleStatusBlock(3)"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
-    <button class="sblock muted" id="statusBlock4" type="button" onclick="toggleStatusBlock(4)" style="display:none"><span class="sblock-label">Awaiting Source</span><span class="sblock-count">-</span></button>
   </div>
-
   <div class="syncbox">
     <strong>Last Sync</strong>
     <span id="syncTime">-</span>
   </div>
   <div class="hdr-actions">
-    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">↻</span> Refresh</button>
+    <button class="hbtn" id="refreshBtn" type="button" onclick="loadAllData()"><span class="spin-icon">R</span> Refresh</button>
     <button class="hbtn on" id="filterToggleBtn" type="button" onclick="toggleFilterBar()">Filters</button>
-    <button class="hbtn" id="fieldUpdatesBtn" type="button" onclick="toggleFieldPanel()" style="display:none">Field Updates</button>
-    <button class="hbtn" id="mobileMenuBtn" type="button" onclick="openMobileDrawer()" aria-label="Open filters" style="display:none">☰ Filters</button>
   </div>
 </header>
 
@@ -408,65 +258,18 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
       <label for="sourceFilter">Source</label>
       <select class="fsel" id="sourceFilter" onchange="onSourceChange()">
         <option value="">Select Source</option>
-        <option value="ATS">ATS Satellite</option>
-        <option value="FieldLog">Field Log (VHF)</option>
-        <option value="PaliFT">Pali FT (Hatchlings)</option>
+        <option value="ATS">ATS Satellite</option> 
       </select>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Animal_ID</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-srno" type="button" onclick="toggleMS('srno',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-srno">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('srno')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('srno')">None</button>
-            <span class="ms-count" id="msc-srno"></span>
-          </div>
-          <div class="ms-items" id="msi-srno"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Enclosure_ID</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-enc" type="button" onclick="toggleMS('enc',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-enc">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('enc')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('enc')">None</button>
-            <span class="ms-count" id="msc-enc"></span>
-          </div>
-          <div class="ms-items" id="msi-enc"></div>
-        </div>
-      </div>
-    </div>
-    <div class="fsep"></div>
-    <div class="fg">
-      <label>Pen</label>
-      <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-pen" type="button" onclick="toggleMS('pen',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
-        <div class="ms-drop" id="msd-pen">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('pen')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('pen')">None</button>
-            <span class="ms-count" id="msc-pen"></span>
-          </div>
-          <div class="ms-items" id="msi-pen"></div>
-        </div>
-      </div>
     </div>
     <div class="fsep"></div>
     <div class="fg">
       <label>Radio ID</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <button class="ms-btn disabled" id="msb-rid" type="button" onclick="toggleMS('rid',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
         <div class="ms-drop" id="msd-rid">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">None</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('rid')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('rid')">Clear All</button>
             <span class="ms-count" id="msc-rid"></span>
           </div>
           <div class="ms-items" id="msi-rid"></div>
@@ -477,11 +280,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Category</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <button class="ms-btn disabled" id="msb-cat" type="button" onclick="toggleMS('cat',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
         <div class="ms-drop" id="msd-cat">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">None</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('cat')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('cat')">Clear All</button>
             <span class="ms-count" id="msc-cat"></span>
           </div>
           <div class="ms-items" id="msi-cat"></div>
@@ -492,11 +295,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Zone</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span></button>
+        <button class="ms-btn disabled" id="msb-zone" type="button" onclick="toggleMS('zone',event)"><span class="ms-lbl">Loading...</span><span class="ms-caret">v</span></button>
         <div class="ms-drop" id="msd-zone">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">None</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('zone')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('zone')">Clear All</button>
             <span class="ms-count" id="msc-zone"></span>
           </div>
           <div class="ms-items" id="msi-zone"></div>
@@ -507,11 +310,11 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <div class="fg">
       <label>Status</label>
       <div class="ms-wrap">
-        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">▾</span></button>
+        <button class="ms-btn disabled" id="msb-status" type="button" onclick="toggleMS('status',event)"><span class="ms-lbl">Not applicable</span><span class="ms-caret">v</span></button>
         <div class="ms-drop" id="msd-status">
           <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">All</button>
-            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">None</button>
+            <button class="ms-hbtn" type="button" onclick="msSelectAll('status')">Select All</button>
+            <button class="ms-hbtn" type="button" onclick="msClearAll('status')">Clear All</button>
             <span class="ms-count" id="msc-status"></span>
           </div>
           <div class="ms-items" id="msi-status"></div>
@@ -529,167 +332,12 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
   </div>
 </div>
 
-<div id="drawerBg" onclick="closeMobileDrawer()"></div>
-<div id="mobileDrawer" role="dialog" aria-modal="true" aria-label="Filters">
-  <div class="drawer-handle"></div>
-  <div class="drawer-hdr">
-    <span class="drawer-title">🔍 Filters & Tools</span>
-    <button class="drawer-close" onclick="closeMobileDrawer()" aria-label="Close filters">✕</button>
-  </div>
-  <div class="drawer-body">
-    <div class="drawer-row">
-      <span class="drawer-label">Data Source</span>
-      <select class="fsel" id="mobileSourceFilter" onchange="onMobileSourceChange()">
-        <option value="">Select Source</option>
-        <option value="ATS">ATS Satellite</option>
-        <option value="FieldLog">Field Log (VHF)</option>
-        <option value="PaliFT">Pali FT (Hatchlings)</option>
-      </select>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Animal_ID</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-srno" type="button" onclick="toggleMobMS('srno',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-srno">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('srno')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('srno')">None</button>
-            <span class="ms-count" id="mob-msc-srno"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-srno"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Enclosure_ID</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-enc" type="button" onclick="toggleMobMS('enc',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-enc">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('enc')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('enc')">None</button>
-            <span class="ms-count" id="mob-msc-enc"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-enc"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Pen</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-pen" type="button" onclick="toggleMobMS('pen',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-pen">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('pen')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('pen')">None</button>
-            <span class="ms-count" id="mob-msc-pen"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-pen"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Radio ID</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-rid" type="button" onclick="toggleMobMS('rid',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-rid">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('rid')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('rid')">None</button>
-            <span class="ms-count" id="mob-msc-rid"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-rid"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Category</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-cat" type="button" onclick="toggleMobMS('cat',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-cat">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('cat')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('cat')">None</button>
-            <span class="ms-count" id="mob-msc-cat"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-cat"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Zone</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-zone" type="button" onclick="toggleMobMS('zone',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-zone">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('zone')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('zone')">None</button>
-            <span class="ms-count" id="mob-msc-zone"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-zone"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Status</span>
-      <div class="ms-wrap" style="flex-shrink:0;width:100%">
-        <button class="ms-btn disabled" id="mob-msb-status" type="button" onclick="toggleMobMS('status',event)">
-          <span class="ms-lbl">Loading...</span><span class="ms-caret">▾</span>
-        </button>
-        <div class="ms-drop" id="mob-msd-status">
-          <div class="ms-head">
-            <button class="ms-hbtn" type="button" onclick="mobMsSelectAll('status')">All</button>
-            <button class="ms-hbtn" type="button" onclick="mobMsClearAll('status')">None</button>
-            <span class="ms-count" id="mob-msc-status"></span>
-          </div>
-          <div class="ms-items" id="mob-msi-status"></div>
-        </div>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <span class="drawer-label">Map Overlays</span>
-      <div class="drawer-toggles">
-        <button class="fbtn" id="mob-heatBtn" type="button" onclick="toggleHeatmap()">Heatmap</button>
-        <button class="fbtn" id="mob-kdeBtn" type="button" onclick="toggleKDE()">KDE</button>
-      </div>
-    </div>
-    <div class="drawer-row">
-      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px" type="button" onclick="exportCSV();closeMobileDrawer()">↓ Export CSV</button>
-    </div>
-    <div class="drawer-row" id="mob-fieldUpdatesRow" style="display:none">
-      <button class="fbtn" style="width:100%;height:44px;justify-content:center;border-radius:12px;background:#eef8f1;color:var(--forest-2);border-color:#8ab99a" type="button" onclick="toggleFieldPanel();closeMobileDrawer()">📋 Field Updates</button>
-    </div>
-  </div>
-  <div class="drawer-footer">
-    <button class="fbtn clear" type="button" onclick="mobileClearFilters()">Clear All</button>
-    <button class="fbtn apply" type="button" onclick="mobileApplyFilters()">Apply Filters</button>
-  </div>
-</div>
-
 <div id="map-wrap">
   <div id="map"></div>
   <div class="map-fab">
     <button class="fab" type="button" title="Reset View" onclick="resetView()">H</button>
   </div>
-  <div id="legend">
-    <div id="legend-header" onclick="toggleLegend()" title="Toggle legend">
-      <span class="legend-title">Legend</span>
-      <button id="legend-toggle-btn" type="button" aria-label="Toggle legend">−</button>
-    </div>
-    <div id="legend-body"></div>
-  </div>
+  <div id="legend"></div>
   <div id="mapFoot">
     <div class="map-foot-dot"></div>
     <span id="mapFootText">Select a source to begin.</span>
@@ -700,19 +348,17 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <div id="fpBg" onclick="closeFieldPanel()"></div>
 <aside id="fp">
   <div class="fp-hdr">
-    <h3>Field Updates</h3>
-    <button class="fp-cl" type="button" onclick="closeFieldPanel()">✕</button>
+    <h3>Pali FT Field Updates</h3>
+    <button class="fp-cl" type="button" onclick="closeFieldPanel()">X</button>
   </div>
-  <div class="fp-body">
-    <div class="fp-latest">
-      <div class="fp-kicker">Latest update</div>
-      <div class="fp-date" id="fuDate">Loading...</div>
-      <div class="update-content" id="fuText"></div>
-    </div>
-    <div class="fp-scroll">
-      <h4>Previous Updates</h4>
-      <div id="fuList"></div>
-    </div>
+  <div class="fp-latest">
+    <div class="fp-kicker">Latest update</div>
+    <div class="fp-date" id="fuDate">Loading...</div>
+    <div class="fp-copy" id="fuText"></div>
+  </div>
+  <div class="fp-scroll">
+    <h4>Previous Updates</h4>
+    <div id="fuList"></div>
   </div>
 </aside>
 
@@ -728,9 +374,6 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
     <table class="dtbl">
       <thead>
         <tr>
-          <th>Animal_ID</th>
-          <th>Enclosure_ID</th>
-          <th>Pen</th>
           <th>Radio ID</th>
           <th>Last Fix</th>
           <th>Days</th>
@@ -748,7 +391,7 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
         </tr>
       </thead>
       <tbody id="tableBody">
-        <tr class="no-data"><td colspan="17">Select a source to display telemetry records.</td></tr>
+        <tr class="no-data"><td colspan="14">Select a source to display telemetry records.</td></tr>
       </tbody>
     </table>
   </div>
@@ -759,97 +402,16 @@ path.leaflet-interactive:focus{outline:none!important;box-shadow:none!important}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier-Leaflet/0.2.6/oms.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
-
 <script>
-/* ═══════════════════════════════════════════════
-   CONSTANTS & STATE
-   ═══════════════════════════════════════════════ */
+/* ─────────────── STRICT DATA SOURCE URLS ─────────────── */
 const URLS = {
   master:'https://docs.google.com/spreadsheets/d/1NO9-SFts4S08nHSiKWiyJdJQ4wn0YDfPb6dUfwegVog/export?format=csv&gid=0',
   ats:'https://docs.google.com/spreadsheets/d/13HfRGsqKmVihmGYACi8nWgLTsV2kYKM83gBvVmWSfXw/export?format=csv&gid=0',
   fl:'https://docs.google.com/spreadsheets/d/1-qg3MnjhJn2SCwPYnyCPgI2ujy235X-chN_EHlJDK3g/export?format=csv&gid=0',
   pali:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=0',
-  updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281'
-};
-
-/* HARDCODED ZONES TO PREVENT NETWORK ISSUES */
-const ZONE_GEOJSON_DATA = {
-  "type": "FeatureCollection",
-  "features": [
-    { "type": "Feature", "properties": { "name": "Pali Nesting Stretch" }, "geometry": { "coordinates": [ [ [76.55788226585895, 25.83887002828274], [76.55879779457314, 25.838458028978522], [76.56478394385692, 25.847109713069045], [76.56369235192892, 25.847204783005424], [76.55788226585895, 25.83887002828274] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Rapta" }, "geometry": { "coordinates": [ [ [76.51235052425409, 25.84163943520221], [76.51389988053916, 25.835110814908163], [76.52967514453564, 25.841037295984606], [76.53069631117802, 25.845695872166175], [76.52949908132064, 25.845315587110903], [76.51235052425409, 25.84163943520221] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pali Chambal RJ Side" }, "geometry": { "coordinates": [ [ [76.56277661371598, 25.852045304847536], [76.55383230047892, 25.847871625939007], [76.55091716399698, 25.84262436532343], [76.56370583072379, 25.84679884043156], [76.56277661371598, 25.852045304847536] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pali RJ Side" }, "geometry": { "coordinates": [ [ [76.56345330462017, 25.848894990978366], [76.5637182984002, 25.847106047251415], [76.57246468793716, 25.857958524700905], [76.5706086097614, 25.859090722198744], [76.56292275452063, 25.85157801402802], [76.56345330462017, 25.848894990978366] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name ": "Pali RJ Island" }, "geometry": { "coordinates": [ [ [76.56565613250297, 25.852987185412516], [76.56758987042792, 25.852328728967265], [76.56970652950736, 25.854633310483607], [76.56847834460893, 25.855385817168525], [76.56798184433057, 25.854962532747663], [76.56565613250297, 25.852987185412516] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pali MP Side" }, "geometry": { "coordinates": [ [ [76.57240157391539, 25.857938255709456], [76.56042879106423, 25.840746569139853], [76.55871294638723, 25.838481609778526], [76.55985684283769, 25.837074567734973], [76.56317414254687, 25.840986789563416], [76.57125767746487, 25.847781393673543], [76.57499440587048, 25.856703008281187], [76.57240157391539, 25.857938255709456] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Parvati Confluence" }, "geometry": { "coordinates": [ [ [76.5717914958073, 25.857080446361152], [76.56374609077096, 25.847232349247435], [76.56481372745822, 25.847163718515546], [76.5717914958073, 25.857080446361152] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pada" }, "geometry": { "coordinates": [ [ [76.54716053478143, 25.830261138270373], [76.54847720080761, 25.828160231620657], [76.55497075824974, 25.83141931445394], [76.55781355989683, 25.834920708405363], [76.55987833161771, 25.837048427970984], [76.5587112867322, 25.838395066153865], [76.55790333258022, 25.83874518957097], [76.55757416607469, 25.838664391951482], [76.54716053478143, 25.830261138270373] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Adusa" }, "geometry": { "coordinates": [ [ [76.5471306215955, 25.83028807682099], [76.53896130739179, 25.82479332037299], [76.53590903615225, 25.821560991561697], [76.53686661144314, 25.818544071726734], [76.54434766840598, 25.824146861670044], [76.5485669845329, 25.827863951004645], [76.5471306215955, 25.83028807682099] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Chappol" }, "geometry": { "coordinates": [ [ [76.51567422639147, 25.770292260629105], [76.51996421849105, 25.770108397968116], [76.51832995869376, 25.778509114173275], [76.51935144156079, 25.7834759519217], [76.52241599971927, 25.792673675351637], [76.5261616799852, 25.80009297812748], [76.52330143315987, 25.80021567350228], [76.51771707941691, 25.787522991951235], [76.5143803004542, 25.778447761364447], [76.51567422639147, 25.770292260629105] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Icchana Khedi" }, "geometry": { "coordinates": [ [ [76.52336909548688, 25.800401008616276], [76.52616147770328, 25.80009443648848], [76.5322223709781, 25.81205028009424], [76.53685280710306, 25.818364223553132], [76.53583119182036, 25.82142904927781], [76.53065592654093, 25.815789730810536], [76.52336909548688, 25.800401008616276] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pali Guest House" }, "geometry": { "coordinates": [ [ [76.57046058479176, 25.859163898275966], [76.57243492391979, 25.85793737934202], [76.57638698796967, 25.863577884884904], [76.57413897567443, 25.864313265050683], [76.57046058479176, 25.859163898275966] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Pali Guest House MP Side" }, "geometry": { "coordinates": [ [ [76.57243492391979, 25.85812132248668], [76.57509295210167, 25.856589311735448], [76.57788591147676, 25.86210616493598], [76.57631899324542, 25.863087228530446], [76.57243492391979, 25.85812132248668] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Kudi Ghat" }, "geometry": { "coordinates": [ [ [76.5743430063352, 25.86486316781628], [76.5781580806784, 25.862656568159295], [76.58442529217388, 25.86927661930504], [76.59144291494323, 25.873200047977804], [76.58912687094539, 25.877000862025795], [76.58285799513379, 25.874117803360164], [76.5743430063352, 25.86486316781628] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Meena Khedi" }, "geometry": { "coordinates": [ [ [76.58905819471113, 25.877368046877223], [76.5915111466283, 25.87326140348661], [76.59614065818079, 25.87240210043487], [76.59798254305974, 25.876632387120097], [76.5947774233764, 25.878775156042906], [76.58905819471113, 25.877368046877223] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Binjari Sandbank" }, "geometry": { "coordinates": [ [ [76.62149922791934, 25.872899313579893], [76.6247001961645, 25.87063196373107], [76.62694782021958, 25.870754483143884], [76.62946871629856, 25.87847597706258], [76.62347456566931, 25.87988516798076], [76.62149922791934, 25.872899313579893] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Bohna Upside" }, "geometry": { "coordinates": [ [ [76.62667535486639, 25.870448090940926], [76.62435963460513, 25.870325576922042], [76.62143112496659, 25.873021871376693], [76.61714043117456, 25.870632096838605], [76.60079646595858, 25.87541160490693], [76.59786828699038, 25.87663703114208], [76.59596246522864, 25.87198040388705], [76.60447425616405, 25.86867162352081], [76.6147569207568, 25.865485090329486], [76.62422318761531, 25.86646509080508], [76.62538113401706, 25.868425926701022], [76.62667535486639, 25.870448090940926] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Bohna Down" }, "geometry": { "coordinates": [ [ [76.6235164360653, 25.880004502250046], [76.62953984005065, 25.878295641798914], [76.63078126357743, 25.889212003053032], [76.63292694503872, 25.898044554998876], [76.62773159725742, 25.899899027503153], [76.62575154180712, 25.89411085763851], [76.6235164360653, 25.880004502250046] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Aniyala" }, "geometry": { "coordinates": [ [ [76.67731119026462, 25.912579715247517], [76.67744376718724, 25.906313872986374], [76.68601678351774, 25.9053497533027], [76.69405438841716, 25.90161342688512], [76.7057102525165, 25.897876523866174], [76.71535771542284, 25.89799601954826], [76.71361483328411, 25.9024560460539], [76.69619738097151, 25.90655489690792], [76.68588334189036, 25.911856816210587], [76.67731119026462, 25.912579715247517] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": {}, "geometry": { "coordinates": [ [ [76.62764002948273, 25.900413310866924], [76.63298571107435, 25.897638293902304], [76.6379381106189, 25.90305953995579], [76.64543827067689, 25.905710115098927], [76.65575478733712, 25.907517968946408], [76.65508667301492, 25.91197676471579], [76.65106771077257, 25.911494772326535], [76.64168968992072, 25.910048737582187], [76.63259090680702, 25.906074355312953], [76.62764002948273, 25.900413310866924] ] ], "type": "Polygon" }, "id": 19 },
-    { "type": "Feature", "properties": { "name": "Sewapur" }, "geometry": { "coordinates": [ [ [76.65468498830916, 25.912458747509262], [76.6562904820741, 25.907035887785227], [76.67772550446387, 25.905951170077756], [76.67718977924454, 25.91257924170914], [76.65468498830916, 25.912458747509262] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Rameshwar" }, "geometry": { "coordinates": [ [ [76.73134463175404, 25.9094468003876], [76.72290538409925, 25.905590790873404], [76.71393104920145, 25.902578921671022], [76.71567158964632, 25.897878635533274], [76.72169933997753, 25.899083087538813], [76.73308604203743, 25.90366297156197], [76.73134463175404, 25.9094468003876] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Banas Confluence" }, "geometry": { "coordinates": [ [ [76.73120811341624, 25.909509080623565], [76.73328482138203, 25.9031214770134], [76.7438686059727, 25.905171024093647], [76.7568602089766, 25.911497467269513], [76.7403852875592, 25.915232938389067], [76.73120811341624, 25.909509080623565] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Lohlai Dam" }, "geometry": { "coordinates": [ [ [76.68196384814559, 25.96668492854411], [76.6807572086974, 25.96337316583174], [76.68704462404071, 25.960232637467286], [76.69384034553389, 25.95400821789643], [76.69784158237047, 25.956977685783414], [76.6919349656311, 25.96365872151081], [76.68628250097754, 25.96565719116535], [76.68196384814559, 25.96668492854411] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Banas River" }, "geometry": { "coordinates": [ [ [76.69772869302841, 25.956976111417973], [76.69364959671879, 25.953657638699497], [76.69772629923358, 25.94186915860459], [76.7049122958768, 25.930950571336354], [76.71831802726905, 25.917406028927672], [76.7305615292741, 25.909800950378], [76.7319217307712, 25.909801293662852], [76.7397898330297, 25.91487256432609], [76.72997807393091, 25.916881046624127], [76.7121977386131, 25.92937798130086], [76.70306783084612, 25.94003537026903], [76.70064029843667, 25.944489509272046], [76.69772869302841, 25.956976111417973] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Banas Confluence Down" }, "geometry": { "coordinates": [ [ [76.74056631349066, 25.91543508244331], [76.75681128713342, 25.911662221432906], [76.76384924166268, 25.920125188939608], [76.7581642622518, 25.929194547580153], [76.74733549737346, 25.92742901093824], [76.74056631349066, 25.91543508244331] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "Bagdiya Upside": "" }, "geometry": { "coordinates": [ [ [76.74692946943003, 25.94015021840022], [76.74395133008574, 25.936741999982658], [76.74483114134455, 25.92986384328816], [76.74632020842694, 25.92682023804906], [76.75586329028954, 25.92895102422483], [76.74963671605974, 25.938506843049595], [76.74692946943003, 25.94015021840022] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Bagdiya Nesting Site" }, "geometry": { "coordinates": [ [ [76.7469266874242, 25.940221348428366], [76.75054832128609, 25.937899841928555], [76.75405852026137, 25.93931947364011], [76.75494999936643, 25.941640952160526], [76.75329704852658, 25.94187476760409], [76.74874679059576, 25.942058479413788], [76.7469266874242, 25.940221348428366] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Bagdiya Down" }, "geometry": { "coordinates": [ [ [76.75494401641015, 25.94168736325412], [76.75330621365009, 25.935572322997686], [76.78289501834433, 25.932867791482792], [76.77323712302729, 25.940899186418378], [76.76353518258168, 25.94126699873715], [76.75494401641015, 25.94168736325412] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Rijheta" }, "geometry": { "coordinates": [ [ [76.89809587694555, 26.094308392447616], [76.90845620479422, 26.086889488815345], [76.92044220036951, 26.093855064596838], [76.93937138605605, 26.0960250774138], [76.93403541698115, 26.10325915890411], [76.91319073185525, 26.100907880189197], [76.89809587694555, 26.094308392447616] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Baroli Island" }, "geometry": { "coordinates": [ [ [76.93403543452558, 26.103440037900825], [76.9392706663865, 26.095934671335314], [76.9546815586798, 26.098737265932556], [76.9485416786531, 26.107601653839026], [76.93403543452558, 26.103440037900825] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Baroli Down" }, "geometry": { "coordinates": [ [ [76.9486440018639, 26.10796422550669], [76.95478948102709, 26.0983789305744], [76.95680346365907, 26.102989786917334], [76.96869402645422, 26.115020124287383], [76.96546629910222, 26.12017488946485], [76.95730679200551, 26.116829257737052], [76.9486440018639, 26.10796422550669] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "Jamurdi": "" }, "geometry": { "coordinates": [ [ [76.96566014474303, 26.12053298083471], [76.96907799804433, 26.11473973763715], [76.97784708678466, 26.11998934082446], [76.97422671418309, 26.125959197634884], [76.96566014474303, 26.12053298083471] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Dubawali" }, "geometry": { "coordinates": [ [ [76.97459550006585, 26.126040703642445], [76.97830556547558, 26.119986669725833], [76.98544937434622, 26.12323930022366], [76.99772323133374, 26.12441051385923], [77.0060747476407, 26.12784437805155], [76.9963141480489, 26.13191005723054], [76.98323914980836, 26.13064433335883], [76.97982438456307, 26.12992197189402], [76.97459550006585, 26.126040703642445] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Nadigaon Main Channel" }, "geometry": { "coordinates": [ [ [76.9997015043611, 26.13472792149085], [77.00418900546293, 26.13346089233586], [77.00520233243412, 26.14395448084383], [77.01059426089574, 26.15334249877793], [77.00285027571897, 26.15418715496962], [76.99944852585708, 26.14210320776793], [76.9997015043611, 26.13472792149085] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Nadigaon Channel" }, "geometry": { "coordinates": [ [ [77.00420459826813, 26.133534446708552], [77.00865620597557, 26.132884674715726], [77.01603917658076, 26.148901644886934], [77.01632867859519, 26.154326234162724], [77.0106106719931, 26.15338427089499], [77.00518195915748, 26.14396323445594], [77.00420459826813, 26.133534446708552] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Kuno Confluence" }, "geometry": { "coordinates": [ [ [77.08051420107773, 26.185795625612727], [77.08037067271096, 26.167469107193483], [77.10384331134605, 26.16871979732943], [77.09994814875267, 26.188552326184762], [77.08051420107773, 26.185795625612727] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Kuno Nesting Site" }, "geometry": { "coordinates": [ [ [77.08651669525898, 26.111247830464322], [77.0851126459807, 26.097320342914244], [77.09502702738303, 26.104104985311494], [77.0943390546932, 26.10961972608152], [77.08651669525898, 26.111247830464322] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Liloli" }, "geometry": { "coordinates": [ [ [77.08026536834649, 26.182823943350172], [77.0509156360128, 26.182824011529917], [77.03596172993792, 26.177053870063958], [77.03945601449516, 26.170531419968796], [77.08026263546202, 26.172789120037066], [77.08026536834649, 26.182823943350172] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Khirkhiri" }, "geometry": { "coordinates": [ [ [76.80711521645196, 26.00047370493982], [76.80088361359566, 25.984215128729886], [76.79413775897103, 25.963791984744404], [76.7904192033152, 25.947199470483838], [76.77428856998762, 25.94082509072129], [76.7831616482145, 25.932691532275925], [76.79347579882068, 25.9351268701907], [76.81189965855896, 25.9545557690722], [76.82112412396725, 25.994736234855225], [76.80711521645196, 26.00047370493982] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Bagora" }, "geometry": { "coordinates": [ [ [76.80845528003852, 26.00093198940968], [76.8205232115663, 25.99534866831256], [76.83792218695072, 26.00985793488482], [76.83046845311003, 26.019427996183808], [76.80845528003852, 26.00093198940968] ] ], "type": "Polygon" } },
-    { "type": "Feature", "properties": { "name": "Saand" }, "geometry": { "coordinates": [ [ [76.82978316293156, 26.020232470565645], [76.8384778331287, 26.00987063052719], [76.86828043772095, 26.03027946106826], [76.85727861481598, 26.042862895407055], [76.83581157492557, 26.031074768039332], [76.82978316293156, 26.020232470565645] ] ], "type": "Polygon" } }
-  ]
-};
-
-/* ── Retagging: April 4 2026 ── */
-const RETAG_DATE_STR = 'April 4th';
-const RETAG_DATE = new Date(2026, 3, 4);
-const RETAG_OLD_TO_NEW = { '68':'65', '84':'67', '86':'69', '88':'71' };
-const RETAG_NEW_TO_OLD = { '65':'68', '67':'84', '69':'86', '71':'88' };
-
-/* ── Pali FTH 2025 Hardcoded buckets ── */
-const RECOVERED_IDS      = new Set(['35','36','64','66','70','76','98']);
-const MISSING_START_IDS  = new Set(['30','33','34','96']);
-const WATER_IDS          = new Set(['31','38','72']);
-const HARD_MISSING_IDS   = new Set(['39','40','62','82']);
-const HARD_ACTIVE_IDS    = new Set(['32','37','65','67','69','71','74','78','80','90','92','94']);
-
-const SR_NO_MAP = {
-  '30':{ srNo:1,  pen:'P3', animal:'P3-G3' }, '31':{ srNo:2,  pen:'P3', animal:'P3-G1' },
-  '32':{ srNo:3,  pen:'P3', animal:'P3-G4' }, '33':{ srNo:4,  pen:'P3', animal:'P3-G5' },
-  '34':{ srNo:5,  pen:'P3', animal:'P3-G2' }, '35':{ srNo:6,  pen:'P4', animal:'P4-G2' },
-  '36':{ srNo:7,  pen:'P4', animal:'P4-G4' }, '37':{ srNo:8,  pen:'P4', animal:'P4-G1' },
-  '38':{ srNo:9,  pen:'P4', animal:'P4-G3' }, '39':{ srNo:10, pen:'P4', animal:'P4-G5' },
-  '40':{ srNo:11, pen:'P5', animal:'P5-G3' }, '62':{ srNo:12, pen:'P5', animal:'P5-G1' },
-  '64':{ srNo:13, pen:'P5', animal:'P5-G5' }, '66':{ srNo:14, pen:'P5', animal:'P5-G2' },
-  '68':{ srNo:15, pen:'P5', animal:'P5-G4' }, '70':{ srNo:16, pen:'P6', animal:'P6-G5' },
-  '72':{ srNo:17, pen:'P6', animal:'P6-G1' }, '74':{ srNo:18, pen:'P6', animal:'P6-G4' },
-  '76':{ srNo:19, pen:'P6', animal:'P6-G3' }, '78':{ srNo:20, pen:'P6', animal:'P6-G2' },
-  '80':{ srNo:21, pen:'P7', animal:'P7-G2' }, '82':{ srNo:22, pen:'P7', animal:'P7-G1' },
-  '84':{ srNo:23, pen:'P7', animal:'P7-G5' }, '86':{ srNo:24, pen:'P7', animal:'P7-G4' },
-  '88':{ srNo:25, pen:'P7', animal:'P7-G3' }, '90':{ srNo:26, pen:'P8', animal:'P8-G2' },
-  '92':{ srNo:27, pen:'P8', animal:'P8-G3' }, '94':{ srNo:28, pen:'P8', animal:'P8-G1' },
-  '96':{ srNo:29, pen:'P8', animal:'P8-G5' }, '98':{ srNo:30, pen:'P8', animal:'P8-G4' }
+  /* FIX-2: Field Updates target Sheet2 (gid=238985281) of the Palighat spreadsheet. */
+  updates:'https://docs.google.com/spreadsheets/d/10maxgDHDOISlVaN3kuc0_BjxOwPVysci5AiFL-WAxoQ/export?format=csv&gid=238985281',
+  zones:'https://raw.githubusercontent.com/sinu-2096/g-m-v/main/map.geojson'
 };
 
 const MAP_CENTER = [25.84,76.56];
@@ -857,9 +419,11 @@ const MAP_ZOOM = 12;
 const TODAY = new Date();
 const SPLASH_START = performance.now();
 const SPLASH_MIN_MS = 7000;
+const DEAD_IDS = new Set(['30','33','34','38','96','64','98']);
+const NOT_DEPLOYED_COLLAR = '060336';
+/* FIX-1: Maximum distance (km) a coordinate may lie outside all zone polygons
+   before it is labelled "Outside Defined Zones" instead of snapping to the nearest. */
 const ZONE_SNAP_MAX_KM = 0.5;
-const NOT_DEPLOYED_COLLAR = '060336'; /* RESTORED FIX FOR ATS BREAKING */
-
 const EMPTY_STATUS = [{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'},{label:'Awaiting Source',count:'-'}];
 
 const STATUS_META = {
@@ -871,17 +435,18 @@ const STATUS_META = {
   gone:{label:'Gone',color:'#374151',bg:'#f3f4f6',border:'#d1d5db'},
   dead:{label:'Dead',color:'#991b1b',bg:'#fee2e2',border:'#fecaca'},
   vhf:{label:'VHF',color:'#2f7a5a',bg:'#dcfce7',border:'#bbf7d0'},
-  ndep:{label:'Not Deployed',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'},
-  
-  /* Additional definitions to handle Pali custom buckets */
-  missing:{label:'Missing',color:'#d97706',bg:'#fef3c7',border:'#fde68a'},
-  missing_start:{label:'Missing Soon After Release',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'},
-  water:{label:'Radio in Water',color:'#2563eb',bg:'#dbeafe',border:'#bfdbfe'},
-  recovered:{label:'Recovered',color:'#dc2626',bg:'#fee2e2',border:'#fecaca'}
+  ndep:{label:'Not Deployed',color:'#7c3aed',bg:'#f3e8ff',border:'#ddd6fe'}
 };
 
 const VIEW_META = {
-  '':{blocks:EMPTY_STATUS,legend:[],statusKeys:[],showFieldUpdates:false,hideCollar:false,statusEnabled:false},
+  '':{
+    blocks:EMPTY_STATUS,
+    legend:[],
+    statusKeys:[],
+    showFieldUpdates:false,
+    hideCollar:false,
+    statusEnabled:false
+  },
   ATS:{
     blocks:[
       {key:'active',label:'Active <= 7d'},
@@ -907,7 +472,9 @@ const VIEW_META = {
       {key:null,label:'Not applicable'},
       {key:null,label:'Not applicable'}
     ],
-    legend:[{label:'Merged adult latest positions',color:'#2f7a5a'}],
+    legend:[
+      {label:'Merged adult latest positions',color:'#2f7a5a'}
+    ],
     statusKeys:[],
     showFieldUpdates:false,
     hideCollar:true,
@@ -915,20 +482,18 @@ const VIEW_META = {
   },
   PaliFT:{
     blocks:[
-      {key:'active',label:'Active <= 14d'},
-      {key:'missing',label:'Missing > 14d'},
-      {key:'missing_start',label:'Missing Soon After Release'},
-      {key:'water',label:'Radio in Water'},
-      {key:'recovered',label:'Recovered'}
+      {key:'active',label:'Active <= 10d'},
+      {key:'tmiss',label:'Temp Missing'},
+      {key:'gone',label:'Gone > 30d'},
+      {key:'dead',label:'Dead'}
     ],
     legend:[
-      {label:'Active <= 14d',color:'#16a34a'},
-      {label:'Missing > 14d',color:'#d97706'},
-      {label:'Missing Soon After Release',color:'#7c3aed'},
-      {label:'Radio in Water',color:'#2563eb'},
-      {label:'Recovered',color:'#dc2626'}
+      {label:'Active <= 10d',color:'#16a34a'},
+      {label:'Temp Missing',color:'#d97706'},
+      {label:'Gone > 30d',color:'#374151'},
+      {label:'Dead',color:'#991b1b'}
     ],
-    statusKeys:['active','missing','missing_start','water','recovered'],
+    statusKeys:['active','tmiss','gone','dead'],
     showFieldUpdates:true,
     hideCollar:true,
     statusEnabled:true
@@ -949,8 +514,14 @@ let filterBarHidden = false;
 let activeStatusKey = null;
 let masterAdultMap = {};
 let masterHatchMap = {};
+/* FIX-1: Secondary lookup maps keyed by raw-trimmed uppercase ID. */
 let masterAdultMapRaw = {};
 let masterHatchMapRaw = {};
+/*
+ * FIX-1: Tertiary lookup maps keyed by flatId (strips ALL non-alphanumeric chars).
+ * Resolves IDs like "50-60" (field log) matching "50-60" in master even when
+ * the two sheets store the hyphen differently or with surrounding whitespace.
+ */
 let masterAdultMapFlat = {};
 let masterHatchMapFlat = {};
 let fixBuckets = {};
@@ -958,207 +529,606 @@ let entities = [];
 let displayedEntities = [];
 let displayRows = [];
 let updatesRows = [];
+let zonePolygons = [];
 let geojsonData = null;
 let entityMarkerMap = {};
 
-/* ═══════════════════════════════════════════════
-   MOBILE DETECTION
-   ═══════════════════════════════════════════════ */
-function isMobile(){
-  return window.innerWidth <= 767;
-}
-
-/* ═══════════════════════════════════════════════
-   MAP INIT
-   ═══════════════════════════════════════════════ */
-function initMap(){
-  map = L.map('map',{
-    zoomControl:false,
-    attributionControl:false,
-    tap:true,           // enable Leaflet mobile tap
-    tapTolerance:15,    // generous tap tolerance for touch
-    bounceAtZoomLimits:false
-  }).setView(MAP_CENTER,MAP_ZOOM);
-
+function initMap() {
+  map = L.map('map',{zoomControl:false,attributionControl:false}).setView(MAP_CENTER,MAP_ZOOM);
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:21}).addTo(map);
   markerLayer = L.layerGroup().addTo(map);
   oms = new OverlappingMarkerSpiderfier(map,{keepSpiderfied:true,nearbyDistance:28,circleSpiralSwitchover:7});
-  
-  oms.addListener('click', m => {
-    L.popup({maxWidth:340})
-     .setLatLng(m.getLatLng())
-     .setContent(m._popupContent)
-     .openOn(map);
-  });
-
-  map.on('click',()=>{
-    document.querySelectorAll('.leaflet-interactive').forEach(el=>el.blur());
+  oms.addListener('click', marker => marker.openPopup());
+  map.on('click', () => {
+    document.querySelectorAll('.leaflet-interactive').forEach(el => el.blur());
   });
 }
 
-/* ═══════════════════════════════════════════════
-   MOBILE DRAWER
-   ═══════════════════════════════════════════════ */
-let drawerOpen = false;
-
-function openMobileDrawer(){
-  drawerOpen = true;
-  document.getElementById('mobileDrawer').classList.add('open');
-  document.getElementById('drawerBg').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  // sync mobile filter state from desktop
-  syncMobileFiltersFromDesktop();
-}
-
-function closeMobileDrawer(){
-  drawerOpen = false;
-  document.getElementById('mobileDrawer').classList.remove('open');
-  document.getElementById('drawerBg').classList.remove('open');
-  document.body.style.overflow = '';
-  setTimeout(()=>map.invalidateSize(),320);
-}
-
-/* Sync the mobile source dropdown to match desktop (and vice-versa) */
-function syncMobileFiltersFromDesktop(){
-  const desktopVal = document.getElementById('sourceFilter').value;
-  const mobSel = document.getElementById('mobileSourceFilter');
-  if(mobSel.value !== desktopVal) mobSel.value = desktopVal;
-}
-
-function onMobileSourceChange(){
-  // mirror to desktop source select
-  const val = document.getElementById('mobileSourceFilter').value;
-  document.getElementById('sourceFilter').value = val;
-  activeStatusKey = null;
-  rebuildFilters();
-  rebuildMobileFilters();
-  updateFieldUpdatesVisibility();
-  updateCollarColumn();
-  applyFilters();
-}
-
-function mobileApplyFilters(){
-  // copy mobile MS selections to desktop MS before applying
-  ['rid','cat','zone','status','srno','enc','pen'].forEach(key=>{
-    const list = document.getElementById('mob-msi-' + key);
-    if(!list) return;
-    const mobChecked = new Set(
-      [...list.querySelectorAll('input[type=checkbox]:checked')].map(i=>i.value)
-    );
-    document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(inp=>{
-      inp.checked = mobChecked.has(inp.value);
+function fetchCSV(url){
+  return new Promise((resolve,reject)=>{
+    Papa.parse(url + '&_t=' + Date.now(),{
+      download:true,
+      header:true,
+      skipEmptyLines:true,
+      complete:results=>resolve(results.data || []),
+      error:reject
     });
-    updateMSBtn(key);
   });
+}
+
+function fetchJSON(url){
+  return fetch(url + '?_t=' + Date.now()).then(r=>r.json());
+}
+
+function setLoadingState(id, ok){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.remove('ok','err');
+  el.classList.add(ok ? 'ok' : 'err');
+}
+
+function loadingCopy(text){
+  document.getElementById('loadingCopy').textContent = text;
+}
+
+function gc(row, ...keys){
+  const rowKeys = Object.keys(row || {});
+  for(const key of keys){
+    const normal = String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+    for(const rowKey of rowKeys){
+      const probe = String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
+      if(probe === normal){
+        const value = String(row[rowKey] || '').trim();
+        if(value && !['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
+      }
+    }
+  }
+  return '';
+}
+
+function nid(raw){
+  return String(raw || '').trim().toUpperCase().replace(/\s+/g,'');
+}
+
+/* FIX-1: rawTrimId — preserves hyphens and other separators that nid() removes. */
+function rawTrimId(raw){
+  return String(raw || '').trim().toUpperCase();
+}
+
+/*
+ * FIX-1: flatId — strips ALL non-alphanumeric characters (hyphens, spaces, dots, etc.)
+ * allowing "50-60" from the field log to match "50-60" or "50 60" from the master sheet
+ * when the two datasets encode the separator differently.
+ * Example: flatId("50-60") === flatId("50 60") === "5060"
+ */
+function flatId(raw){
+  return String(raw || '').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+}
+
+function isHatchCategory(row){
+  const category = gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
+  return /hatch|hatchling|fth|pali\s*ft/i.test(category);
+}
+
+function parseFieldDate(value){
+  if(!value) return null;
+  const match = String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!match) return null;
+  const date = new Date(+match[3], +match[1]-1, +match[2], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parsePaliDate(value){
+  if(!value) return null;
+  const match = String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(!match) return null;
+  const date = new Date(+match[3], +match[2]-1, +match[1], +(match[4] || 0), +(match[5] || 0), +(match[6] || 0));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseATSDate(value){
+  if(!value) return null;
+  const date = new Date(String(value).trim());
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseAnyDate(value, isHatch){
+  return isHatch ? (parsePaliDate(value) || parseFieldDate(value) || parseATSDate(value)) : (parseFieldDate(value) || parseATSDate(value) || parsePaliDate(value));
+}
+
+/*
+ * FIX-2: parseTagDate — extended to handle DD-MMM-YY / DD-MMM-YYYY format
+ * (e.g. "26-Jan-25", "26-Jan-2025") which is the format used in the
+ * Tag Date / Release Date column of the Master Radio sheet.
+ *
+ * Resolution order:
+ *   1. DD-MMM-YY or DD-MMM-YYYY  ← NEW: month-name aware (handles "26-Jan-25")
+ *   2. DD-MM-YYYY or DD/MM/YYYY  (Indian field standard)
+ *   3. MM/DD/YYYY                (American fallback)
+ *   4. ISO 8601 / browser-native
+ *
+ * Two-digit years: 00–49 → 2000–2049, 50–99 → 1950–1999.
+ * Returns null (never throws) when value is absent or unparseable.
+ */
+function parseTagDate(value){
+  if(!value) return null;
+  const s = String(value).trim();
+  if(!s || ['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
+
+  /* 1. DD-MMM-YY or DD-MMM-YYYY  e.g. "26-Jan-25", "26 Jan 2025", "26/Jan/25" */
+  const MONTH_NAMES = {
+    jan:0,feb:1,mar:2,apr:3,may:4,jun:5,
+    jul:6,aug:7,sep:8,oct:9,nov:10,dec:11
+  };
+  const dmmyMatch = s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
+  if(dmmyMatch){
+    const d = parseInt(dmmyMatch[1], 10);
+    const mStr = dmmyMatch[2].toLowerCase().slice(0, 3);
+    const mIdx = MONTH_NAMES[mStr];
+    let y = parseInt(dmmyMatch[3], 10);
+    /* Expand two-digit year: 25 → 2025, 99 → 1999 */
+    if(y < 100) y += (y < 50 ? 2000 : 1900);
+    if(d >= 1 && d <= 31 && mIdx !== undefined){
+      const dt = new Date(y, mIdx, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 2. DD-MM-YYYY or DD/MM/YYYY (common in Indian field records) */
+  const dmyMatch = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if(dmyMatch){
+    const d = +dmyMatch[1], m = +dmyMatch[2], y = +dmyMatch[3];
+    if(d >= 1 && d <= 31 && m >= 1 && m <= 12){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 3. MM/DD/YYYY (American format fallback) */
+  const mdyMatch = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(mdyMatch){
+    const m = +mdyMatch[1], d = +mdyMatch[2], y = +mdyMatch[3];
+    if(m >= 1 && m <= 12 && d >= 1 && d <= 31){
+      const dt = new Date(y, m - 1, d);
+      if(!Number.isNaN(dt.getTime())) return dt;
+    }
+  }
+
+  /* 4. ISO 8601 and other browser-native parseable strings */
+  const iso = new Date(s);
+  if(!Number.isNaN(iso.getTime())) return iso;
+
+  return null;
+}
+
+function daysSince(ts){
+  if(!ts || Number.isNaN(ts.getTime())) return 9999;
+  return Math.max(0, Math.floor((TODAY - ts) / 86400000));
+}
+
+function fmtDateTime(ts){
+  if(!ts || Number.isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function fmtDateOnly(ts){
+  if(!ts || Number.isNaN(ts.getTime())) return '-';
+  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+function escapeHtml(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function toast(message, ok = false){
+  const el = document.getElementById('toast');
+  el.textContent = message;
+  el.className = ok ? 'on ok' : 'on';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(()=>{ el.className = ''; }, 3600);
+}
+
+function adultStatus(days, collar){
+  if(collar === NOT_DEPLOYED_COLLAR) return 'ndep';
+  if(days <= 7) return 'active';
+  if(days <= 30) return 's7';
+  if(days < 45) return 's30';
+  return 'crit';
+}
+
+function hatchStatus(id, days){
+  if(DEAD_IDS.has(String(id))) return 'dead';
+  if(days <= 10) return 'active';
+  if(days <= 30) return 'tmiss';
+  return 'gone';
+}
+
+function markerColor(entity){
+  if(entity.viewSource === 'FieldLog') return STATUS_META.vhf.color;
+  return (STATUS_META[entity.status] || STATUS_META.vhf).color;
+}
+
+function getBucket(compKey){
+  if(!fixBuckets[compKey]) fixBuckets[compKey] = {ATS:[],FieldLog:[],PaliFT:[]};
+  return fixBuckets[compKey];
+}
+
+/*
+ * FIX-1: buildMasterMaps — stores each master row under three key variants so
+ * that field logs using "50-60" always resolve to the correct master record
+ * regardless of whether the master sheet stores it as "50-60", "50 60", or "5060":
+ *
+ *   masterAdultMap[nid]      — whitespace-stripped uppercase   ("5060")  [primary]
+ *   masterAdultMapRaw[rid]   — whitespace-trimmed uppercase    ("50-60") [secondary]
+ *   masterAdultMapFlat[fid]  — all non-alphanumeric stripped   ("5060")  [tertiary]
+ *
+ * The flat variant handles the most common mismatch: a hyphen present in one
+ * sheet but absent (or encoded as a space) in the other.
+ */
+function buildMasterMaps(rows){
+  masterAdultMap = {};
+  masterHatchMap = {};
+  masterAdultMapRaw = {};
+  masterHatchMapRaw = {};
+  masterAdultMapFlat = {};
+  masterHatchMapFlat = {};
+  rows.forEach(row=>{
+    const rawVal = String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID') || '').trim().toUpperCase();
+    const id  = nid(rawVal);      // strips whitespace only
+    const rid = rawTrimId(rawVal); // trim + uppercase (preserves hyphens)
+    const fid = flatId(rawVal);   // strips ALL non-alphanumeric chars
+    if(!id) return;
+    if(isHatchCategory(row)){
+      masterHatchMap[id] = row;
+      if(rid && rid !== id)   masterHatchMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterHatchMapFlat[fid] = row;
+    }else{
+      masterAdultMap[id] = row;
+      if(rid && rid !== id)   masterAdultMapRaw[rid]  = row;
+      if(fid && fid !== id)   masterAdultMapFlat[fid] = row;
+    }
+  });
+}
+
+/*
+ * FIX-1: lookupMasterRow — three-tier fallback chain.
+ * Primary  : nid-normalised key  (strips whitespace)
+ * Secondary: raw-trimmed key     (preserves hyphens, catches spaces-vs-no-spaces)
+ * Tertiary : flatId key          (strips ALL non-alphanum — resolves "50-60" ↔ "5060")
+ *
+ * The tertiary flat lookup is the decisive fix for VHF animals like "50-60" and
+ * "51-61" that the master sheet stores with a different separator encoding.
+ */
+function lookupMasterRow(rawId, isHatchling){
+  const fid = flatId(rawId);
+  if(isHatchling){
+    return masterHatchMap[rawId]
+      || masterAdultMap[rawId]
+      || masterHatchMapRaw[rawId]
+      || masterAdultMapRaw[rawId]
+      || masterHatchMapFlat[fid]
+      || masterAdultMapFlat[fid]
+      || null;
+  }
+  return masterAdultMap[rawId]
+    || masterAdultMapRaw[rawId]
+    || masterAdultMapFlat[fid]
+    || null;
+}
+
+function ingestATS(rows){
+  rows.forEach(row=>{
+    const id = nid(gc(row,'RadioID','Radio_ID','Radio ID'));
+    if(!id) return;
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const ts = parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
+    const bucket = getBucket(id + '|A');
+    bucket.ATS.push({
+      lat, lon, ts, source:'ATS', rawId:id,
+      collar:gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial'),
+      place:gc(row,'Place','Location','Site'),
+      activity:gc(row,'Activity','Behavior','Behaviour'),
+      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
+      remarks:gc(row,'Remarks','Notes'),
+      zone:'-'
+    });
+  });
+}
+
+function ingestFieldLog(rows){
+  rows.forEach(row=>{
+    const id = nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
+    if(!id) return;
+    if(masterHatchMap[id] || masterHatchMapRaw[rawTrimId(id)] || masterHatchMapFlat[flatId(id)]) return;
+    if(isHatchCategory(row)) return;
+    let lat = parseFloat(gc(row,'Latitude','Lat'));
+    let lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    const pair = gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
+    if((!Number.isFinite(lat) || !Number.isFinite(lon)) && pair && pair.includes(',')){
+      const parts = pair.split(',').map(item=>parseFloat(item.trim()));
+      lat = parts[0];
+      lon = parts[1];
+    }
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const ts = parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
+    const bucket = getBucket(id + '|A');
+    bucket.FieldLog.push({
+      lat, lon, ts, source:'FieldLog', rawId:id,
+      place:gc(row,'Place','Location','Site'),
+      activity:gc(row,'Activity','Behavior','Behaviour'),
+      signal:gc(row,'Signal','Signal Strength','SignalStrength'),
+      remarks:gc(row,'Remarks','Notes'),
+      zone:'-'
+    });
+  });
+}
+
+function ingestPali(rows){
+  rows.forEach(row=>{
+    const id = nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
+    if(!id) return;
+    const lat = parseFloat(gc(row,'Latitude','Lat'));
+    const lon = parseFloat(gc(row,'Longitude','Lon','Long'));
+    if(!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    const ts = parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
+    const bucket = getBucket(id + '|H');
+    bucket.PaliFT.push({
+      lat, lon, ts, source:'PaliFT', rawId:id,
+      place:gc(row,'Place','Location','Site'),
+      activity:gc(row,'Activity','activity'),
+      signal:gc(row,'Signal','signal'),
+      remarks:gc(row,'Remarks','Notes','remarks'),
+      zone:'-'
+    });
+  });
+}
+
+function sortHistory(list){
+  return list.slice().sort((a,b)=>{
+    const ta = a.ts ? a.ts.getTime() : -Infinity;
+    const tb = b.ts ? b.ts.getTime() : -Infinity;
+    return ta - tb;
+  });
+}
+
+function latestFrom(list){
+  return sortHistory(list).slice(-1)[0] || null;
+}
+
+function mergeEntities(){
+  const keys = new Set(Object.keys(fixBuckets));
+  Object.keys(masterHatchMap).forEach(id=>keys.add(id + '|H'));
+  entities = [];
+  keys.forEach(compKey=>{
+    const [rawId, scope] = compKey.split('|');
+    const isHatchling = scope === 'H';
+    const bucket = fixBuckets[compKey] || {ATS:[],FieldLog:[],PaliFT:[]};
+    const masterRow = lookupMasterRow(rawId, isHatchling) || {};
+    const allHistory = sortHistory([...(bucket.ATS || []), ...(bucket.FieldLog || []), ...(bucket.PaliFT || [])]);
+    const latestATS = latestFrom(bucket.ATS || []);
+    const latestVHF = latestFrom(bucket.FieldLog || []);
+    const latestPali = latestFrom(bucket.PaliFT || []);
+    const latestOverall = latestFrom(allHistory);
+    const collar = (latestATS && latestATS.collar) || gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
+    const tagDateRaw = gc(masterRow,'Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
+
+    /*
+     * FIX-1: Resolve Category and T.L strictly from the master row when a match
+     * was found. If masterRow is empty (no match) the fallback placeholder is used.
+     * This ensures "Adult Female" from the master always wins over the default
+     * "Adult / Sub-adult" generated for unrecognised Field Log entries.
+     */
+    const masterCategory = gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
+    const masterTL       = gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
+
+    entities.push({
+      compKey,
+      rawId,
+      id:rawId,
+      isHatchling,
+      /* FIX-1: masterCategory strictly overwrites the placeholder when present */
+      category: masterCategory || (isHatchling ? 'Pali FTH 2025' : 'Adult / Sub-adult'),
+      sex:gc(masterRow,'Sex','Gender','M/F'),
+      /* FIX-1: T.L explicitly resolved from master row */
+      tl: masterTL,
+      tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
+      remarks:gc(masterRow,'Remarks','Notes','Comments'),
+      collar,
+      /* FIX-2: parseTagDate now handles "26-Jan-25" month-name format */
+      tagDate:parseTagDate(tagDateRaw),
+      histories:{
+        ATS:sortHistory(bucket.ATS || []),
+        FieldLog:sortHistory(bucket.FieldLog || []),
+        PaliFT:sortHistory(bucket.PaliFT || [])
+      },
+      allHistory,
+      latestATS,
+      latestVHF,
+      latestPali,
+      latestOverall
+    });
+  });
+  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
+}
+
+function getZoneName(feature){
+  return feature?.properties?.name || feature?.properties?.Name || feature?.properties?.ZONE || feature?.properties?.zone || feature?.properties?.STRETCH || feature?.properties?.stretch || '-';
+}
+
+/*
+ * FIX-1: assignZones — strict 500 m distance threshold.
+ * Direct point-in-polygon match → assigned; nearest polygon > ZONE_SNAP_MAX_KM → "Outside Defined Zones".
+ */
+function assignZones(){
+  if(!geojsonData || !geojsonData.features) return;
+  zonePolygons = geojsonData.features.filter(feature=>feature.geometry && (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon'));
+  const allFixes = [];
+  Object.values(fixBuckets).forEach(bucket=>{
+    ['ATS','FieldLog','PaliFT'].forEach(source=>{
+      (bucket[source] || []).forEach(fix=>allFixes.push(fix));
+    });
+  });
+  allFixes.forEach(fix=>{
+    if(!Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)){
+      fix.zone = '-';
+      return;
+    }
+    const point = turf.point([fix.lon,fix.lat]);
+    let found = '-';
+    for(const feature of zonePolygons){
+      try{
+        if(turf.booleanPointInPolygon(point, feature)){
+          found = getZoneName(feature);
+          break;
+        }
+      }catch(error){}
+    }
+    if(found === '-'){
+      let best = Infinity;
+      let bestName = '-';
+      for(const feature of zonePolygons){
+        try{
+          const outline = turf.polygonToLine(feature);
+          const nearest = turf.nearestPointOnLine(outline, point);
+          const distance = turf.distance(point, nearest, {units:'kilometers'});
+          if(distance < best){
+            best = distance;
+            bestName = getZoneName(feature);
+          }
+        }catch(error){}
+      }
+      found = best <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
+    }
+    fix.zone = found;
+  });
+}
+
+function ensureZoneLayer(){
+  if(zoneGeoLayer || !geojsonData) return;
+  zoneGeoLayer = L.geoJSON(geojsonData,{
+    style:{
+      color:'rgba(23,63,49,.45)',
+      weight:1.5,
+      dashArray:'4 8',
+      fillColor:'rgba(23,63,49,.04)',
+      fillOpacity:.7
+    },
+    onEachFeature(feature, layer){
+      layer.bindTooltip(getZoneName(feature),{className:'zone-label',direction:'center'});
+    }
+  });
+}
+
+function showZoneLayer(visible){
+  ensureZoneLayer();
+  if(!zoneGeoLayer) return;
+  if(visible){
+    if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);
+  }else if(map.hasLayer(zoneGeoLayer)){
+    map.removeLayer(zoneGeoLayer);
+  }
+}
+
+function statusLabel(status, source){
+  if(status === 'active' && source === 'PaliFT') return 'Active <= 10d';
+  if(status === 'active' && source === 'ATS') return 'Active <= 7d';
+  if(status === 's7') return 'Silent > 7d';
+  if(status === 's30') return 'Silent > 30d';
+  if(status === 'crit') return 'Critical >= 45d';
+  if(status === 'tmiss') return 'Temp Missing';
+  if(status === 'gone') return 'Gone > 30d';
+  if(status === 'dead') return 'Dead';
+  if(status === 'ndep') return 'Not Deployed';
+  if(status === 'vhf') return 'VHF';
+  return '-';
+}
+
+function badgeHtml(status, source){
+  const meta = STATUS_META[status] || STATUS_META.vhf;
+  return '<span class="sbadge" style="background:' + meta.bg + ';color:' + meta.color + ';border-color:' + meta.border + '">' + escapeHtml(statusLabel(status, source)) + '</span>';
+}
+
+function blockCounts(source, pool){
+  const defs = VIEW_META[source]?.blocks || EMPTY_STATUS;
+  return defs.map(def=>{
+    if(!def.key) return {label:def.label,count:'-'};
+    const count = pool.filter(item=>item.status === def.key).length;
+    return {key:def.key,label:def.label,count};
+  });
+}
+
+function updateStatusBlocks(source, pool){
+  const counts = blockCounts(source, pool || []);
+  counts.forEach((block, index)=>{
+    const el = document.getElementById('statusBlock' + index);
+    const label = el.querySelector('.sblock-label');
+    const count = el.querySelector('.sblock-count');
+    el.className = 'sblock';
+    el.dataset.status = block.key || '';
+    if(block.key){
+      el.classList.add('clickable');
+      if(activeStatusKey === block.key) el.classList.add('on');
+    }else{
+      el.classList.add('muted');
+    }
+    label.textContent = block.label;
+    count.textContent = block.count;
+  });
+}
+
+function toggleStatusBlock(index){
+  const source = document.getElementById('sourceFilter').value;
+  const defs = VIEW_META[source]?.blocks || [];
+  const def = defs[index];
+  if(!def || !def.key) return;
+  activeStatusKey = activeStatusKey === def.key ? null : def.key;
+  const options = document.querySelectorAll('#msi-status input[type=checkbox]');
+  options.forEach(option=>{
+    option.checked = activeStatusKey ? option.value === activeStatusKey : true;
+  });
+  updateMSBtn('status');
   applyFilters();
-  closeMobileDrawer();
 }
 
-function mobileClearFilters(){
-  document.getElementById('mobileSourceFilter').value = '';
-  document.getElementById('sourceFilter').value = '';
-  activeStatusKey = null;
-  rebuildFilters();
-  rebuildMobileFilters();
-  updateFieldUpdatesVisibility();
-  updateCollarColumn();
-  displayRows = [];
-  displayedEntities = [];
-  clearVisuals(true);
-  renderTable();
-  updateMapFoot();
-  map.closePopup();
-  closeMobileDrawer();
-}
-
-/* Mobile multi-select helpers */
-function toggleMobMS(key, event){
-  if(event) event.stopPropagation();
-  const btn = document.getElementById('mob-msb-' + key);
-  if(btn.classList.contains('disabled')) return;
-  const drop = document.getElementById('mob-msd-' + key);
-  const isOpen = drop.classList.contains('open');
-  document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
-  if(!isOpen) drop.classList.add('open');
-}
-
-function mobMsSelectAll(key){
-  clearOtherIdFilters(key);
-  document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]').forEach(i=>{i.checked=true;});
-  updateMobMSBtn(key);
-}
-
-function mobMsClearAll(key){
-  document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]').forEach(i=>{i.checked=false;});
-  updateMobMSBtn(key);
-}
-
-function updateMobMSBtn(key){
-  const btn = document.getElementById('mob-msb-' + key);
-  if(!btn || btn.classList.contains('disabled')) return;
-  const all = [...document.querySelectorAll('#mob-msi-' + key + ' input[type=checkbox]')];
-  const checked = all.filter(i=>i.checked);
-  const counter = document.getElementById('mob-msc-' + key);
-  if(counter) counter.textContent = checked.length + '/' + all.length;
-  if(!all.length){
-    btn.querySelector('.ms-lbl').textContent = key === 'status' ? 'Not applicable' : 'No options';
+function updateLegend(source){
+  const legend = document.getElementById('legend');
+  const rows = VIEW_META[source]?.legend || [];
+  if(!source || !rows.length){
+    legend.style.display = 'none';
+    legend.innerHTML = '';
     return;
   }
-  if(checked.length === 0){ btn.querySelector('.ms-lbl').textContent='None selected'; btn.classList.add('active'); }
-  else if(checked.length === all.length){ btn.querySelector('.ms-lbl').textContent='All'; btn.classList.remove('active'); }
-  else{ btn.querySelector('.ms-lbl').textContent=checked.length+' selected'; btn.classList.add('active'); }
+  legend.style.display = '';
+  legend.innerHTML = '<div class="legend-title">Legend</div>' + rows.map(row=>'<div class="legend-row"><span class="legend-dot" style="background:' + row.color + '"></span>' + escapeHtml(row.label) + '</div>').join('');
 }
 
-/* Rebuild mobile MS dropdowns (mirrors desktop state) */
-function rebuildMobileFilters(){
-  const source = document.getElementById('sourceFilter').value;
-  const sourcePool = source ? getViewEntities(source) : null;
-  const poolForFilters = sourcePool || entities;
-
-  const srnoOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMobMSOptions('srno', srnoOpts);
-
-  const encOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
-  buildMobMSOptions('enc', encOpts);
-
-  const penOpts=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
-  buildMobMSOptions('pen', penOpts);
-
-  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
-    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
-  buildMobMSOptions('rid', allIds);
-
-  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
-  buildMobMSOptions('cat', allCats);
-
-  const zoneCounts = {};
-  poolForFilters.forEach(e=>{
-    const z = e.latestOverall?.zone || e.zone || '-';
-    if(z && z !== '-') zoneCounts[z] = (zoneCounts[z]||0)+1;
-  });
-  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
-  buildMobMSOptions('zone', sortedZones, zone=>zone+' ('+zoneCounts[zone]+')');
-
-  if(source && VIEW_META[source].statusEnabled){
-    buildMobMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key,source));
-  } else {
-    resetMobMultiSelect('status','Not applicable',true);
-  }
-
-  // Field updates row visibility in drawer
-  const fuRow = document.getElementById('mob-fieldUpdatesRow');
-  if(fuRow) fuRow.style.display = VIEW_META[source]?.showFieldUpdates ? '' : 'none';
+function resetMultiSelect(key, message, disabled){
+  const button = document.getElementById('msb-' + key);
+  const list = document.getElementById('msi-' + key);
+  const counter = document.getElementById('msc-' + key);
+  button.classList.toggle('disabled', !!disabled);
+  button.classList.remove('active');
+  button.querySelector('.ms-lbl').textContent = message;
+  list.innerHTML = '<div class="ms-empty">' + escapeHtml(message) + '</div>';
+  counter.textContent = disabled ? '' : '0/0';
 }
 
-function buildMobMSOptions(key, options, formatter){
-  const btn = document.getElementById('mob-msb-' + key);
-  const list = document.getElementById('mob-msi-' + key);
-  if(!btn || !list) return;
-  btn.classList.remove('disabled');
+function buildMSOptions(key, options, formatter, preserveSelection = false){
+  const button = document.getElementById('msb-' + key);
+  const list = document.getElementById('msi-' + key);
+  const previous = preserveSelection ? new Set([...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]:checked')].map(item=>item.value)) : new Set();
+  button.classList.remove('disabled');
   list.innerHTML = '';
   if(!options.length){
-    resetMobMultiSelect(key, key==='status' ? 'Not applicable' : 'No options', key==='status');
+    resetMultiSelect(key, key === 'status' ? 'Not applicable' : 'No options', key === 'status');
     return;
   }
   options.forEach(option=>{
@@ -1167,986 +1137,462 @@ function buildMobMSOptions(key, options, formatter){
     const input = document.createElement('input');
     input.type = 'checkbox';
     input.value = option;
-    input.checked = false; // Start empty by default
-    input.addEventListener('change',(e)=>{
-       if(e.target.checked) clearOtherIdFilters(key);
-       updateMobMSBtn(key);
-    });
+    input.checked = previous.size ? previous.has(option) : true;
+    input.addEventListener('change',()=>updateMSBtn(key));
     label.appendChild(input);
-    label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
-    list.appendChild(label);
-  });
-  updateMobMSBtn(key);
-}
-
-function resetMobMultiSelect(key, message, disabled){
-  const btn = document.getElementById('mob-msb-' + key);
-  const list = document.getElementById('mob-msi-' + key);
-  const counter = document.getElementById('mob-msc-' + key);
-  if(!btn) return;
-  btn.classList.toggle('disabled', !!disabled);
-  btn.classList.remove('active');
-  btn.querySelector('.ms-lbl').textContent = message;
-  if(list) list.innerHTML = '<div class="ms-empty">'+escapeHtml(message)+'</div>';
-  if(counter) counter.textContent = disabled ? '' : '0/0';
-}
-
-/* Close mobile MS drops when tapping outside */
-document.addEventListener('click',event=>{
-  if(!event.target.closest('#mobileDrawer .ms-wrap')){
-    document.querySelectorAll('#mobileDrawer .ms-drop').forEach(d=>d.classList.remove('open'));
-  }
-});
-
-/* ─── Mobile bottom panel toggle ─── */
-function initMobileBottomPanel(){
-  if(!isMobile()) return;
-  const btm = document.getElementById('btm');
-  const btn = document.getElementById('btmToggleBtn');
-  // start collapsed on mobile
-  bottomCollapsed = true;
-  btm.style.height = '52px';
-  document.getElementById('map-wrap').style.bottom = '52px';
-  btn.textContent = 'Show';
-}
-
-/* ═══════════════════════════════════════════════
-   DATA FETCH
-   ═══════════════════════════════════════════════ */
-function fetchCSV(url){
-  return new Promise((resolve,reject)=>{
-    Papa.parse(url+'&_t='+Date.now(),{
-      download:true,header:true,skipEmptyLines:true,
-      complete:results=>resolve(results.data||[]),
-      error:reject
-    });
-  });
-}
-
-function fetchJSON(url){
-  return fetch(url+'?_t='+Date.now()).then(r=>r.json());
-}
-
-function setLoadingState(id,ok){
-  const el = document.getElementById(id);
-  if(!el) return;
-  el.classList.remove('ok','err');
-  el.classList.add(ok?'ok':'err');
-}
-
-function loadingCopy(text){
-  document.getElementById('loadingCopy').textContent=text;
-}
-
-/* ═══════════════════════════════════════════════
-   UTILITY
-   ═══════════════════════════════════════════════ */
-function gc(row,...keys){
-  const rowKeys=Object.keys(row||{});
-  for(const key of keys){
-    const normal=String(key).toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-    for(const rowKey of rowKeys){
-      const probe=String(rowKey).trim().toLowerCase().replace(/[\s_\-\.\/\(\)]+/g,'');
-      if(probe===normal){
-        const value=String(row[rowKey]||'').trim();
-        if(value&&!['na','n/a','-','—','null'].includes(value.toLowerCase())) return value;
-      }
-    }
-  }
-  return '';
-}
-
-function nid(raw){return String(raw||'').trim().toUpperCase().replace(/\s+/g,'');}
-function rawTrimId(raw){return String(raw||'').trim().toUpperCase();}
-function flatId(raw){return String(raw||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');}
-
-function isHatchCategory(row){
-  const category=gc(row,'Category','Type','Tag Type','Tag_Type','TagType','animal_type','AnimalType','Species_Category').toLowerCase();
-  return /hatch|hatchling|fth|pali\s*ft/i.test(category);
-}
-
-function parseFieldDate(value){
-  if(!value) return null;
-  const match=String(value).trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date=new Date(+match[3],+match[1]-1,+match[2],+(match[4]||0),+(match[5]||0),+(match[6]||0));
-  return Number.isNaN(date.getTime())?null:date;
-}
-
-function parsePaliDate(value){
-  if(!value) return null;
-  const match=String(value).trim().match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(?:[\sT](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-  if(!match) return null;
-  const date=new Date(+match[3],+match[2]-1,+match[1],+(match[4]||0),+(match[5]||0),+(match[6]||0));
-  return Number.isNaN(date.getTime())?null:date;
-}
-
-function parseATSDate(value){
-  if(!value) return null;
-  const date=new Date(String(value).trim());
-  return Number.isNaN(date.getTime())?null:date;
-}
-
-function parseTagDate(value){
-  if(!value) return null;
-  const s=String(value).trim();
-  if(!s||['na','n/a','-','—','null',''].includes(s.toLowerCase())) return null;
-  const MONTH_NAMES={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-  const dmmyMatch=s.match(/^(\d{1,2})[\s\-\/]([A-Za-z]{3,})[\s\-\/](\d{2,4})$/i);
-  if(dmmyMatch){
-    const d=parseInt(dmmyMatch[1],10),mStr=dmmyMatch[2].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr];
-    let y=parseInt(dmmyMatch[3],10);if(y<100)y+=(y<50?2000:1900);
-    if(d>=1&&d<=31&&mIdx!==undefined){const dt=new Date(y,mIdx,d);if(!Number.isNaN(dt.getTime()))return dt;}
-  }
-  const mddyMatch=s.match(/^([A-Za-z]{3,})[\s\-\/](\d{1,2})[,\s\-\/]+(\d{4})$/i);
-  if(mddyMatch){
-    const mStr=mddyMatch[1].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr],d=parseInt(mddyMatch[2],10),y=parseInt(mddyMatch[3],10);
-    if(mIdx!==undefined&&d>=1&&d<=31){const dt=new Date(y,mIdx,d);if(!Number.isNaN(dt.getTime()))return dt;}
-  }
-  const myMatch=s.match(/^([A-Za-z]{3,})[\s\-\/]+(\d{4})$/i);
-  if(myMatch){
-    const mStr=myMatch[1].toLowerCase().slice(0,3),mIdx=MONTH_NAMES[mStr],y=parseInt(myMatch[2],10);
-    if(mIdx!==undefined){const dt=new Date(y,mIdx,1);if(!Number.isNaN(dt.getTime()))return dt;}
-  }
-  const dmyMatch=s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
-  if(dmyMatch){
-    const d=+dmyMatch[1],m=+dmyMatch[2],y=+dmyMatch[3];
-    if(d>=1&&d<=31&&m>=1&&m<=12){const dt=new Date(y,m-1,d);if(!Number.isNaN(dt.getTime()))return dt;}
-  }
-  const iso=new Date(s);
-  if(!Number.isNaN(iso.getTime())) return iso;
-  return null;
-}
-
-function daysSince(ts){
-  if(!ts||Number.isNaN(ts.getTime())) return null;
-  return Math.max(0,Math.floor((TODAY-ts)/86400000));
-}
-function fmtDateTime(ts){
-  if(!ts||Number.isNaN(ts.getTime())) return '-';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+ts.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-}
-function fmtDateOnly(ts){
-  if(!ts||Number.isNaN(ts.getTime())) return '-';
-  return ts.toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
-}
-function escapeHtml(value){
-  return String(value??'').replace(/&/g,'&').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-function toast(message,ok=false){
-  const el=document.getElementById('toast');
-  el.textContent=message;
-  el.className=ok?'on ok':'on';
-  clearTimeout(el._timer);
-  el._timer=setTimeout(()=>{el.className='';},3600);
-}
-
-function getSrNoInfo(entity){
-  let info = SR_NO_MAP[entity.id];
-  if(!info){
-    const oldId = RETAG_NEW_TO_OLD[entity.id] || entity.oldId;
-    if(oldId) info = SR_NO_MAP[oldId];
-  }
-  return info || null;
-}
-
-function togglePopDetails(btn) {
-  const extra = btn.nextElementSibling;
-  if (extra.style.display === 'none' || !extra.style.display) {
-    extra.style.display = 'block';
-    btn.textContent = 'Hide Details ▴';
-  } else {
-    extra.style.display = 'none';
-    btn.textContent = 'View More Details ▾';
-  }
-}
-
-function adultStatus(days,collar){
-  if(collar===NOT_DEPLOYED_COLLAR) return 'ndep';
-  if(days<=7) return 'active';
-  if(days<=30) return 's7';
-  if(days<45) return 's30';
-  return 'crit';
-}
-
-function hatchStatus(id, daysSinceLastFix){
-  const sid = String(id);
-  if(RECOVERED_IDS.has(sid))     return 'recovered'; 
-  if(MISSING_START_IDS.has(sid)) return 'missing_start';
-  if(WATER_IDS.has(sid))         return 'water';
-  if(HARD_MISSING_IDS.has(sid))  return 'missing';
-  if(daysSinceLastFix === null || daysSinceLastFix > 14) return 'missing';
-  return 'active';
-}
-
-function markerColor(entity){
-  if(entity.viewSource==='FieldLog') return STATUS_META.vhf.color;
-  return (STATUS_META[entity.status]||STATUS_META.vhf).color;
-}
-
-/* ═══════════════════════════════════════════════
-   DATA INGESTION
-   ═══════════════════════════════════════════════ */
-function getBucket(compKey){
-  if(!fixBuckets[compKey]) fixBuckets[compKey]={ATS:[],FieldLog:[],PaliFT:[]};
-  return fixBuckets[compKey];
-}
-
-function buildMasterMaps(rows){
-  masterAdultMap={};masterHatchMap={};masterAdultMapRaw={};masterHatchMapRaw={};masterAdultMapFlat={};masterHatchMapFlat={};
-  rows.forEach(row=>{
-    const rawVal=String(gc(row,'Radio_ID','RadioID','Radio ID','ID','Animal ID','AnimalID','Animal_ID')||'').trim().toUpperCase();
-    const id=nid(rawVal),rid=rawTrimId(rawVal),fid=flatId(rawVal);
-    if(!id) return;
-    if(isHatchCategory(row)){
-      masterHatchMap[id]=row;
-      if(rid&&rid!==id) masterHatchMapRaw[rid]=row;
-      if(fid&&fid!==id) masterHatchMapFlat[fid]=row;
-    }else{
-      masterAdultMap[id]=row;
-      if(rid&&rid!==id) masterAdultMapRaw[rid]=row;
-      if(fid&&fid!==id) masterAdultMapFlat[fid]=row;
-    }
-  });
-}
-
-function lookupMasterRow(rawId,isHatchling){
-  const fid=flatId(rawId),useFlatFallback=fid!==rawId;
-  if(isHatchling){
-    return masterHatchMap[rawId]||masterAdultMap[rawId]||masterHatchMapRaw[rawId]||masterAdultMapRaw[rawId]
-      ||(useFlatFallback?masterHatchMapFlat[fid]:null)||(useFlatFallback?masterAdultMapFlat[fid]:null)||null;
-  }
-  return masterAdultMap[rawId]||masterAdultMapRaw[rawId]||(useFlatFallback?masterAdultMapFlat[fid]:null)||null;
-}
-
-function ingestATS(rows){
-  rows.forEach(row=>{
-    const id=nid(gc(row,'RadioID','Radio_ID','Radio ID'));
-    if(!id) return;
-    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
-    const ts=parseATSDate(gc(row,'Date','Timestamp','DateTime','date'));
-    const bucket=getBucket(id+'|A');
-    bucket.ATS.push({lat,lon,ts,source:'ATS',rawId:id,collar:gc(row,'CollarSerialNumber','Collar','SerialNumber','Collar_Serial'),place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','Behavior','Behaviour'),signal:gc(row,'Signal','Signal Strength','SignalStrength'),remarks:gc(row,'Remarks','Notes'),zone:'-'});
-  });
-}
-
-function ingestFieldLog(rows){
-  rows.forEach(row=>{
-    const id=nid(gc(row,'Radio_ID','RadioID','Radio ID','ID','AnimalID'));
-    if(!id) return;
-    if(masterHatchMap[id]||masterHatchMapRaw[rawTrimId(id)]||masterHatchMapFlat[flatId(id)]) return;
-    if(isHatchCategory(row)) return;
-    let lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
-    const pair=gc(row,'LatLong','Lat Long','GPS_Coordinates','Coordinates','Lat_Long');
-    if((!Number.isFinite(lat)||!Number.isFinite(lon))&&pair&&pair.includes(',')){
-      const parts=pair.split(',').map(item=>parseFloat(item.trim()));
-      lat=parts[0];lon=parts[1];
-    }
-    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
-    const ts=parseFieldDate(gc(row,'Datetime','DateTime','Timestamp','Date','date'));
-    const bucket=getBucket(id+'|A');
-    bucket.FieldLog.push({lat,lon,ts,source:'FieldLog',rawId:id,place:gc(row,'Place','Location','Site'),activity:gc(row,'Activity','Behavior','Behaviour'),signal:gc(row,'Signal','Signal Strength','SignalStrength'),remarks:gc(row,'Remarks','Notes'),zone:'-'});
-  });
-}
-
-function ingestPali(rows){
-  rows.forEach(row=>{
-    const rawId=nid(gc(row,'Animal ID','AnimalID','Animal_ID','Radio_ID','RadioID','ID'));
-    if(!rawId) return;
-    const remappedId = RETAG_OLD_TO_NEW[rawId] || rawId;
-    const lat=parseFloat(gc(row,'Latitude','Lat')),lon=parseFloat(gc(row,'Longitude','Lon','Long'));
-    if(!Number.isFinite(lat)||!Number.isFinite(lon)) return;
-    const ts=parsePaliDate(gc(row,'Timestamp','Date','timestamp','date'));
-    const bucket=getBucket(remappedId+'|H');
-    
-    bucket.PaliFT.push({
-      lat,lon,ts,source:'PaliFT',
-      rawId:remappedId,
-      place:gc(row,'Place','place','Current Place','CurrentPlace','Locality','Site','Location'),
-      activity:gc(row,'Activity','activity','Behaviour','Behavior','Activity_Type','Activity Type'),
-      signal:gc(row,'Signal','signal','Signal Strength','SignalStrength','Signal_Strength'),
-      remarks:gc(row,'Remarks','Notes','remarks'),
-      zone:'-',
-      fromOldId: (RETAG_OLD_TO_NEW[rawId] ? rawId : null)
-    });
-  });
-}
-
-function sortHistory(list){
-  return list.slice().sort((a,b)=>{
-    const ta=a.ts?a.ts.getTime():-Infinity,tb=b.ts?b.ts.getTime():-Infinity;
-    return ta-tb;
-  });
-}
-function latestFrom(list){return sortHistory(list).slice(-1)[0]||null;}
-
-function mergeEntities(){
-  const keys=new Set(Object.keys(fixBuckets));
-  Object.keys(masterHatchMap).forEach(id=>{
-    if(!RETAG_OLD_TO_NEW[id]) keys.add(id+'|H');
-  });
-  
-  entities=[];
-  keys.forEach(compKey=>{
-    const [rawId,scope]=compKey.split('|'),isHatchling=scope==='H';
-    const bucket=fixBuckets[compKey]||{ATS:[],FieldLog:[],PaliFT:[]};
-    
-    let masterRow = lookupMasterRow(rawId,isHatchling)||{};
-    let tagDateRaw = gc(masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
-    let retagHistory = null;
-    
-    if(isHatchling){
-      const oldId = RETAG_NEW_TO_OLD[rawId];
-      if(oldId){
-        const oldMasterRow = lookupMasterRow(oldId, true) || {};
-        tagDateRaw = gc(oldMasterRow||masterRow,'Tag Date/Release Date','Tag Date','Release Date','TagDate','ReleaseDate','Tag_Date','Release_Date','DeploymentDate','Tagging Date','Tagged Date');
-        retagHistory = `Previously ${oldId}, retagged on ${RETAG_DATE_STR}.`;
-      }
-    }
-
-    const allHistory=sortHistory([...(bucket.ATS||[]),...(bucket.FieldLog||[]),...(bucket.PaliFT||[])]);
-    const latestATS=latestFrom(bucket.ATS||[]),latestVHF=latestFrom(bucket.FieldLog||[]),latestPali=latestFrom(bucket.PaliFT||[]),latestOverall=latestFrom(allHistory);
-    const collar=(latestATS&&latestATS.collar)||gc(masterRow,'SAT','Collar','Collar Serial','CollarSerial','CollarSerialNumber');
-    const masterCategory=gc(masterRow,'Category','Type','Tag Type','Tag_Type','TagType','AnimalType','animal_type');
-    const masterTL=gc(masterRow,'T.L','TL','T.L (cm)','TL (cm)','Total Length','TotalLength','Total_Length');
-    
-    entities.push({
-      compKey,rawId,id:rawId,isHatchling,
-      category:masterCategory||(isHatchling?'Pali FTH 2025':'Adult / Sub-adult'),
-      sex:gc(masterRow,'Sex','Gender','M/F'),tl:masterTL,
-      tagPlace:gc(masterRow,'Tag Place','TagPlace','Tag_Place','Release Site','Release Location','Location','Site'),
-      remarks:gc(masterRow,'Remarks','Notes','Comments'),
-      collar,tagDate:parseTagDate(tagDateRaw), retagHistory,
-      histories:{ATS:sortHistory(bucket.ATS||[]),FieldLog:sortHistory(bucket.FieldLog||[]),PaliFT:sortHistory(bucket.PaliFT||[])},
-      allHistory,latestATS,latestVHF,latestPali,latestOverall
-    });
-  });
-  entities.sort((a,b)=>String(a.id).localeCompare(String(b.id),undefined,{numeric:true,sensitivity:'base'}));
-}
-
-/* ═══════════════════════════════════════════════
-   ZONE ASSIGNMENT
-   ═══════════════════════════════════════════════ */
-function getZoneName(f) {
-  if (!f || !f.properties) return '-';
-  const p = f.properties;
-  if (p.name) return p.name;
-  if (p.Name) return p.Name;
-  if (p.ZONE) return p.ZONE;
-  if (p.zone) return p.zone;
-  if (p.STRETCH) return p.STRETCH;
-  if (p['name ']) return p['name '];
-  const keys = Object.keys(p);
-  if (keys.length > 0) { return keys[0]; }
-  return '-';
-}
-
-function assignZones(){
-  if(!geojsonData?.features) return;
-  const zoneFeatures = geojsonData.features.filter(f=>f.geometry);
-
-  const allFixes=[];
-  Object.values(fixBuckets).forEach(bucket=>{
-    ['ATS','FieldLog','PaliFT'].forEach(src=>{(bucket[src]||[]).forEach(fix=>allFixes.push(fix));});
-  });
-
-  allFixes.forEach(fix=>{
-    if(!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)){fix.zone='-';return;}
-    const pt = turf.point([fix.lon, fix.lat]);
-    let bestDist = Infinity;
-    let bestName = '-';
-
-    for(const feat of zoneFeatures){
-      try {
-        const type = feat.geometry.type;
-        if((type === 'Polygon' || type === 'MultiPolygon') && turf.booleanPointInPolygon(pt, feat)){
-          bestDist = 0; bestName = getZoneName(feat); break; 
-        }
-        const dist = turf.pointToLineDistance(pt, feat, {units: 'kilometers'});
-        if(dist < bestDist){ bestDist = dist; bestName = getZoneName(feat); }
-      } catch(e) {
-        try {
-          const coords = turf.coordAll(feat);
-          coords.forEach(coord => {
-            const d = turf.distance(pt, turf.point(coord), {units: 'kilometers'});
-            if(d < bestDist) { bestDist = d; bestName = getZoneName(feat); }
-          });
-        } catch(e2){}
-      }
-    }
-    fix.zone = bestDist <= ZONE_SNAP_MAX_KM ? bestName : 'Outside Defined Zones';
-  });
-
-  entities.forEach(entity=>{
-    if(entity.latestOverall) entity.zone = entity.latestOverall.zone || '-';
-  });
-}
-
-function ensureZoneLayer(){
-  if(zoneGeoLayer||!geojsonData) return;
-  zoneGeoLayer=L.geoJSON(geojsonData,{
-    style: { opacity: 0, fillOpacity: 0 },
-    onEachFeature(feature,layer){layer.bindTooltip(getZoneName(feature),{className:'zone-label',direction:'center'});}
-  });
-}
-
-function showZoneLayer(visible){
-  ensureZoneLayer();
-  if(!zoneGeoLayer) return;
-  if(visible){if(!map.hasLayer(zoneGeoLayer)) zoneGeoLayer.addTo(map);}
-  else if(map.hasLayer(zoneGeoLayer)) map.removeLayer(zoneGeoLayer);
-}
-
-/* ═══════════════════════════════════════════════
-   STATUS & LEGEND
-   ═══════════════════════════════════════════════ */
-function statusLabel(status,source){
-  if(source === 'PaliFT') {
-     const meta = STATUS_META[status];
-     return meta ? meta.label : '-';
-  }
-  if(status==='active'&&source==='ATS') return 'Active <= 7d';
-  if(status==='s7') return 'Silent > 7d';
-  if(status==='s30') return 'Silent > 30d';
-  if(status==='crit') return 'Critical >= 45d';
-  if(status==='ndep') return 'Not Deployed';
-  if(status==='vhf') return 'VHF';
-  return '-';
-}
-
-function badgeHtml(status,source){
-  const meta=STATUS_META[status]||STATUS_META.vhf;
-  return '<span class="sbadge" style="background:'+meta.bg+';color:'+meta.color+';border-color:'+meta.border+'">'+escapeHtml(statusLabel(status,source))+'</span>';
-}
-
-function blockCounts(source,pool){
-  const defs=VIEW_META[source]?.blocks||EMPTY_STATUS;
-  return defs.map(def=>{
-    if(!def.key) return {key:null, label:def.label,count:'-'};
-    return {key:def.key, label:def.label, count:pool.filter(item=>item.status===def.key).length};
-  });
-}
-
-function updateStatusBlocks(source,pool){
-  const counts=blockCounts(source,pool||[]);
-  
-  for(let i=0; i<5; i++){
-    const el = document.getElementById('statusBlock'+i);
-    if(!el) continue;
-    
-    if(i < counts.length) {
-      el.style.display = 'flex';
-      const label=el.querySelector('.sblock-label'),count=el.querySelector('.sblock-count');
-      el.className='sblock';
-      el.dataset.status=counts[i].key||'';
-      
-      if(counts[i].key){
-         el.classList.add('clickable');
-         if(activeStatusKey===counts[i].key) el.classList.add('on');
-      } else {
-         el.classList.add('muted');
-      }
-      label.textContent=counts[i].label;
-      count.textContent=counts[i].count;
-    } else {
-      el.style.display = 'none'; // Hide unused blocks
-    }
-  }
-}
-
-function toggleStatusBlock(index){
-  const source=document.getElementById('sourceFilter').value;
-  const defs=VIEW_META[source]?.blocks||[];
-  const def=defs[index];
-  if(!def||!def.key) return;
-  activeStatusKey=activeStatusKey===def.key?null:def.key;
-  const options=document.querySelectorAll('#msi-status input[type=checkbox]');
-  options.forEach(option=>{option.checked=activeStatusKey?option.value===activeStatusKey:true;});
-  updateMSBtn('status');
-  applyFilters();
-}
-
-function updateLegend(source){
-  const legend=document.getElementById('legend');
-  const rows=VIEW_META[source]?.legend||[];
-  if(!source||!rows.length){legend.style.display='none';legend.innerHTML='';return;}
-  legend.style.display='';
-  legend.innerHTML='<div class="legend-title">Legend</div>'+rows.map(row=>'<div class="legend-row"><span class="legend-dot" style="background:'+row.color+'"></span>'+escapeHtml(row.label)+'</div>').join('');
-}
-
-/* ═══════════════════════════════════════════════
-   DESKTOP MULTISELECT
-   ═══════════════════════════════════════════════ */
-function clearOtherIdFilters(activeKey) {
-  const specificIds = ['srno', 'enc', 'rid'];
-  const broadCats = ['pen', 'zone', 'cat', 'status'];
-
-  let keysToClear = [];
-  if (specificIds.includes(activeKey)) {
-    keysToClear = ['srno', 'enc', 'rid', 'pen', 'zone', 'cat', 'status'].filter(k => k !== activeKey);
-  } else if (broadCats.includes(activeKey)) {
-    keysToClear = specificIds;
-  }
-
-  keysToClear.forEach(k => {
-    const desktopList = document.getElementById('msi-'+k);
-    if(desktopList) {
-      desktopList.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false);
-      updateMSBtn(k);
-    }
-    const mobileList = document.getElementById('mob-msi-'+k);
-    if(mobileList) {
-      mobileList.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=false);
-      const mobBtn = document.getElementById('mob-msb-'+k);
-      if (mobBtn) updateMobMSBtn(k);
-    }
-  });
-}
-
-function resetMultiSelect(key,message,disabled){
-  const btn=document.getElementById('msb-'+key),list=document.getElementById('msi-'+key),counter=document.getElementById('msc-'+key);
-  btn.classList.toggle('disabled',!!disabled);btn.classList.remove('active');
-  btn.querySelector('.ms-lbl').textContent=message;
-  list.innerHTML='<div class="ms-empty">'+escapeHtml(message)+'</div>';
-  counter.textContent=disabled?'':'0/0';
-}
-
-function buildMSOptions(key,options,formatter,preserveSelection=false){
-  const btn=document.getElementById('msb-'+key),list=document.getElementById('msi-'+key);
-  const previous=preserveSelection?new Set([...document.querySelectorAll('#msi-'+key+' input[type=checkbox]:checked')].map(i=>i.value)):new Set();
-  btn.classList.remove('disabled');
-  list.innerHTML='';
-  if(!options.length){resetMultiSelect(key,key==='status'?'Not applicable':'No options',key==='status');return;}
-  options.forEach(option=>{
-    const label=document.createElement('label');label.className='ms-item';
-    const input=document.createElement('input');input.type='checkbox';input.value=option;
-    input.checked = false; // Start empty by default
-    input.addEventListener('change',(e)=>{
-       if(e.target.checked) clearOtherIdFilters(key);
-       updateMSBtn(key);
-    });
-    label.appendChild(input);label.appendChild(document.createTextNode(' '+(formatter?formatter(option):option)));
+    label.appendChild(document.createTextNode(' ' + (formatter ? formatter(option) : option)));
     list.appendChild(label);
   });
   updateMSBtn(key);
 }
 
 function updateMSBtn(key){
-  const btn=document.getElementById('msb-'+key);
-  if(btn.classList.contains('disabled')) return;
-  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')],checked=all.filter(i=>i.checked);
-  const counter=document.getElementById('msc-'+key);
-  counter.textContent=checked.length+'/'+all.length;
-  if(!all.length){btn.querySelector('.ms-lbl').textContent=key==='status'?'Not applicable':'No options';return;}
-  if(checked.length===0){btn.querySelector('.ms-lbl').textContent='None selected';btn.classList.add('active');}
-  else if(checked.length===all.length){btn.querySelector('.ms-lbl').textContent='All';btn.classList.remove('active');}
-  else{btn.querySelector('.ms-lbl').textContent=checked.length+' selected';btn.classList.add('active');}
+  const button = document.getElementById('msb-' + key);
+  if(button.classList.contains('disabled')) return;
+  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
+  const checked = all.filter(item=>item.checked);
+  const counter = document.getElementById('msc-' + key);
+  counter.textContent = checked.length + '/' + all.length;
+  if(!all.length){
+    button.querySelector('.ms-lbl').textContent = key === 'status' ? 'Not applicable' : 'No options';
+    return;
+  }
+  if(checked.length === 0){
+    button.querySelector('.ms-lbl').textContent = 'None selected';
+    button.classList.add('active');
+  }else if(checked.length === all.length){
+    button.querySelector('.ms-lbl').textContent = 'All';
+    button.classList.remove('active');
+  }else{
+    button.querySelector('.ms-lbl').textContent = checked.length + ' selected';
+    button.classList.add('active');
+  }
 }
 
-function toggleMS(key,event){
+function toggleMS(key, event){
   if(event) event.stopPropagation();
-  const btn=document.getElementById('msb-'+key);
-  if(btn.classList.contains('disabled')) return;
-  const drop=document.getElementById('msd-'+key),isOpen=drop.classList.contains('open');
-  document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
+  const button = document.getElementById('msb-' + key);
+  if(button.classList.contains('disabled')) return;
+  const drop = document.getElementById('msd-' + key);
+  const isOpen = drop.classList.contains('open');
+  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
   if(!isOpen) drop.classList.add('open');
 }
 
 function msSelectAll(key){
-  clearOtherIdFilters(key);
-  document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=true;});
+  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = true; });
   updateMSBtn(key);
 }
 
 function msClearAll(key){
-  document.querySelectorAll('#msi-'+key+' input[type=checkbox]').forEach(i=>{i.checked=false;});
+  document.querySelectorAll('#msi-' + key + ' input[type=checkbox]').forEach(input=>{ input.checked = false; });
   updateMSBtn(key);
 }
 
-document.addEventListener('click',event=>{
-  if(!event.target.closest('#fbar .ms-wrap')){
-    document.querySelectorAll('#fbar .ms-drop').forEach(d=>d.classList.remove('open'));
+function selectedSet(key){
+  const all = [...document.querySelectorAll('#msi-' + key + ' input[type=checkbox]')];
+  if(!all.length || document.getElementById('msb-' + key).classList.contains('disabled')) return null;
+  const checked = all.filter(item=>item.checked).map(item=>item.value);
+  if(checked.length === 0 || checked.length === all.length) return null;
+  return new Set(checked);
+}
+
+document.addEventListener('click', event=>{
+  if(!event.target.closest('.ms-wrap')){
+    document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
   }
 });
 
-/* ═══════════════════════════════════════════════
-   FILTER REBUILD & APPLICATION
-   ═══════════════════════════════════════════════ */
+/* FIX-5: rebuildFilters — cascading dropdown dependency based on active source pool. */
 function rebuildFilters(){
-  const source=document.getElementById('sourceFilter').value;
-  const sourcePool=source?getViewEntities(source):null;
-  const poolForFilters=sourcePool||entities;
+  const source = document.getElementById('sourceFilter').value;
+  const sourcePool = source ? getViewEntities(source) : null;
+  const poolForFilters = sourcePool || entities;
 
-  const srnoOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?String(i.srNo):null;}).filter(Boolean))].sort((a,b)=>+a-+b);
-  buildMSOptions('srno', srnoOptions);
+  const allIds = [...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>
+    String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
+  buildMSOptions('rid', allIds);
 
-  const encOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.animal:null;}).filter(Boolean))].sort();
-  buildMSOptions('enc', encOptions);
+  const allCats = [...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
+  buildMSOptions('cat', allCats);
 
-  const penOptions=[...new Set(poolForFilters.map(e=>{const i=getSrNoInfo(e);return i?i.pen:null;}).filter(Boolean))].sort();
-  buildMSOptions('pen', penOptions);
+  const zoneCounts = {};
+  if(sourcePool){
+    sourcePool.forEach(e=>{
+      const z = e.zone||'-';
+      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
+    });
+  }else{
+    entities.forEach(e=>{
+      const z = e.latestOverall?.zone||'-';
+      if(z && z!=='-') zoneCounts[z] = (zoneCounts[z]||0) + 1;
+    });
+  }
+  const sortedZones = Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
+  buildMSOptions('zone', sortedZones, zone=>zone + ' (' + zoneCounts[zone] + ')');
 
-  const allIds=[...new Set(poolForFilters.map(e=>e.id))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true,sensitivity:'base'}));
-  buildMSOptions('rid',allIds);
+  if(source && VIEW_META[source].statusEnabled){
+    buildMSOptions('status', VIEW_META[source].statusKeys, key=>statusLabel(key, source));
+  }else{
+    resetMultiSelect('status','Not applicable',true);
+  }
 
-  const allCats=[...new Set(poolForFilters.map(e=>e.category||'-'))].sort();
-  buildMSOptions('cat',allCats);
-
-  const zoneCounts={};
-  if(sourcePool){sourcePool.forEach(e=>{const z=e.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
-  else{entities.forEach(e=>{const z=e.latestOverall?.zone||'-';if(z&&z!=='-')zoneCounts[z]=(zoneCounts[z]||0)+1;});}
-  const sortedZones=Object.keys(zoneCounts).sort((a,b)=>zoneCounts[b]-zoneCounts[a]);
-  buildMSOptions('zone',sortedZones,zone=>zone+' ('+zoneCounts[zone]+')');
-
-  if(source&&VIEW_META[source].statusEnabled){buildMSOptions('status',VIEW_META[source].statusKeys,key=>statusLabel(key,source));}
-  else{resetMultiSelect('status','Not applicable',true);}
-  
-  updateStatusBlocks(source||'',sourcePool||[]);
+  updateStatusBlocks(source||'', sourcePool||[]);
   updateLegend(source||'');
 }
 
 function onSourceChange(){
-  activeStatusKey=null;
+  activeStatusKey = null;
   rebuildFilters();
-  if(isMobile()){
-    document.getElementById('mobileSourceFilter').value=document.getElementById('sourceFilter').value;
-    rebuildMobileFilters();
-  }
   updateFieldUpdatesVisibility();
   updateCollarColumn();
   applyFilters();
 }
 
 function updateFieldUpdatesVisibility(){
-  const source=document.getElementById('sourceFilter').value;
-  document.getElementById('fieldUpdatesBtn').style.display=VIEW_META[source]?.showFieldUpdates?'':'none';
+  const source = document.getElementById('sourceFilter').value;
+  document.getElementById('fieldUpdatesBtn').style.display = VIEW_META[source]?.showFieldUpdates ? '' : 'none';
 }
 
 function updateCollarColumn(){
-  const source=document.getElementById('sourceFilter').value;
-  document.getElementById('thCollar').style.display=VIEW_META[source]?.hideCollar?'none':'';
-  document.querySelectorAll('.collar-cell').forEach(cell=>{cell.style.display=VIEW_META[source]?.hideCollar?'none':'';});
-}
-
-function selectedSet(key){
-  const all=[...document.querySelectorAll('#msi-'+key+' input[type=checkbox]')];
-  if(!all.length||document.getElementById('msb-'+key).classList.contains('disabled')) return null;
-  const checked=all.filter(i=>i.checked).map(i=>i.value);
-  if(checked.length===0||checked.length===all.length) return null;
-  return new Set(checked);
+  const source = document.getElementById('sourceFilter').value;
+  document.getElementById('thCollar').style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
+  document.querySelectorAll('.collar-cell').forEach(cell=>{
+    cell.style.display = VIEW_META[source]?.hideCollar ? 'none' : '';
+  });
 }
 
 function applyFilters(){
-  const source=document.getElementById('sourceFilter').value;
-  const idFilter=selectedSet('rid');
-  const catFilter=selectedSet('cat');
-  const zoneFilter=selectedSet('zone');
-  let statusFilter=selectedSet('status');
-  const srnoFilter=selectedSet('srno');
-  const penFilter=selectedSet('pen');
-  const encFilter=selectedSet('enc');
+  const source    = document.getElementById('sourceFilter').value;
+  const idFilter  = selectedSet('rid');
+  const catFilter = selectedSet('cat');
+  const zoneFilter= selectedSet('zone');
 
-  // Smart clear activeStatusKey if a specific identity is filtered
-  if ((idFilter || srnoFilter || encFilter || penFilter) && activeStatusKey) {
-     activeStatusKey = null;
-     document.querySelectorAll('#msi-status input[type=checkbox], #mob-msi-status input[type=checkbox]').forEach(inp=>inp.checked=true);
-     updateMSBtn('status');
-     const mobBtn = document.getElementById('mob-msb-status');
-     if (mobBtn) updateMobMSBtn('status');
-     const pool=getViewEntities(source);
-     updateStatusBlocks(source||'', pool);
-     statusFilter = selectedSet('status'); 
-  }
-
-  // Count how many boxes are actually checked across all valid filters
-  let totalChecked = 0;
-  ['rid','cat','zone','status','srno','pen','enc'].forEach(k => {
-     const els = document.querySelectorAll('#msi-'+k+' input[type=checkbox]:checked');
-     if(els) totalChecked += els.length;
-  });
-
-  clearVisuals(false); 
-
-  if(!source || totalChecked === 0){
-    displayedEntities=[];displayRows=[];
-    renderTable();updateMapFoot();
-    showZoneLayer(false);
+  if(!source){
+    const hasFilter = idFilter || catFilter || zoneFilter;
+    if(!hasFilter){
+      displayedEntities = [];
+      displayRows = [];
+      activeStatusKey = null;
+      clearVisuals(true);
+      renderTable();
+      updateLegend('');
+      updateStatusBlocks('', []);
+      showZoneLayer(false);
+      return;
+    }
+    const seen = new Set();
+    const allEntities = [];
+    ['ATS','FieldLog','PaliFT'].forEach(src=>{
+      getViewEntities(src).forEach(entity=>{
+        if(!seen.has(entity.compKey)){
+          seen.add(entity.compKey);
+          allEntities.push(entity);
+        }
+      });
+    });
+    displayedEntities = allEntities.filter(entity=>{
+      if(idFilter  && !idFilter.has(entity.id))               return false;
+      if(catFilter && !catFilter.has(entity.category || '-')) return false;
+      if(zoneFilter&& !zoneFilter.has(entity.zone || '-'))    return false;
+      return true;
+    });
+    displayedEntities.sort((a,b)=>{
+      const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
+      const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
+      return tb - ta;
+    });
+    showZoneLayer(displayedEntities.length > 0);
+    renderMarkers();
+    renderTable();
+    updateMapFoot();
+    if(zoneFilter && zoneFilter.size === 1 && geojsonData){
+      const zoneName = [...zoneFilter][0];
+      const feature  = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
+      if(feature){ try{ map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15}); }catch(e){} }
+    } else {
+      const pts = displayedEntities
+        .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
+        .map(e=>[e.displayFix.lat, e.displayFix.lon]);
+      if(pts.length) map.fitBounds(L.latLngBounds(pts),{padding:[42,42],maxZoom:16});
+    }
     return;
   }
 
-  const pool=getViewEntities(source);
-  updateStatusBlocks(source,pool);
-  
-  displayedEntities=pool.filter(entity=>{
-    if(idFilter&&!idFilter.has(entity.id)) return false;
-    if(catFilter&&!catFilter.has(entity.category||'-')) return false;
-    if(zoneFilter&&!zoneFilter.has(entity.zone||'-')) return false;
-    if(statusFilter&&!statusFilter.has(entity.status)) return false;
-    const info = getSrNoInfo(entity);
-    if(srnoFilter   && (!info || !srnoFilter.has(String(info.srNo))))  return false;
-    if(penFilter    && (!info || !penFilter.has(info.pen)))            return false;
-    if(encFilter    && (!info || !encFilter.has(info.animal)))         return false;
+  const statusFilter = selectedSet('status');
+  const pool = getViewEntities(source);
+  updateStatusBlocks(source, pool);
+  displayedEntities = pool.filter(entity=>{
+    if(idFilter   && !idFilter.has(entity.id))               return false;
+    if(catFilter  && !catFilter.has(entity.category || '-')) return false;
+    if(zoneFilter && !zoneFilter.has(entity.zone || '-'))    return false;
+    if(statusFilter&& !statusFilter.has(entity.status))      return false;
     return true;
   });
-
   displayedEntities.sort((a,b)=>{
-    const ta=a.displayFix?.ts?a.displayFix.ts.getTime():-Infinity,tb=b.displayFix?.ts?b.displayFix.ts.getTime():-Infinity;
-    return tb-ta;
+    const ta = a.displayFix?.ts ? a.displayFix.ts.getTime() : -Infinity;
+    const tb = b.displayFix?.ts ? b.displayFix.ts.getTime() : -Infinity;
+    return tb - ta;
   });
-  
-  showZoneLayer(displayedEntities.length>0);
+  showZoneLayer(displayedEntities.length > 0);
   renderMarkers();
+  renderTable();
+  updateMapFoot();
+  if(zoneFilter && zoneFilter.size === 1 && geojsonData){
+    const zoneName = [...zoneFilter][0];
+    const feature = (geojsonData.features || []).find(item=>getZoneName(item) === zoneName);
+    if(feature){
+      try{
+        map.flyToBounds(L.geoJSON(feature).getBounds(),{padding:[40,40],maxZoom:15});
+      }catch(error){}
+    }
+  }
+}
+
+function clearFilters(){
+  document.getElementById('sourceFilter').value = '';
+  activeStatusKey = null;
+  document.querySelectorAll('.ms-drop').forEach(item=>item.classList.remove('open'));
+  rebuildFilters();
+  updateFieldUpdatesVisibility();
+  updateCollarColumn();
+  displayRows = [];
+  displayedEntities = [];
+  clearVisuals(true);
   renderTable();
   updateMapFoot();
 }
 
-function clearFilters(){
-  document.getElementById('sourceFilter').value='';
-  if(isMobile()) document.getElementById('mobileSourceFilter').value='';
-  activeStatusKey=null;
-  document.querySelectorAll('.ms-drop').forEach(d=>d.classList.remove('open'));
-  rebuildFilters();
-  if(isMobile()) rebuildMobileFilters();
-  updateFieldUpdatesVisibility();updateCollarColumn();
-  displayRows=[];displayedEntities=[];clearVisuals(true);
-  renderTable();updateMapFoot();
-  map.closePopup();
-}
-
 function clearVisuals(resetViewport){
-  markerLayer.clearLayers();entityMarkerMap={};
-  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
-  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
-  heatmapOn=false;kdeOn=false;
+  markerLayer.clearLayers();
+  entityMarkerMap = {};
+  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
+  if(heatLayer){
+    map.removeLayer(heatLayer);
+    heatLayer = null;
+  }
+  if(kdeLayer){
+    map.removeLayer(kdeLayer);
+    kdeLayer = null;
+  }
+  heatmapOn = false;
+  kdeOn = false;
   document.getElementById('heatBtn').classList.remove('on');
   document.getElementById('kdeBtn').classList.remove('on');
-  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
-  if(mobHeat) mobHeat.classList.remove('on');
-  if(mobKde) mobKde.classList.remove('on');
   showZoneLayer(false);
   if(resetViewport) resetView();
 }
 
-/* ═══════════════════════════════════════════════
-   MARKER RENDERING
-   ═══════════════════════════════════════════════ */
-function markerIcon(entity,text){
-  const color=markerColor(entity);
-  const fontSize=text.length>=5?9:text.length>=4?10:12;
+function markerIcon(entity, text){
+  const color = markerColor(entity);
+  const fontSize = text.length >= 5 ? 9 : text.length >= 4 ? 10 : 12;
   return L.divIcon({
     className:'',
-    html:'<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:'+color+';border:2px solid #fff;color:#fff;font:700 '+fontSize+'px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">'+escapeHtml(text)+'</div>',
-    iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-16]
+    html:'<div style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:' + color + ';border:2px solid #fff;color:#fff;font:700 ' + fontSize + 'px var(--mono);letter-spacing:-.02em;text-align:center;overflow:hidden">' + escapeHtml(text) + '</div>',
+    iconSize:[34,34],
+    iconAnchor:[17,17],
+    popupAnchor:[0,-16]
   });
 }
 
+/*
+ * FIX-1: popupHtml — "Days since release" always rendered; shows "N/A" when tagDate
+ *         is absent or unparseable rather than silently omitting the row.
+ * FIX-2: tagDate is now correctly parsed (handles "26-Jan-25") so daysRelease
+ *         will display the real day-count instead of "N/A" for most animals.
+ * FIX-3: "Track" button removed. Popup actions are Focus + Table only.
+ */
 function popupHtml(entity){
-  const display=entity.displayFix;
-  const status=badgeHtml(entity.status,entity.viewSource);
-  const latestSat=entity.latestATS?fmtDateTime(entity.latestATS.ts):'-';
-  const latestVhf=entity.latestVHF?fmtDateTime(entity.latestVHF.ts):'-';
-  const latestPali=entity.latestPali?fmtDateTime(entity.latestPali.ts):'-';
-  const sourceLabel=entity.viewSource==='FieldLog'?'Field Log (VHF)':entity.viewSource;
-  const daysFix=display?.ts?daysSince(display.ts)+'d':'-';
-  const rdRaw=entity.tagDate?daysSince(entity.tagDate):null;
-  const daysRelease=rdRaw!==null?rdRaw+'d':'N/A';
-  const showCollar=entity.collar&&!['-','na','n/a','null',''].includes(String(entity.collar).trim().toLowerCase());
-  const srInfo = getSrNoInfo(entity);
-
-  const badgeParts = [];
-  if(srInfo) badgeParts.push(`#${srInfo.srNo}`);
-  if(srInfo) badgeParts.push(`Pen ${srInfo.pen}`);
-  badgeParts.push(escapeHtml(sourceLabel));
-  const subLine = badgeParts.join(' | ');
-
-  const badgeText = srInfo ? String(srInfo.srNo) : (entity.id.length>5?entity.id.slice(0,5):entity.id);
-
-  return `<div>
-    <div class="pop-top">
-      <div class="pop-id-badge" style="background:${markerColor(entity)}">${escapeHtml(badgeText)}</div>
-      <div>
-        <div class="pop-id">Radio ID: ${escapeHtml(entity.id)}</div>
-        <div class="pop-sub">${status} | ${subLine}</div>
-      </div>
-    </div>
-    <div class="pop-body">
-      
-      ${srInfo ? `
-      <div class="pop-animal-id">
-        <span class="pop-label">Enclosure_ID</span>
-        <span class="pop-value">${escapeHtml(srInfo.animal)}</span>
-      </div>
-      <div class="pop-row"><span class="pop-label">Animal_ID</span><span class="pop-value">${escapeHtml(String(srInfo.srNo))}</span></div>
-      ` : ''}
-      <div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">${escapeHtml(entity.category||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Latest Fix</span><span class="pop-value">${escapeHtml(fmtDateTime(display?.ts))}</span></div>
-      <div class="pop-row"><span class="pop-label">Days Since Last Fix</span><span class="pop-value">${escapeHtml(daysFix)}</span></div>
-      <div class="pop-row"><span class="pop-label">Current Place</span><span class="pop-value">${escapeHtml(display?.place||'-')}</span></div>
-      <div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">${display?display.lat.toFixed(5)+', '+display.lon.toFixed(5):'-'}</span></div>
-
-      <button class="pop-details-btn" type="button" onclick="togglePopDetails(this)">View More Details ▾</button>
-
-      <div class="pop-extra" style="display:none; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line);">
-        ${entity.retagHistory ? `<div class="pop-retag">🏷️ ${escapeHtml(entity.retagHistory)}</div>` : ''}
-        ${srInfo ? `<div class="pop-row"><span class="pop-label">Pen</span><span class="pop-value">${escapeHtml(srInfo.pen)}</span></div>` : ''}
-        ${entity.latestATS ? `<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">${escapeHtml(latestSat)}</span></div>` : ''}
-        ${entity.latestVHF ? `<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">${escapeHtml(latestVhf)}</span></div>` : ''}
-        ${entity.latestPali ? `<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">${escapeHtml(latestPali)}</span></div>` : ''}
-        <div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">${escapeHtml(entity.sex||'-')}</span></div>
-        ${showCollar ? `<div class="pop-row"><span class="pop-label">Collar #</span><span class="pop-value">${escapeHtml(entity.collar)}</span></div>` : ''}
-        <div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">${escapeHtml(entity.tagPlace||'-')}</span></div>
-        ${entity.tl ? `<div class="pop-row"><span class="pop-label">T.L (cm)</span><span class="pop-value">${escapeHtml(entity.tl)}</span></div>` : ''}
-        <div class="pop-row"><span class="pop-label">Days Since Release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">${escapeHtml(daysRelease)}</span></div>
-        <div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">${escapeHtml(entity.zone||'-')}</span></div>
-        <div class="pop-row"><span class="pop-label">Activity</span><span class="pop-value">${escapeHtml(display?.activity||'-')}</span></div>
-        <div class="pop-row"><span class="pop-label">Signal Strength</span><span class="pop-value">${escapeHtml(display?.signal||'-')}</span></div>
-        ${entity.remarks?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">${escapeHtml(entity.remarks)}</div>`:''}
-      </div>
-    </div>
-    <div class="pop-actions">
-      <button class="pab" type="button" onclick="focusEntity('${entity.compKey}')">Focus</button>
-      <button class="pab" type="button" onclick="focusTableRow('${entity.compKey}')">Table</button>
-    </div>
-  </div>`;
+  const display = entity.displayFix;
+  const status = badgeHtml(entity.status, entity.viewSource);
+  const latestSat = entity.latestATS ? fmtDateTime(entity.latestATS.ts) : '-';
+  const latestVhf = entity.latestVHF ? fmtDateTime(entity.latestVHF.ts) : '-';
+  const latestPali = entity.latestPali ? fmtDateTime(entity.latestPali.ts) : '-';
+  const sourceLabel = entity.viewSource === 'FieldLog' ? 'Field Log (VHF)' : entity.viewSource;
+  const daysFix = display?.ts ? daysSince(display.ts) + 'd' : '-';
+  /* FIX-2: tagDate now parsed correctly — shows real count; "N/A" only as genuine fallback */
+  const daysRelease = entity.tagDate ? daysSince(entity.tagDate) + 'd' : 'N/A';
+  return '' +
+    '<div>' +
+      '<div class="pop-top">' +
+        '<div class="pop-id-badge" style="background:' + markerColor(entity) + '">' + escapeHtml(entity.id.length > 5 ? entity.id.slice(0,5) : entity.id) + '</div>' +
+        '<div>' +
+          '<div class="pop-id">' + escapeHtml(entity.id) + '</div>' +
+          '<div class="pop-sub">' + status + ' | ' + escapeHtml(sourceLabel) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="pop-body">' +
+        '<div class="pop-row"><span class="pop-label">Latest mapped fix</span><span class="pop-value">' + escapeHtml(fmtDateTime(display?.ts)) + '</span></div>' +
+        (entity.viewSource === 'ATS' ? '<div class="pop-row"><span class="pop-label">Last ATS fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
+        (entity.viewSource === 'FieldLog' ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
+        (entity.viewSource === 'PaliFT' ? '<div class="pop-row"><span class="pop-label">Last hatchling fix</span><span class="pop-value">' + escapeHtml(latestPali) + '</span></div>' : '') +
+        (entity.viewSource === 'ATS' && entity.latestVHF ? '<div class="pop-row"><span class="pop-label">Last VHF fix</span><span class="pop-value">' + escapeHtml(latestVhf) + '</span></div>' : '') +
+        (entity.viewSource === 'FieldLog' && entity.latestATS ? '<div class="pop-row"><span class="pop-label">Last SAT fix</span><span class="pop-value">' + escapeHtml(latestSat) + '</span></div>' : '') +
+        '<div class="pop-row"><span class="pop-label">Days since last fix</span><span class="pop-value">' + escapeHtml(daysFix) + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Days since release</span><span class="pop-value" style="font-weight:700;color:var(--forest-2)">' + escapeHtml(daysRelease) + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Zone</span><span class="pop-value">' + escapeHtml(entity.zone || '-') + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Category</span><span class="pop-value">' + escapeHtml(entity.category || '-') + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Sex</span><span class="pop-value">' + escapeHtml(entity.sex || '-') + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Coordinates</span><span class="pop-value">' + (display ? display.lat.toFixed(5) + ', ' + display.lon.toFixed(5) : '-') + '</span></div>' +
+        '<div class="pop-row"><span class="pop-label">Tag Place</span><span class="pop-value">' + escapeHtml(entity.tagPlace || '-') + '</span></div>' +
+        (entity.tl ? '<div class="pop-row"><span class="pop-label">Total Length (cm)</span><span class="pop-value">' + escapeHtml(entity.tl) + '</span></div>' : '') +
+        (entity.collar ? '<div class="pop-row"><span class="pop-label">Collar</span><span class="pop-value">' + escapeHtml(entity.collar) + '</span></div>' : '') +
+        (entity.remarks ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font:600 .66rem/1.5 var(--font);color:var(--muted)">' + escapeHtml(entity.remarks) + '</div>' : '') +
+      '</div>' +
+      '<div class="pop-actions">' +
+        '<button class="pab" type="button" onclick="focusEntity(\'' + entity.compKey + '\')">Focus</button>' +
+        '<button class="pab" type="button" onclick="focusTableRow(\'' + entity.compKey + '\')">Table</button>' +
+      '</div>' +
+    '</div>';
 }
 
 function getViewEntities(source){
   if(!source) return [];
   return entities.map(entity=>{
-    if(source==='PaliFT'){
+    if(source === 'PaliFT'){
       if(!entity.isHatchling) return null;
-      const relevantFix=entity.latestPali||null,locationFix=relevantFix||entity.latestOverall||null;
-      const status=hatchStatus(entity.id,daysSince(relevantFix?relevantFix.ts:null));
-      return{...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone||'-'};
+      const relevantFix = entity.latestPali || null;
+      const locationFix = relevantFix || entity.latestOverall || null;
+      const status = hatchStatus(entity.id, daysSince(relevantFix ? relevantFix.ts : null));
+      return {...entity,viewSource:'PaliFT',displayFix:locationFix,relevantFix,trackHistory:entity.histories.PaliFT.slice(),status,zone:locationFix?.zone || '-'};
     }
-    if(source==='ATS'){
-      if(entity.isHatchling||!entity.latestATS) return null;
-      const relevantFix=entity.latestATS,locationFix=entity.latestATS;
-      const status=adultStatus(daysSince(relevantFix.ts),entity.collar);
-      return{...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone||'-'};
+    if(source === 'ATS'){
+      if(entity.isHatchling || !entity.latestATS) return null;
+      const relevantFix = entity.latestATS;
+      const locationFix = entity.latestATS;
+      const status = adultStatus(daysSince(relevantFix.ts), entity.collar);
+      return {...entity,viewSource:'ATS',displayFix:locationFix,relevantFix,trackHistory:entity.histories.ATS.slice(),status,zone:locationFix?.zone || '-'};
     }
-    if(source==='FieldLog'){
-      if(entity.isHatchling||!entity.latestVHF) return null;
-      const relevantFix=entity.latestVHF,locationFix=entity.latestVHF;
-      return{...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone||'-'};
+    if(source === 'FieldLog'){
+      if(entity.isHatchling || !entity.latestVHF) return null;
+      const relevantFix = entity.latestVHF;
+      const locationFix = entity.latestVHF;
+      return {...entity,viewSource:'FieldLog',displayFix:locationFix,relevantFix,trackHistory:entity.histories.FieldLog.slice(),status:'vhf',zone:locationFix?.zone || '-'};
     }
     return null;
   }).filter(Boolean);
 }
 
+/*
+ * FIX-3: renderMarkers — track entity block completely removed.
+ * All displayedEntities are rendered as standard markers; clicking opens the popup.
+ */
 function renderMarkers(){
-  markerLayer.clearLayers();entityMarkerMap={};
-  try{oms.clearMarkers&&oms.clearMarkers();}catch(e){}
+  markerLayer.clearLayers();
+  entityMarkerMap = {};
+  try{ oms.clearMarkers && oms.clearMarkers(); }catch(error){}
   if(!displayedEntities.length){
-    if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-    if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
     return;
   }
+
   displayedEntities.forEach(entity=>{
-    const fix=entity.displayFix;
-    if(!fix||!Number.isFinite(fix.lat)||!Number.isFinite(fix.lon)) return;
-    const marker=L.marker([fix.lat,fix.lon],{
-      icon:markerIcon(entity,entity.id.length>5?entity.id.slice(0,5):entity.id),keyboard:false
+    const fix = entity.displayFix;
+    if(!fix || !Number.isFinite(fix.lat) || !Number.isFinite(fix.lon)) return;
+    const marker = L.marker([fix.lat,fix.lon],{
+      icon:markerIcon(entity, entity.id.length > 5 ? entity.id.slice(0,5) : entity.id),
+      keyboard:false
     });
-    marker._popupContent = popupHtml(entity);
-    markerLayer.addLayer(marker);oms.addMarker(marker);
-    entityMarkerMap[entity.compKey]=marker;
+    marker.bindPopup(popupHtml(entity),{maxWidth:330});
+    marker.on('popupclose',()=>{ marker.setLatLng([fix.lat,fix.lon]); });
+    markerLayer.addLayer(marker);
+    oms.addMarker(marker);
+    entityMarkerMap[entity.compKey] = marker;
   });
+
   if(heatmapOn) renderHeatmap();
   else if(kdeOn) renderKDE();
   else if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
-  const points=displayedEntities
-    .filter(e=>e.displayFix&&Number.isFinite(e.displayFix.lat)&&Number.isFinite(e.displayFix.lon))
+
+  const points = displayedEntities
+    .filter(e=>e.displayFix && Number.isFinite(e.displayFix.lat) && Number.isFinite(e.displayFix.lon))
     .map(e=>[e.displayFix.lat,e.displayFix.lon]);
-  if(points.length) map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
+  if(points.length){
+    map.fitBounds(L.latLngBounds(points),{padding:[42,42],maxZoom:16});
+  }
 }
 
 function focusEntity(compKey){
-  const marker=entityMarkerMap[compKey];
+  const marker = entityMarkerMap[compKey];
   if(!marker) return;
-  Object.values(entityMarkerMap).forEach(m=>m.setZIndexOffset(0));
-  marker.setZIndexOffset(9000);map.closePopup();
+  Object.values(entityMarkerMap).forEach(item=>item.setZIndexOffset(0));
+  marker.setZIndexOffset(9000);
+  map.closePopup();
   map.flyTo(marker.getLatLng(),16,{duration:1});
-  setTimeout(()=>{
-    L.popup({maxWidth:340})
-     .setLatLng(marker.getLatLng())
-     .setContent(marker._popupContent)
-     .openOn(map);
-  },700);
-  // on mobile: collapse bottom panel to reveal map
-  if(isMobile()&&!bottomCollapsed) toggleBottom();
+  setTimeout(()=>marker.openPopup(),700);
 }
 
 function focusTableRow(key){
-  const row=document.querySelector('[data-row-key="'+CSS.escape(key)+'"]');
+  const row = document.querySelector('[data-row-key="' + CSS.escape(key) + '"]');
   if(!row) return;
   row.classList.add('sel');
   row.scrollIntoView({block:'center',behavior:'smooth'});
   setTimeout(()=>row.classList.remove('sel'),1600);
-  // on mobile: expand bottom panel to show table
-  if(isMobile()&&bottomCollapsed) toggleBottom();
 }
 
-/* ═══════════════════════════════════════════════
-   TABLE RENDERING
-   ═══════════════════════════════════════════════ */
 function buildEntityRow(entity){
-  const fix=entity.displayFix;
-  const srInfo = getSrNoInfo(entity);
-  return{
-    rowKey:entity.compKey,type:'entity',entity,id:entity.id,
-    srNo: srInfo ? String(srInfo.srNo) : '-',
-    animalId: srInfo ? srInfo.animal : '-',
-    pen: srInfo ? srInfo.pen : '-',
-    ts:fix?.ts||null,days:daysSince(fix?.ts||null),status:entity.status,
-    category:entity.category||'-',sex:entity.sex||'-',source:entity.viewSource,
-    zone:entity.zone||'-',collar:entity.collar||'-',
-    lat:Number.isFinite(fix?.lat)?fix.lat:null,
-    lon:Number.isFinite(fix?.lon)?fix.lon:null,
-    tagPlace:entity.tagPlace||'-',tl:entity.tl||'-',
-    remarks:(fix?.remarks||entity.remarks||'-')
+  const fix = entity.displayFix;
+  return {
+    rowKey:entity.compKey,
+    type:'entity',
+    entity,
+    id:entity.id,
+    ts:fix?.ts || null,
+    days:daysSince(fix?.ts || null),
+    status:entity.status,
+    category:entity.category || '-',
+    sex:entity.sex || '-',
+    source:entity.viewSource,
+    zone:entity.zone || '-',
+    collar:entity.collar || '-',
+    lat:Number.isFinite(fix?.lat) ? fix.lat : null,
+    lon:Number.isFinite(fix?.lon) ? fix.lon : null,
+    tagPlace:entity.tagPlace || '-',
+    tl:entity.tl || '-',
+    remarks:(fix?.remarks || entity.remarks || '-')
   };
 }
 
+/*
+ * FIX-3: renderTable — one row per entity (latest fix). Clicking calls focusEntity().
+ */
 function renderTable(){
-  const body=document.getElementById('tableBody');
-  body.innerHTML='';
-  const source=document.getElementById('sourceFilter').value;
-  displayRows=displayedEntities.map(buildEntityRow);
-  document.getElementById('tableBadge').textContent=displayRows.length+' records';
+  const body = document.getElementById('tableBody');
+  body.innerHTML = '';
+  const source = document.getElementById('sourceFilter').value;
+  displayRows = displayedEntities.map(buildEntityRow);
+  document.getElementById('tableBadge').textContent = displayRows.length + ' records';
   updateCollarColumn();
-  if(!source&&!displayedEntities.length){
-    body.innerHTML='<tr class="no-data"><td colspan="17">Select a source or apply filters to display telemetry records.</td></tr>';return;
+  if(!source && !displayedEntities.length){
+    body.innerHTML = '<tr class="no-data"><td colspan="14">Select a source or apply filters to display telemetry records.</td></tr>';
+    return;
   }
   if(!displayRows.length){
-    body.innerHTML='<tr class="no-data"><td colspan="17">No records match the current filters.</td></tr>';return;
+    body.innerHTML = '<tr class="no-data"><td colspan="14">No records match the current filters.</td></tr>';
+    return;
   }
   displayRows.forEach(row=>{
-    const tr=document.createElement('tr');
-    tr.dataset.rowKey=row.rowKey;
-    const rowSource=row.source==='FieldLog'?'VHF':row.source;
-    tr.innerHTML=
-      '<td>'+escapeHtml(row.srNo)+'</td>'+
-      '<td><strong style="color:var(--forest-2)">'+escapeHtml(row.animalId)+'</strong></td>'+
-      '<td>'+escapeHtml(row.pen)+'</td>'+
-      '<td><strong style="color:'+markerColor(row.entity)+'">'+escapeHtml(row.id)+'</strong></td>'+
-      '<td>'+escapeHtml(fmtDateTime(row.ts))+'</td>'+
-      '<td>'+escapeHtml(String(row.days))+'</td>'+
-      '<td>'+badgeHtml(row.status,row.entity.viewSource)+'</td>'+
-      '<td>'+escapeHtml(row.category)+'</td>'+
-      '<td>'+escapeHtml(row.sex)+'</td>'+
-      '<td>'+escapeHtml(rowSource)+'</td>'+
-      '<td>'+escapeHtml(row.zone)+'</td>'+
-      '<td class="collar-cell" style="'+(VIEW_META[source]?.hideCollar?'display:none':'')+'">'+escapeHtml(row.collar)+'</td>'+
-      '<td>'+(row.lat===null?'-':row.lat.toFixed(5))+'</td>'+
-      '<td>'+(row.lon===null?'-':row.lon.toFixed(5))+'</td>'+
-      '<td>'+escapeHtml(row.tagPlace)+'</td>'+
-      '<td>'+escapeHtml(row.tl)+'</td>'+
-      '<td>'+escapeHtml(row.remarks)+'</td>';
+    const tr = document.createElement('tr');
+    tr.dataset.rowKey = row.rowKey;
+    const rowSource = row.source === 'FieldLog' ? 'VHF' : row.source;
+    tr.innerHTML =
+      '<td><strong style="color:' + markerColor(row.entity) + '">' + escapeHtml(row.id) + '</strong></td>' +
+      '<td>' + escapeHtml(fmtDateTime(row.ts)) + '</td>' +
+      '<td>' + escapeHtml(String(row.days)) + '</td>' +
+      '<td>' + badgeHtml(row.status, row.entity.viewSource) + '</td>' +
+      '<td>' + escapeHtml(row.category) + '</td>' +
+      '<td>' + escapeHtml(row.sex) + '</td>' +
+      '<td>' + escapeHtml(rowSource) + '</td>' +
+      '<td>' + escapeHtml(row.zone) + '</td>' +
+      '<td class="collar-cell" style="' + (VIEW_META[source]?.hideCollar ? 'display:none' : '') + '">' + escapeHtml(row.collar) + '</td>' +
+      '<td>' + (row.lat === null ? '-' : row.lat.toFixed(5)) + '</td>' +
+      '<td>' + (row.lon === null ? '-' : row.lon.toFixed(5)) + '</td>' +
+      '<td>' + escapeHtml(row.tagPlace) + '</td>' +
+      '<td>' + escapeHtml(row.tl) + '</td>' +
+      '<td>' + escapeHtml(row.remarks) + '</td>';
     tr.addEventListener('click',()=>{
-      document.querySelectorAll('#tableBody tr').forEach(r=>r.classList.remove('sel'));
+      document.querySelectorAll('#tableBody tr').forEach(item=>item.classList.remove('sel'));
       tr.classList.add('sel');
       focusEntity(row.entity.compKey);
     });
@@ -2155,154 +1601,189 @@ function renderTable(){
 }
 
 function updateMapFoot(){
-  const source=document.getElementById('sourceFilter').value;
-  if(!source&&!displayedEntities.length){
-    document.getElementById('mapFootText').textContent='Select a source to begin.';
-    document.getElementById('mapFootCount').textContent='';return;
+  const source = document.getElementById('sourceFilter').value;
+  if(!source && !displayedEntities.length){
+    document.getElementById('mapFootText').textContent = 'Select a source to begin.';
+    document.getElementById('mapFootCount').textContent = '';
+    return;
   }
   if(!displayedEntities.length){
-    document.getElementById('mapFootText').textContent='No mapped entities match the current filter set.';
-    document.getElementById('mapFootCount').textContent='0 visible';return;
+    document.getElementById('mapFootText').textContent = 'No mapped entities match the current filter set.';
+    document.getElementById('mapFootCount').textContent = '0 visible';
+    return;
   }
-  const latest=displayedEntities.reduce((memo,entity)=>{
-    if(entity.displayFix?.ts&&(!memo||entity.displayFix.ts>memo)) return entity.displayFix.ts;
+  const latest = displayedEntities.reduce((memo, entity)=>{
+    if(entity.displayFix?.ts && (!memo || entity.displayFix.ts > memo)) return entity.displayFix.ts;
     return memo;
-  },null);
-  document.getElementById('mapFootText').textContent='Latest visible fix: '+fmtDateTime(latest);
-  document.getElementById('mapFootCount').textContent=displayedEntities.length+' entities';
+  }, null);
+  document.getElementById('mapFootText').textContent = 'Latest visible fix: ' + fmtDateTime(latest);
+  document.getElementById('mapFootCount').textContent = displayedEntities.length + ' entities';
 }
 
-/* ═══════════════════════════════════════════════
-   OVERLAYS (Heatmap / KDE)
-   ═══════════════════════════════════════════════ */
 function getOverlayFixes(){
-  const fixes=[];
-  displayedEntities.forEach(entity=>{entity.trackHistory.forEach(fix=>{if(Number.isFinite(fix.lat)&&Number.isFinite(fix.lon))fixes.push(fix);});});
+  const fixes = [];
+  displayedEntities.forEach(entity=>{
+    entity.trackHistory.forEach(fix=>{
+      if(Number.isFinite(fix.lat) && Number.isFinite(fix.lon)) fixes.push(fix);
+    });
+  });
   return fixes;
 }
 
 function renderHeatmap(){
-  const fixes=getOverlayFixes();
-  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
-  if(!fixes.length){heatmapOn=false;document.getElementById('heatBtn').classList.remove('on');return;}
-  heatLayer=L.heatLayer(fixes.map(fix=>[fix.lat,fix.lon,.65]),{radius:22,blur:18,maxZoom:17,gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}}).addTo(map);
+  const fixes = getOverlayFixes();
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+  if(!fixes.length){
+    heatmapOn = false;
+    document.getElementById('heatBtn').classList.remove('on');
+    return;
+  }
+  heatLayer = L.heatLayer(fixes.map(fix=>[fix.lat,fix.lon,.65]),{
+    radius:22,
+    blur:18,
+    maxZoom:17,
+    gradient:{0.2:'#ffffb2',0.4:'#fdd98c',0.6:'#fd8d3c',0.8:'#ef4444',1:'#7f1d1d'}
+  }).addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
 function renderKDE(){
-  const fixes=getOverlayFixes();
-  if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}
-  if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}
-  if(fixes.length<4){kdeOn=false;document.getElementById('kdeBtn').classList.remove('on');return;}
-  const points=fixes.map(fix=>[fix.lat,fix.lon]);
-  const KDE=L.Layer.extend({
-    initialize(){this._points=points;},
+  const fixes = getOverlayFixes();
+  if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+  if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+  if(fixes.length < 4){
+    kdeOn = false;
+    document.getElementById('kdeBtn').classList.remove('on');
+    return;
+  }
+  const points = fixes.map(fix=>[fix.lat,fix.lon]);
+  const KDE = L.Layer.extend({
+    initialize(){ this._points = points; },
     onAdd(instanceMap){
-      this._map=instanceMap;this._canvas=document.createElement('canvas');
-      this._canvas.style.cssText='position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
+      this._map = instanceMap;
+      this._canvas = document.createElement('canvas');
+      this._canvas.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;opacity:.52;z-index:220';
       instanceMap.getPanes().overlayPane.appendChild(this._canvas);
-      instanceMap.on('moveend zoomend resize',this.draw,this);this.draw();
+      instanceMap.on('moveend zoomend resize', this.draw, this);
+      this.draw();
     },
     onRemove(instanceMap){
-      if(this._canvas?.parentNode)this._canvas.parentNode.removeChild(this._canvas);
-      instanceMap.off('moveend zoomend resize',this.draw,this);
+      if(this._canvas?.parentNode) this._canvas.parentNode.removeChild(this._canvas);
+      instanceMap.off('moveend zoomend resize', this.draw, this);
     },
     draw(){
-      const size=this._map.getSize(),canvas=this._canvas;
-      canvas.width=size.x;canvas.height=size.y;
-      L.DomUtil.setPosition(canvas,this._map.containerPointToLayerPoint([0,0]));
-      const ctx=canvas.getContext('2d');ctx.clearRect(0,0,size.x,size.y);
-      const pixels=this._points.map(p=>this._map.latLngToContainerPoint(L.latLng(p[0],p[1])));
-      const bandwidth=26;
+      const size = this._map.getSize();
+      const canvas = this._canvas;
+      canvas.width = size.x;
+      canvas.height = size.y;
+      L.DomUtil.setPosition(canvas, this._map.containerPointToLayerPoint([0,0]));
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,size.x,size.y);
+      const pixels = this._points.map(point=>this._map.latLngToContainerPoint(L.latLng(point[0],point[1])));
+      const bandwidth = 26;
       pixels.forEach(pixel=>{
-        const gradient=ctx.createRadialGradient(pixel.x,pixel.y,0,pixel.x,pixel.y,bandwidth);
-        gradient.addColorStop(0,'rgba(127,29,29,.35)');gradient.addColorStop(.45,'rgba(239,68,68,.18)');gradient.addColorStop(1,'rgba(255,255,255,0)');
-        ctx.fillStyle=gradient;ctx.fillRect(pixel.x-bandwidth,pixel.y-bandwidth,bandwidth*2,bandwidth*2);
+        const gradient = ctx.createRadialGradient(pixel.x,pixel.y,0,pixel.x,pixel.y,bandwidth);
+        gradient.addColorStop(0,'rgba(127,29,29,.35)');
+        gradient.addColorStop(.45,'rgba(239,68,68,.18)');
+        gradient.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(pixel.x - bandwidth,pixel.y - bandwidth,bandwidth*2,bandwidth*2);
       });
     }
   });
-  kdeLayer=new KDE().addTo(map);
+  kdeLayer = new KDE().addTo(map);
   if(map.hasLayer(markerLayer)) map.removeLayer(markerLayer);
 }
 
 function toggleHeatmap(){
-  if(!displayedEntities.length){toast('Apply a source filter before using the heatmap.');return;}
-  heatmapOn=!heatmapOn;if(heatmapOn)kdeOn=false;
-  document.getElementById('heatBtn').classList.toggle('on',heatmapOn);
+  if(!displayedEntities.length){ toast('Apply a source filter before using the heatmap.'); return; }
+  heatmapOn = !heatmapOn;
+  if(heatmapOn) kdeOn = false;
+  document.getElementById('heatBtn').classList.toggle('on', heatmapOn);
   document.getElementById('kdeBtn').classList.remove('on');
-  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
-  if(mobHeat)mobHeat.classList.toggle('on',heatmapOn);if(mobKde)mobKde.classList.remove('on');
-  if(!heatmapOn){if(heatLayer){map.removeLayer(heatLayer);heatLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
+  if(!heatmapOn){
+    if(heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
+    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+    return;
+  }
   renderHeatmap();
 }
 
 function toggleKDE(){
-  if(!displayedEntities.length){toast('Apply a source filter before using KDE.');return;}
-  kdeOn=!kdeOn;if(kdeOn)heatmapOn=false;
-  document.getElementById('kdeBtn').classList.toggle('on',kdeOn);
+  if(!displayedEntities.length){ toast('Apply a source filter before using KDE.'); return; }
+  kdeOn = !kdeOn;
+  if(kdeOn) heatmapOn = false;
+  document.getElementById('kdeBtn').classList.toggle('on', kdeOn);
   document.getElementById('heatBtn').classList.remove('on');
-  const mobHeat=document.getElementById('mob-heatBtn'),mobKde=document.getElementById('mob-kdeBtn');
-  if(mobKde)mobKde.classList.toggle('on',kdeOn);if(mobHeat)mobHeat.classList.remove('on');
-  if(!kdeOn){if(kdeLayer){map.removeLayer(kdeLayer);kdeLayer=null;}if(!map.hasLayer(markerLayer))markerLayer.addTo(map);return;}
+  if(!kdeOn){
+    if(kdeLayer){ map.removeLayer(kdeLayer); kdeLayer = null; }
+    if(!map.hasLayer(markerLayer)) markerLayer.addTo(map);
+    return;
+  }
   renderKDE();
 }
 
 function exportCSV(){
-  if(!displayRows.length){toast('No visible records to export.');return;}
-  const rows=[['Animal_ID','Enclosure_ID','Pen','Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
+  if(!displayRows.length){ toast('No visible records to export.'); return; }
+  const rows = [['Radio_ID','Last_Fix','Days','Status','Category','Sex','Source','Zone','Collar','Latitude','Longitude','Tag_Place','TL_cm','Remarks']];
   displayRows.forEach(row=>{
-    rows.push([row.srNo,row.animalId,row.pen,row.id,fmtDateTime(row.ts),row.days,statusLabel(row.status,row.entity.viewSource),row.category,row.sex,row.source,row.zone,row.collar,row.lat??'',row.lon??'',row.tagPlace,row.tl,row.remarks]);
+    rows.push([
+      row.id,
+      fmtDateTime(row.ts),
+      row.days,
+      statusLabel(row.status, row.entity.viewSource),
+      row.category,
+      row.sex,
+      row.source,
+      row.zone,
+      row.collar,
+      row.lat ?? '',
+      row.lon ?? '',
+      row.tagPlace,
+      row.tl,
+      row.remarks
+    ]);
   });
-  const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const link=document.createElement('a');
-  link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-  link.download='gep_telemetry_'+new Date().toISOString().slice(0,10)+'.csv';
-  link.click();URL.revokeObjectURL(link.href);
+  const csv = rows.map(row=>row.map(value=>'"' + String(value).replace(/"/g,'""') + '"').join(',')).join('\n');
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  link.download = 'gep_telemetry_' + new Date().toISOString().slice(0,10) + '.csv';
+  link.click();
+  URL.revokeObjectURL(link.href);
 }
 
-/* ═══════════════════════════════════════════════
-   FIELD UPDATES PANEL
-   ═══════════════════════════════════════════════ */
-function formatUpdateText(text){
-  if(!text) return '';
-  const blocks=['Current Status','Pali Release Site Aggregation','Suspected Dropped Radios & Observations','Lost Radios & Predation','Already present:','Recently found at Pali release stretch:'];
-  let html=escapeHtml(text);
-  blocks.forEach(b=>{
-    const regex=new RegExp(b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g');
-    html=html.replace(regex,'<strong>'+b+'</strong>');
-  });
-  return html;
-}
-
-function getUpdateDate(row){
-  const raw=gc(row,'Date','date','Update Date','UpdateDate','update date','updatedate','Timestamp','timestamp','Posted','posted','When','when','Field Date','FieldDate','field date','Log Date','LogDate','log date');
-  return parseTagDate(raw);
-}
-
+/*
+ * FIX-2: loadUpdates — sorts descending (newest first) so the most recent entry
+ * appears at the top of both the latest block and the previous-updates list.
+ */
 function loadUpdates(rows){
-  updatesRows=rows||[];
-  const latestDate=document.getElementById('fuDate'),latestText=document.getElementById('fuText'),list=document.getElementById('fuList');
-  list.innerHTML='';
-  const sorted=updatesRows.filter(row=>{
-    const hasDate=!!getUpdateDate(row),hasText=!!(gc(row,'Update','update','Notes','Text','notes','text','Content','content'));
-    return hasDate||hasText;
-  }).sort((a,b)=>{
-    const da=getUpdateDate(a),db=getUpdateDate(b),ta=da?da.getTime():-Infinity,tb=db?db.getTime():-Infinity;
-    return tb-ta;
-  });
+  updatesRows = rows || [];
+  const latestDate = document.getElementById('fuDate');
+  const latestText = document.getElementById('fuText');
+  const list = document.getElementById('fuList');
+  list.innerHTML = '';
+  const sorted = updatesRows
+    .filter(row=>gc(row,'Date','date') || gc(row,'Update','update','Notes','Text'))
+    .sort((a,b)=>{
+      const da = parsePaliDate(gc(a,'Date','date'));
+      const db = parsePaliDate(gc(b,'Date','date'));
+      const ta = da ? da.getTime() : -Infinity;
+      const tb = db ? db.getTime() : -Infinity;
+      return tb - ta; /* descending: newest first */
+    });
   if(!sorted.length){
-    latestDate.textContent='No updates';latestText.innerHTML='';
-    list.innerHTML='<div class="fu"><div class="update-content">No field updates available.</div></div>';return;
+    latestDate.textContent = 'No updates';
+    latestText.textContent = '';
+    list.innerHTML = '<div class="fu"><div class="fu-text">No field updates available.</div></div>';
+    return;
   }
-  const latestRowDate=getUpdateDate(sorted[0]);
-  latestDate.textContent=latestRowDate?fmtDateOnly(latestRowDate):(gc(sorted[0],'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date')||'Unknown date');
-  latestText.innerHTML=formatUpdateText(gc(sorted[0],'Update','update','Notes','Text','notes','text','Content','content'));
+  latestDate.textContent = fmtDateOnly(parsePaliDate(gc(sorted[0],'Date','date')));
+  latestText.textContent = gc(sorted[0],'Update','update','Notes','Text');
   sorted.slice(1).forEach(row=>{
-    const rowDate=getUpdateDate(row);
-    const dateLabel=rowDate?fmtDateOnly(rowDate):(gc(row,'Date','date','Update Date','UpdateDate','Timestamp','timestamp','Posted','posted','When','when','Field Date','Log Date')||'Unknown date');
-    const item=document.createElement('div');item.className='fu';
-    item.innerHTML='<div class="fu-date">'+escapeHtml(dateLabel)+'</div><div class="update-content">'+formatUpdateText(gc(row,'Update','update','Notes','Text','notes','text','Content','content'))+'</div>';
+    const item = document.createElement('div');
+    item.className = 'fu';
+    item.innerHTML = '<div class="fu-date">' + escapeHtml(fmtDateOnly(parsePaliDate(gc(row,'Date','date')))) + '</div><div class="fu-text">' + escapeHtml(gc(row,'Update','update','Notes','Text')) + '</div>';
     list.appendChild(item);
   });
 }
@@ -2311,137 +1792,123 @@ function toggleFieldPanel(){
   document.getElementById('fp').classList.toggle('open');
   document.getElementById('fpBg').classList.toggle('open');
 }
+
 function closeFieldPanel(){
   document.getElementById('fp').classList.remove('open');
   document.getElementById('fpBg').classList.remove('open');
 }
 
-/* ═══════════════════════════════════════════════
-   LAYOUT CONTROLS
-   ═══════════════════════════════════════════════ */
 function toggleFilterBar(){
-  filterBarHidden=!filterBarHidden;
-  document.getElementById('fbar').classList.toggle('hidden',filterBarHidden);
-  document.getElementById('filterToggleBtn').classList.toggle('on',!filterBarHidden);
-  document.getElementById('map-wrap').style.top=filterBarHidden?'var(--hdr)':'calc(var(--hdr) + var(--fbar))';
-  const fp = document.getElementById('fp');
-  if(fp && !isMobile()){
-    fp.style.top = filterBarHidden
-      ? 'var(--hdr)'
-      : 'calc(var(--hdr) + var(--fbar))';
-    fp.style.height = filterBarHidden
-      ? 'calc(100vh - var(--hdr))'
-      : 'calc(100vh - var(--hdr) - var(--fbar))';
-  }
+  filterBarHidden = !filterBarHidden;
+  document.getElementById('fbar').classList.toggle('hidden', filterBarHidden);
+  document.getElementById('filterToggleBtn').classList.toggle('on', !filterBarHidden);
+  document.getElementById('map-wrap').style.top = filterBarHidden ? 'var(--hdr)' : 'calc(var(--hdr) + var(--fbar))';
   setTimeout(()=>map.invalidateSize(),220);
 }
 
-function resetView(){map.setView(MAP_CENTER,MAP_ZOOM);}
+function resetView(){
+  map.setView(MAP_CENTER, MAP_ZOOM);
+}
 
 function toggleBottom(){
-  bottomCollapsed=!bottomCollapsed;
-  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap'),btn=document.getElementById('btmToggleBtn');
-  if(isMobile()){
-    if(bottomCollapsed){
-      btm.style.height='52px';wrap.style.bottom='52px';btn.textContent='Show';
-      btm.classList.remove('mobile-expanded');
-    }else{
-      btm.style.height='55vh';wrap.style.bottom='55vh';btn.textContent='Hide';
-      btm.classList.add('mobile-expanded');
-    }
+  bottomCollapsed = !bottomCollapsed;
+  const btm = document.getElementById('btm');
+  const wrap = document.getElementById('map-wrap');
+  const button = document.getElementById('btmToggleBtn');
+  if(bottomCollapsed){
+    btm.style.height = '42px';
+    wrap.style.bottom = '42px';
+    button.textContent = 'Show';
   }else{
-    if(bottomCollapsed){btm.style.height='42px';wrap.style.bottom='42px';btn.textContent='Show';}
-    else{btm.style.height=bottomHeight+'px';wrap.style.bottom=bottomHeight+'px';btn.textContent='Hide';}
+    btm.style.height = bottomHeight + 'px';
+    wrap.style.bottom = bottomHeight + 'px';
+    button.textContent = 'Hide';
   }
   setTimeout(()=>map.invalidateSize(),220);
 }
 
 function initResize(){
-  const bar=document.getElementById('resizeBar'),btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
-  let dragging=false,startY=0,startHeight=0;
-  function begin(y){if(bottomCollapsed||isMobile()) return;dragging=true;startY=y;startHeight=btm.offsetHeight;document.body.style.cursor='ns-resize';}
+  const bar = document.getElementById('resizeBar');
+  const btm = document.getElementById('btm');
+  const wrap = document.getElementById('map-wrap');
+  let dragging = false;
+  let startY = 0;
+  let startHeight = 0;
+  function begin(y){
+    if(bottomCollapsed) return;
+    dragging = true;
+    startY = y;
+    startHeight = btm.offsetHeight;
+    document.body.style.cursor = 'ns-resize';
+  }
   function move(y){
     if(!dragging) return;
-    const nextHeight=Math.min(Math.max(120,startHeight+(startY-y)),window.innerHeight*.7);
-    bottomHeight=nextHeight;btm.style.height=nextHeight+'px';wrap.style.bottom=nextHeight+'px';
+    const nextHeight = Math.min(Math.max(120, startHeight + (startY - y)), window.innerHeight * .7);
+    bottomHeight = nextHeight;
+    btm.style.height = nextHeight + 'px';
+    wrap.style.bottom = nextHeight + 'px';
   }
-  function end(){dragging=false;document.body.style.cursor='';setTimeout(()=>map.invalidateSize(),100);}
-  bar.addEventListener('mousedown',event=>{begin(event.clientY);event.preventDefault();});
-  document.addEventListener('mousemove',event=>move(event.clientY));
-  document.addEventListener('mouseup',end);
+  function end(){
+    dragging = false;
+    document.body.style.cursor = '';
+    setTimeout(()=>map.invalidateSize(),100);
+  }
+  bar.addEventListener('mousedown', event=>{ begin(event.clientY); event.preventDefault(); });
+  document.addEventListener('mousemove', event=>move(event.clientY));
+  document.addEventListener('mouseup', end);
 }
 
-/* ═══════════════════════════════════════════════
-   DATA LOADING
-   ═══════════════════════════════════════════════ */
 async function loadAllData(){
-  const button=document.getElementById('refreshBtn');
+  const button = document.getElementById('refreshBtn');
   button.classList.add('loading');
   document.getElementById('loading').classList.remove('hide');
   ['ld-master','ld-ats','ld-fl','ld-pali','ld-zones'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.classList.remove('ok','err');
+    const el = document.getElementById(id);
+    if(el) el.classList.remove('ok','err');
   });
   loadingCopy('Fetching Google Sheets and GeoJSON layers...');
   try{
-    const [masterRows,atsRows,fieldRows,paliRows,updateRows]=await Promise.all([
-      fetchCSV(URLS.master).then(data=>{setLoadingState('ld-master',true);return data;}).catch(()=>{setLoadingState('ld-master',false);return[];}),
-      fetchCSV(URLS.ats).then(data=>{setLoadingState('ld-ats',true);return data;}).catch(()=>{setLoadingState('ld-ats',false);return[];}),
-      fetchCSV(URLS.fl).then(data=>{setLoadingState('ld-fl',true);return data;}).catch(()=>{setLoadingState('ld-fl',false);return[];}),
-      fetchCSV(URLS.pali).then(data=>{setLoadingState('ld-pali',true);return data;}).catch(()=>{setLoadingState('ld-pali',false);return[];}),
+    const [masterRows, atsRows, fieldRows, paliRows, zonesData, updateRows] = await Promise.all([
+      fetchCSV(URLS.master).then(data=>{ setLoadingState('ld-master', true); return data; }).catch(()=>{ setLoadingState('ld-master', false); return []; }),
+      fetchCSV(URLS.ats).then(data=>{ setLoadingState('ld-ats', true); return data; }).catch(()=>{ setLoadingState('ld-ats', false); return []; }),
+      fetchCSV(URLS.fl).then(data=>{ setLoadingState('ld-fl', true); return data; }).catch(()=>{ setLoadingState('ld-fl', false); return []; }),
+      fetchCSV(URLS.pali).then(data=>{ setLoadingState('ld-pali', true); return data; }).catch(()=>{ setLoadingState('ld-pali', false); return []; }),
+      fetchJSON(URLS.zones).then(data=>{ setLoadingState('ld-zones', true); return data; }).catch(()=>{ setLoadingState('ld-zones', false); return null; }),
       fetchCSV(URLS.updates).catch(()=>[])
     ]);
-    
-    setLoadingState('ld-zones', true);
-    
     loadingCopy('Routing records through the master dictionary...');
-    fixBuckets={};buildMasterMaps(masterRows);
-    ingestATS(atsRows);ingestFieldLog(fieldRows);ingestPali(paliRows);
-    
-    geojsonData = ZONE_GEOJSON_DATA;
-    
+    fixBuckets = {};
+    buildMasterMaps(masterRows);
+    ingestATS(atsRows);
+    ingestFieldLog(fieldRows);
+    ingestPali(paliRows);
+    geojsonData = zonesData;
     loadingCopy('Assigning zones and merging entities...');
     if(geojsonData) assignZones();
-    mergeEntities();loadUpdates(updateRows);
+    mergeEntities();
+    loadUpdates(updateRows);
     rebuildFilters();
-    if(isMobile()) rebuildMobileFilters();
-    updateFieldUpdatesVisibility();updateCollarColumn();
+    updateFieldUpdatesVisibility();
+    updateCollarColumn();
     clearFilters();
-    document.getElementById('syncTime').textContent=new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-    toast('Loaded '+entities.length+' routed telemetry entities.',true);
+    document.getElementById('syncTime').textContent = new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    toast('Loaded ' + entities.length + ' routed telemetry entities.', true);
   }catch(error){
-    console.error(error);toast('Failed to load telemetry data.');
+    console.error(error);
+    toast('Failed to load telemetry data.');
   }finally{
     button.classList.remove('loading');
-    const elapsed=performance.now()-SPLASH_START,wait=Math.max(0,SPLASH_MIN_MS-elapsed);
-    setTimeout(()=>document.getElementById('loading').classList.add('hide'),wait);
+    const elapsed = performance.now() - SPLASH_START;
+    const wait = Math.max(0, SPLASH_MIN_MS - elapsed);
+    setTimeout(()=>document.getElementById('loading').classList.add('hide'), wait);
   }
 }
 
-/* ═══════════════════════════════════════════════
-   RESIZE OBSERVER — keeps map sized correctly
-   ═══════════════════════════════════════════════ */
-window.addEventListener('resize',()=>{
-  setTimeout(()=>map.invalidateSize(),150);
-});
+window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize(),150));
 
-/* Observe the bottom panel height change and update map-wrap */
-const resizeObserver=new ResizeObserver(()=>{
-  const btm=document.getElementById('btm'),wrap=document.getElementById('map-wrap');
-  if(btm&&wrap&&!bottomCollapsed){
-    wrap.style.bottom=btm.offsetHeight+'px';
-  }
-  setTimeout(()=>map&&map.invalidateSize(),80);
-});
-resizeObserver.observe(document.getElementById('btm'));
-
-/* ═══════════════════════════════════════════════
-   BOOT
-   ═══════════════════════════════════════════════ */
 (function boot(){
   initMap();
   initResize();
-  // Set up mobile bottom panel on small screens
-  if(isMobile()) initMobileBottomPanel();
   loadAllData();
 })();
 </script>
